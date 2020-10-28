@@ -26,6 +26,8 @@ class Jira:
         issue_data["Created"].append(dateutil.parser.parse(issue.fields.created).replace(tzinfo=None))
         if self.jira_config["story_points_field"]:
             issue_data["Story Points"].append(getattr(issue.fields,self.jira_config["story_points_field"]))
+        if self.jira_config["epic_link_field"]:
+            issue_data["Epic Link"].append(getattr(issue.fields,self.jira_config["epic_link_field"]))
  
         history_item = {}
         for workflow_step in self.workflow:
@@ -69,6 +71,7 @@ class Jira:
             "Key": [],
             "Type": [],
             "Story Points": [],
+            "Epic Link": [],
             "Created": []
         }
 
