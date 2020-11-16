@@ -23,11 +23,16 @@ class Jira:
     def get_issue_data(self, issue, issue_data):
         issue_data["Key"].append(issue.key)
         issue_data["Type"].append(issue.fields.issuetype.name)
+        issue_data["Summary"].append(issue.fields.summary)
         issue_data["Created"].append(dateutil.parser.parse(issue.fields.created).replace(tzinfo=None))
+        issue_data["Status"].append(issue.fields.status.name)
         if self.jira_config["story_points_field"]:
             issue_data["Story Points"].append(getattr(issue.fields,self.jira_config["story_points_field"]))
         if self.jira_config["epic_link_field"]:
-            issue_data["Epic Link"].append(getattr(issue.fields,self.jira_config["epic_link_field"]))
+            epic_link = getattr(issue.fields,self.jira_config["epic_link_field"])
+            if epic_link == None:
+                epic_link = "No Epic"
+            issue_data["Epic Link"].append(epic_link)
  
         history_item = {}
         for workflow_step in self.workflow:
@@ -70,8 +75,10 @@ class Jira:
         issue_data = {
             "Key": [],
             "Type": [],
+            "Summary": [],
             "Story Points": [],
             "Epic Link": [],
+            "Status": [],
             "Created": []
         }
 

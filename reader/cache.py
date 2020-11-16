@@ -5,7 +5,7 @@ import logging
 
 class Cache:
     def __init__(self, filename):
-        self.file = f"/tmp/seshat_cache_{filename}.pkl"
+        self.file = f"/tmp/anansi_cache_{filename}.pkl"
         logging.info("Initializing Cache")
 
     def write(self, data):
