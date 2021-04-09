@@ -7,6 +7,8 @@ class Backlog:
     def __init__(self, cycle_data, config):
         self.cycle_data = cycle_data
         self.config = config
+        # TODO: Make this more generic
+        self.link_ref = '<a href="{}browse/{}" style="cursor: pointer" target="_blank" rel="noopener noreferrer">{}</a>'
         self.treemap_data = self.get_treemap_data(cycle_data)
         self.treemap_data = self.calculate_cycle_time(self.treemap_data)
 
@@ -40,7 +42,7 @@ class Backlog:
 
     def draw_story_points(self):
         fig = px.histogram(
-            treemap_data,
+            self.treemap_data,
             x=["Story Points"],
             title="Story points delivered",
             color="Epic Name",
@@ -49,7 +51,7 @@ class Backlog:
 
     def draw_timeline(self):
         fig = px.timeline(
-            treemap_data,
+            self.treemap_data,
             x_start="In Progress" if "In Progress" else "Created",
             x_end="Done",
             y="Summary",
@@ -97,7 +99,13 @@ class Backlog:
             how="left",
         )
         merged["Epic Name"].fillna("No Epic", inplace=True)
+        merged["Key"] = merged["Key"].apply(
+            lambda item: self.link_ref.format(
+                self.config["jira"]["url"], item, item, "{}"
+            )
+        )
         merged["Composed"] = merged["Key"] + "\n" + merged["Summary"]
+
         # Filling NaN to 1 so that we can display the story points in the treemap
         # merged['Story Points'].fillna(1,inplace=True)
         return merged

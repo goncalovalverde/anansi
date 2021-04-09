@@ -21,9 +21,10 @@ with open("config.yml", "r") as f:
     config["issue_type"].insert(0, "Total")
 
 cycle_data = reader.read_data(config)
-print(cycle_data)
 backlog = viewer.backlog.Backlog(cycle_data, config)
+# backlog.draw_treemap().show()
 backlog.show_all()
+# backlog.draw_pbis_epic("Done").show()
 # show(treemap_data,settings={'block': True})
 
 
