@@ -1,0 +1,40 @@
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
+
+import database
+import api.config
+import api.data
+import api.charts
+
+app = FastAPI(title="Anansi", description="Jira/CSV backlog analytics dashboard")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"http://localhost(:\d+)?",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+database.init_db(database.DB_PATH)
+
+app.include_router(api.config.router)
+app.include_router(api.data.router)
+app.include_router(api.charts.router)
+
+_vue_dist = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend-vue", "dist")
+_legacy_frontend = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
+_frontend_dir = _vue_dist if os.path.isdir(_vue_dist) else _legacy_frontend
+if os.path.isdir(_frontend_dir):
+    app.mount(
+        "/",
+        StaticFiles(directory=_frontend_dir, html=True),
+        name="static",
+    )
