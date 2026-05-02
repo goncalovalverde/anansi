@@ -69,7 +69,7 @@ def update_dataset_progress(
     db.commit()
 
 
-db: sqlite3.Connection, dataset_id: str, df: DataFrame) -> None:
+def save_dataframe(db: sqlite3.Connection, dataset_id: str, df: DataFrame) -> None:
     rows = [
         (dataset_id, idx, json.dumps(row, default=str))
         for idx, row in enumerate(df.to_dict(orient="records"))
