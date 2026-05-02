@@ -18,6 +18,7 @@ export function useDataLoader() {
     stop()
     const gen = generation
     store.setLoading(true)
+    store.setProgress(0, 0)
     store.setStatus('loading', 'Initiating data load…')
 
     try {
@@ -70,15 +71,16 @@ export function useDataLoader() {
   }
 
   function _poll(datasetId, gen) {
-    let issueCount = 0
     pollTimer = setInterval(async () => {
       if (gen !== generation) { clearInterval(pollTimer); return }
       try {
-        const { status, error, count } = await Api.getStatus(datasetId)
+        const { status, error, progress_loaded, progress_total } = await Api.getStatus(datasetId)
         if (gen !== generation) return
 
-        if (count !== undefined) issueCount = count
-        const detail = issueCount > 0 ? `${issueCount} issues fetched so far…` : 'Fetching from Jira…'
+        if (progress_total > 0) store.setProgress(progress_loaded, progress_total)
+        const detail = progress_total > 0
+          ? `${progress_loaded} of ${progress_total} issues fetched…`
+          : progress_loaded > 0 ? `${progress_loaded} issues fetched so far…` : 'Fetching from Jira…'
         store.setStatus('loading', 'Loading data…', detail)
 
         if (status === 'ready') {

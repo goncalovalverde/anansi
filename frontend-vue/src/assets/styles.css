@@ -1,43 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;800&family=Inter:wght@400;500&family=Fira+Code:wght@400&display=swap');
+
 :root {
-  --bg-primary: #0f1117;
-  --bg-secondary: #1a1d27;
-  --bg-card: #1e2130;
-  --bg-input: #252a3a;
-  --border: #2e3347;
-  --border-focus: #5b6af0;
-  --text-primary: #e8eaf0;
-  --text-secondary: #8b95b0;
-  --text-muted: #5a6175;
-  --accent: #5b6af0;
-  --accent-hover: #6e7df5;
-  --accent-light: rgba(91, 106, 240, 0.15);
-  --success: #2dd4a0;
+  /* Brand colours */
+  --color-teal:   #007B85;
+  --color-gold:   #F5A623;
+  --color-amber:  #D35400;
+  --color-navy:   #2C3E50;
+  --color-parchment: #F9F9F7;
+
+  /* Light mode (default) — Parchment White per design system */
+  --bg-primary:   #F9F9F7;
+  --bg-secondary: #FFFFFF;
+  --bg-card:      #FFFFFF;
+  --bg-input:     #EEEEE9;
+  --border:       #C8D0CC;
+  --border-focus: #007B85;
+  --text-primary:   #2C3E50;
+  --text-secondary: #4A5C6B;
+  --text-muted:     #7A8A95;
+
+  /* Accent = Anansi Teal */
+  --accent:       #007B85;
+  --accent-hover: #009BA7;
+  --accent-light: rgba(0, 123, 133, 0.15);
+
+  /* Semantic */
+  --success:    #2dd4a0;
   --success-bg: rgba(45, 212, 160, 0.12);
-  --danger: #f05b5b;
-  --danger-bg: rgba(240, 91, 91, 0.12);
-  --warning: #f0b15b;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --danger:     #D35400;
+  --danger-bg:  rgba(211, 84, 0, 0.12);
+  --warning:    #F5A623;
+
+  /* Geometry — sharp corners per design system */
+  --radius:    4px;
+  --radius-lg: 6px;
+
+  --shadow:    0 1px 4px rgba(44, 62, 80, 0.08);
+  --shadow-lg: 0 4px 16px rgba(44, 62, 80, 0.12);
   --transition: 0.18s ease;
+}
+
+/* ── Dark mode override ── */
+.app-root.dark-mode {
+  --bg-primary:   #141C27;
+  --bg-secondary: #1A2535;
+  --bg-card:      #1E2D3F;
+  --bg-input:     #243347;
+  --border:       #2C3E50;
+  --border-focus: #007B85;
+  --text-primary:   #E8EDF2;
+  --text-secondary: #9DAAB5;
+  --text-muted:     #7A8A95;
+  --shadow:    0 1px 4px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; scroll-behavior: smooth; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.6;
   min-height: 100vh;
 }
+.app-root {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+code, pre, .mono { font-family: 'Fira Code', 'Courier New', monospace; }
 
 /* ── Typography ── */
-h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
-h2 { font-size: 1.2rem; font-weight: 600; }
-h3 { font-size: 1rem; font-weight: 600; }
+h1 { font-family: 'Raleway', 'Inter', sans-serif; font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
+h2 { font-family: 'Raleway', 'Inter', sans-serif; font-size: 1.2rem; font-weight: 700; }
+h3 { font-family: 'Raleway', 'Inter', sans-serif; font-size: 1rem; font-weight: 600; }
 a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
 a:hover { color: var(--accent-hover); }
 
@@ -47,7 +83,7 @@ a:hover { color: var(--accent-hover); }
 /* ── Header ── */
 .app-header {
   background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--color-teal);
   padding: 1rem 0;
   position: sticky;
   top: 0;
@@ -60,8 +96,7 @@ a:hover { color: var(--accent-hover); }
   justify-content: space-between;
   gap: 1rem;
 }
-.app-header h1 { color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
-.app-header h1 span.logo { color: var(--accent); }
+/* logo styles moved to AppHeader.vue scoped styles */
 .nav-links { display: flex; gap: 1.5rem; }
 .nav-links a {
   color: var(--text-secondary);
@@ -82,7 +117,7 @@ main { padding: 2rem 0; }
 /* ── Status bar ── */
 .status-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   padding: 0.875rem 1.25rem;
   background: var(--bg-card);
@@ -91,11 +126,23 @@ main { padding: 2rem 0; }
   margin-bottom: 1.5rem;
   font-size: 0.875rem;
 }
+.status-bar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.status-texts {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 .status-indicator {
   width: 8px; height: 8px;
   border-radius: 50%;
   background: var(--text-muted);
   flex-shrink: 0;
+  margin-top: 0.35rem;
   transition: background var(--transition);
 }
 .status-indicator.idle    { background: var(--text-muted); }
@@ -107,6 +154,31 @@ main { padding: 2rem 0; }
 }
 .status-text { color: var(--text-secondary); flex: 1; }
 .status-detail { color: var(--text-muted); font-size: 0.8rem; }
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--warning);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.progress-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  min-width: 7rem;
+  text-align: right;
+}
 
 /* ── Toolbar ── */
 .toolbar {
@@ -167,12 +239,16 @@ main { padding: 2rem 0; }
 .chart-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
+  border-top: 2px solid var(--color-teal);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow);
-  transition: border-color var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition);
 }
-.chart-card:hover { border-color: var(--border-focus); }
+.chart-card:hover {
+  border-color: var(--color-teal);
+  box-shadow: var(--shadow-lg);
+}
 .chart-card-header {
   padding: 0.875rem 1.25rem;
   border-bottom: 1px solid var(--border);
@@ -220,15 +296,16 @@ main { padding: 2rem 0; }
   margin-bottom: 2rem;
 }
 .section-title {
+  font-family: 'Raleway', 'Inter', sans-serif;
   font-size: 1.1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 1.25rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--color-teal);
 }
 
 /* Form row (2-column layout inside sections) */
@@ -289,7 +366,7 @@ main { padding: 2rem 0; }
   padding: 0.25rem 0.65rem;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius);
   font-size: 0.8rem;
   color: var(--text-secondary);
   cursor: pointer;
@@ -379,6 +456,37 @@ main { padding: 2rem 0; }
 .form-group select:focus { border-color: var(--border-focus); }
 .form-group select option { background: var(--bg-secondary); }
 .form-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem; }
+.form-hint-success { color: var(--success); }
+.form-error { font-size: 0.78rem; color: var(--danger); margin-top: 0.35rem; }
+
+.file-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 2rem 1.5rem;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-secondary);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  text-align: center;
+  min-height: 120px;
+}
+.file-upload-area:hover,
+.file-upload-dragging {
+  border-color: var(--primary);
+  background: var(--bg-card);
+}
+.file-upload-done {
+  border-color: var(--success);
+  border-style: solid;
+}
+.file-upload-hidden { display: none; }
+.file-upload-icon { font-size: 1.75rem; }
+.file-upload-label { font-size: 0.9rem; color: var(--text-secondary); }
+.file-upload-size  { font-size: 0.78rem; color: var(--text-muted); }
 
 /* Radio group */
 .radio-group { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
@@ -387,7 +495,7 @@ main { padding: 2rem 0; }
   padding: 0.4rem 0.875rem;
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius);
   cursor: pointer;
   font-size: 0.875rem;
   transition: all var(--transition);
@@ -426,7 +534,7 @@ main { padding: 2rem 0; }
   padding: 0.3rem 0.65rem;
   background: var(--accent-light);
   border: 1px solid var(--border-focus);
-  border-radius: 20px;
+  border-radius: var(--radius);
   font-size: 0.8rem;
   color: var(--accent);
 }
@@ -487,21 +595,6 @@ main { padding: 2rem 0; }
 }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ── Light mode overrides ── */
-body.light-mode {
-  --bg-primary: #f5f6fa;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --bg-input: #f0f1f5;
-  --border: #dde0ea;
-  --border-focus: #5b6af0;
-  --text-primary: #1a1d27;
-  --text-secondary: #4a5168;
-  --text-muted: #8b95b0;
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-}
-
 /* ── KPI strip ── */
 .kpi-strip {
   display: grid;
@@ -513,6 +606,7 @@ body.light-mode {
 .kpi-box {
   background: var(--bg-card);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--color-teal);
   border-radius: var(--radius-lg);
   padding: 1rem 1.25rem;
   display: flex;
@@ -619,7 +713,7 @@ body.light-mode {
   padding: 0.3rem 0.75rem;
   background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: var(--radius);
   font-size: 0.78rem;
   color: var(--text-secondary);
   cursor: pointer;
@@ -664,8 +758,7 @@ details.advanced-settings .advanced-content {
   margin-top: 0.75rem;
 }
 
-/* ── Contrast fix: WCAG AA ── */
-:root { --text-muted: #7a85a0; }
+/* ── Contrast fix: WCAG AA — text-muted defined in :root above ── */
 
 /* ── Mobile chart fix ── */
 @media (max-width: 600px) {
@@ -722,10 +815,7 @@ details.advanced-settings .advanced-content {
 }
 
 
-/* ── Contrast fix ── */
-:root {
-  --text-muted: #7a85a0;
-}
+/* ── Contrast fix — text-muted defined in :root above ── */
 
 /* ── Empty state card (updated) ── */
 .empty-state-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; }

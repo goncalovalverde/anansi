@@ -29,9 +29,7 @@ app.include_router(api.config.router)
 app.include_router(api.data.router)
 app.include_router(api.charts.router)
 
-_vue_dist = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend-vue", "dist")
-_legacy_frontend = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend")
-_frontend_dir = _vue_dist if os.path.isdir(_vue_dist) else _legacy_frontend
+_frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend-vue", "dist")
 if os.path.isdir(_frontend_dir):
     app.mount(
         "/",

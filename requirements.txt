@@ -6,7 +6,8 @@ python-dateutil
 numpy
 plotly
 statsmodels
-dash
 setuptools
 wheel
-dash_bootstrap_components
+fastapi
+uvicorn[standard]
+python-multipart

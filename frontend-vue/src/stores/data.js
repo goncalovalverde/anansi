@@ -4,17 +4,26 @@ const STORAGE_KEY    = 'anansi_last_dataset_id'
 const STORAGE_LOADED = 'anansi_last_loaded_ts'
 
 export const useDataStore = defineStore('data', {
-  state: () => ({
-    datasetId:   localStorage.getItem(STORAGE_KEY) || null,
-    lastLoadedTs: parseInt(localStorage.getItem(STORAGE_LOADED) || '0', 10) || null,
-    status: 'idle',       // idle | loading | ready | error
-    statusText: 'Idle — click "Load Data" to begin',
-    statusDetail: '',
-    isLoading: false,
-    charts: null,
-    kpis: null,
-    hasData: false,
-  }),
+  state: () => {
+    const storedId = localStorage.getItem(STORAGE_KEY)
+    const datasetId = storedId && storedId !== 'undefined' && storedId !== 'null' ? storedId : null
+    if (!datasetId && storedId) {
+      localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(STORAGE_LOADED)
+    }
+    return {
+      datasetId,
+      lastLoadedTs: parseInt(localStorage.getItem(STORAGE_LOADED) || '0', 10) || null,
+      status: 'idle',
+      statusText: 'Idle — click "Load Data" to begin',
+      statusDetail: '',
+      isLoading: false,
+      charts: null,
+      kpis: null,
+      hasData: false,
+      progress: { loaded: 0, total: 0 },
+    }
+  },
   actions: {
     setStatus(state, text, detail = '') {
       this.status = state
@@ -22,6 +31,7 @@ export const useDataStore = defineStore('data', {
       this.statusDetail = detail
     },
     setLoading(v) { this.isLoading = v },
+    setProgress(loaded, total) { this.progress = { loaded, total } },
     setCharts(charts, datasetId, saveTimestamp) {
       this.charts = charts
       this.kpis = charts.kpis || null
@@ -39,6 +49,7 @@ export const useDataStore = defineStore('data', {
       this.charts = null
       this.kpis = null
       this.hasData = false
+      this.progress = { loaded: 0, total: 0 }
       localStorage.removeItem(STORAGE_KEY)
       localStorage.removeItem(STORAGE_LOADED)
     },

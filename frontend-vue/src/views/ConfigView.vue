@@ -197,10 +197,29 @@
 
           <!-- CSV section -->
           <div v-show="inputMode === 'csv'" class="form-section">
+            <div class="form-section-title">Upload your CSV</div>
             <div class="form-group">
-              <label for="input_csv_file">CSV File Path (on server)</label>
-              <input type="text" id="input_csv_file" v-model="form.input_csv_file" placeholder="/path/to/data.csv" />
-              <p class="form-hint">Absolute path to the CSV file on the machine running Anansi.</p>
+              <div class="file-upload-area"
+                :class="{ 'file-upload-dragging': csvDragging, 'file-upload-done': csvFile }"
+                @dragover.prevent="csvDragging = true"
+                @dragleave.prevent="csvDragging = false"
+                @drop.prevent="onCsvDrop"
+                @click="$refs.csvFileInput.click()">
+                <input ref="csvFileInput" type="file" accept=".csv" class="file-upload-hidden" @change="onCsvFileChange" />
+                <template v-if="!csvFile">
+                  <span class="file-upload-icon">📂</span>
+                  <span class="file-upload-label">Click or drag &amp; drop a CSV file here</span>
+                </template>
+                <template v-else>
+                  <span class="file-upload-icon">{{ csvUploading ? '⏳' : '✅' }}</span>
+                  <span class="file-upload-label">{{ csvFile.name }}</span>
+                  <span class="file-upload-size">{{ (csvFile.size / 1024).toFixed(1) }} KB</span>
+                </template>
+              </div>
+              <p v-if="csvUploadError" class="form-error">{{ csvUploadError }}</p>
+              <p v-else-if="csvUploading" class="form-hint">Uploading and processing…</p>
+              <p v-else-if="csvDatasetId" class="form-hint form-hint-success">✓ Ready — click "Save Configuration" then go to the Dashboard.</p>
+              <p v-else class="form-hint">The file is processed in memory — nothing is saved to disk.</p>
             </div>
           </div>
 
@@ -249,6 +268,16 @@
                     @keydown.enter="addWorkflowManual" />
                   <button class="btn btn-secondary btn-sm" @click="addWorkflowManual">+ Add</button>
                 </div>
+              </div>
+            </div>
+
+            <div class="form-row" style="margin-top:1rem;" v-if="workflowSteps.length > 1">
+              <div class="form-group">
+                <label for="workflow_start_step">Cycle Time Start Step</label>
+                <select id="workflow_start_step" v-model="startStep">
+                  <option v-for="step in workflowSteps.slice(0, -1)" :key="step" :value="step">{{ step }}</option>
+                </select>
+                <p class="form-hint">The step that marks when active work begins. Cycle time is measured from this step to the final step.</p>
               </div>
             </div>
           </div>
@@ -340,6 +369,7 @@ const workflowVisible  = ref(false)
 const allStatuses      = ref([])
 const workflowSteps    = ref([])
 const workflowInput    = ref('')
+const startStep        = ref('')
 const availableStatuses = computed(() =>
   allStatuses.value.filter(s => !workflowSteps.value.includes(s))
 )
@@ -351,6 +381,7 @@ const PRESETS = {
 
 function applyPreset(name) {
   workflowSteps.value = [...(PRESETS[name] || [])]
+  startStep.value = workflowSteps.value[1] || ''
 }
 
 function addToWorkflow(s) {
@@ -398,7 +429,7 @@ function removeType(t) {
 
 // ── Collect form data for API ─────────────────────────────────────────────
 function collectFormData() {
-  const data = { input_mode: inputMode.value }
+  const data = { input_mode: inputMode.value, workflow_start_step: startStep.value }
   const SECRET_FIELDS = ['jira_password', 'jira_pat_token', 'jira_oauth_token', 'jira_oauth_token_secret']
   for (const [key, val] of Object.entries(form)) {
     if (key === 'jira_cache_enabled') {
@@ -490,7 +521,44 @@ async function detectFields() {
   }
 }
 
-// ── Save ──────────────────────────────────────────────────────────────────
+// ── CSV upload ────────────────────────────────────────────────────────────
+const csvFile       = ref(null)
+const csvDragging   = ref(false)
+const csvUploading  = ref(false)
+const csvUploadError = ref('')
+const csvDatasetId  = ref('')
+
+async function uploadCsv(file) {
+  csvFile.value = file
+  csvUploadError.value = ''
+  csvDatasetId.value = ''
+  csvUploading.value = true
+  try {
+    const { dataset_id } = await Api.uploadCsv(file)
+    csvDatasetId.value = dataset_id
+    // Persist dataset id to localStorage so the dashboard can pick it up
+    localStorage.setItem('anansi_last_dataset_id', dataset_id)
+    localStorage.setItem('anansi_last_loaded_ts', Date.now().toString())
+    showNotification?.(`CSV processed — ${file.name}`, 'success')
+  } catch (err) {
+    csvUploadError.value = err.message
+  } finally {
+    csvUploading.value = false
+  }
+}
+
+function onCsvFileChange(e) {
+  const file = e.target.files?.[0]
+  if (file) uploadCsv(file)
+}
+
+function onCsvDrop(e) {
+  csvDragging.value = false
+  const file = e.dataTransfer.files?.[0]
+  if (file) uploadCsv(file)
+}
+
+
 const saving = ref(false)
 
 async function save() {
@@ -540,6 +608,13 @@ onMounted(async () => {
 
     workflowSteps.value = workflowResp.steps || []
     issueTypes.value = typesResp.types || []
+
+    const savedStart = configResp.workflow_start_step
+    if (savedStart && workflowSteps.value.includes(savedStart)) {
+      startStep.value = savedStart
+    } else if (workflowSteps.value.length > 1) {
+      startStep.value = workflowSteps.value[1]
+    }
 
     if (workflowSteps.value.length > 0) {
       workflowVisible.value = true

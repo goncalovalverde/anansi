@@ -1,42 +1,36 @@
 const BASE = ''
 
+async function apiFetch(url, opts = {}) {
+  const r = await fetch(BASE + url, opts)
+  const data = await r.json()
+  if (!r.ok) throw new Error(data?.detail || `HTTP ${r.status}`)
+  return data
+}
+
+const json = (body) => ({ headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+
 export const Api = {
-  getConfig:     ()       => fetch(`${BASE}/api/config`).then(r => r.json()),
-  putConfig:     (data)   => fetch(`${BASE}/api/config`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(r => r.json()),
+  getConfig:     ()  => apiFetch('/api/config'),
+  putConfig:     (d) => apiFetch('/api/config', { method: 'PUT',  ...json(d) }),
 
-  getWorkflow:   ()       => fetch(`${BASE}/api/config/workflow`).then(r => r.json()),
-  putWorkflow:   (steps)  => fetch(`${BASE}/api/config/workflow`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ steps }),
-  }).then(r => r.json()),
+  getWorkflow:   ()  => apiFetch('/api/config/workflow'),
+  putWorkflow:   (steps) => apiFetch('/api/config/workflow', { method: 'PUT', ...json({ steps }) }),
 
-  getIssueTypes: ()       => fetch(`${BASE}/api/config/issue-types`).then(r => r.json()),
-  putIssueTypes: (types)  => fetch(`${BASE}/api/config/issue-types`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ types }),
-  }).then(r => r.json()),
+  getIssueTypes: ()  => apiFetch('/api/config/issue-types'),
+  putIssueTypes: (types) => apiFetch('/api/config/issue-types', { method: 'PUT', ...json({ types }) }),
 
-  testConnection:  (d) => fetch(`${BASE}/api/config/test-connection`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d || {}),
-  }).then(r => r.json()),
+  testConnection:  (d) => apiFetch('/api/config/test-connection',  { method: 'POST', ...json(d || {}) }),
+  getJiraStatuses: (d) => apiFetch('/api/config/jira-statuses',    { method: 'POST', ...json(d || {}) }),
+  getJiraProjects: (d) => apiFetch('/api/config/jira-projects',    { method: 'POST', ...json(d || {}) }),
+  getJiraFields:   (d) => apiFetch('/api/config/jira-fields',      { method: 'POST', ...json(d || {}) }),
 
-  getJiraStatuses: (d) => fetch(`${BASE}/api/config/jira-statuses`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d || {}),
-  }).then(r => r.json()),
-
-  getJiraProjects: (d) => fetch(`${BASE}/api/config/jira-projects`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d || {}),
-  }).then(r => r.json()),
-
-  getJiraFields: (d) => fetch(`${BASE}/api/config/jira-fields`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d || {}),
-  }).then(r => r.json()),
-
-  loadData:  () => fetch(`${BASE}/api/data/load`, { method: 'POST' }).then(r => r.json()),
-  getStatus: (id) => fetch(`${BASE}/api/data/${id}/status`).then(r => r.json()),
-  getCharts: (id) => fetch(`${BASE}/api/charts/${id}`).then(r => r.json()),
-  clearCache: () => fetch(`${BASE}/api/data/cache`, { method: 'DELETE' }).then(r => r.json()),
+  loadData:     ()   => apiFetch('/api/data/load', { method: 'POST' }),
+  uploadCsv:    (file) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return apiFetch('/api/data/upload-csv', { method: 'POST', body: fd })
+  },
+  getStatus:  (id) => apiFetch(`/api/data/${id}/status`),
+  getCharts:  (id) => apiFetch(`/api/charts/${id}`),
+  clearCache: ()   => apiFetch('/api/data/cache', { method: 'DELETE' }),
 }

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useConfigStore = defineStore('config', {
   state: () => ({
-    theme: localStorage.getItem('anansi_theme') || 'dark',
+    theme: localStorage.getItem('anansi_theme') || 'light',
   }),
   actions: {
     setTheme(t) {

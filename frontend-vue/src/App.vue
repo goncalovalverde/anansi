@@ -1,5 +1,5 @@
 <template>
-  <div :class="['app-root', { 'light-mode': configStore.theme === 'light' }]">
+  <div :class="['app-root', { 'dark-mode': configStore.theme === 'dark' }]">
     <AppHeader />
     <router-view />
     <div id="notification" :class="['notification', notif.type, notif.show ? 'show' : '']" role="alert" aria-live="assertive">
