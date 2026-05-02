@@ -50,76 +50,8 @@
                 <p class="form-hint">The URL you use to open Jira in your browser.</p>
               </div>
 
-              <!-- Project picker (after test connection) -->
-              <div v-if="projects.length > 0" class="form-group">
-                <label for="jira_project_picker">Select Project</label>
-                <div class="field-with-action">
-                  <select id="jira_project_picker" v-model="selectedProject" @change="onProjectChange">
-                    <option value="">— Choose a project —</option>
-                    <option v-for="p in projects" :key="p.key" :value="p.key">{{ p.name }} ({{ p.key }})</option>
-                  </select>
-                </div>
-                <p class="form-hint">Select a project and we'll build the issue filter automatically.</p>
-              </div>
+              <div class="form-section-title" style="margin-top:1.5rem;">Log In to Jira</div>
 
-              <!-- JQL advanced -->
-              <details class="advanced-settings" ref="jqlDetails">
-                <summary>Advanced: Custom Issue Filter (JQL)</summary>
-                <div class="advanced-content">
-                  <div class="form-group">
-                    <label for="jira_jql_query">Issue Filter (JQL)</label>
-                    <input type="text" id="jira_jql_query" v-model="form.jira_jql_query"
-                      placeholder="project = MYPROJECT AND issuetype in (Story, Bug, Task) ORDER BY created DESC" />
-                    <p class="form-hint">Set automatically when you select a project above.</p>
-                  </div>
-                </div>
-              </details>
-
-              <!-- Story points + epic link -->
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="jira_story_points_field">Story Points Field ID</label>
-                  <div class="field-with-action">
-                    <input type="text" id="jira_story_points_field" v-model="form.jira_story_points_field"
-                      placeholder="customfield_10016" />
-                    <button type="button" class="btn btn-secondary btn-sm" @click="detectFields" :disabled="detectingFields">
-                      {{ detectingFields ? 'Detecting…' : 'Auto-detect' }}
-                    </button>
-                  </div>
-                  <p class="form-hint" id="fields-hint">{{ fieldsHint }}</p>
-                </div>
-                <div class="form-group">
-                  <label for="jira_epic_link_field">Epic Link Field ID</label>
-                  <input type="text" id="jira_epic_link_field" v-model="form.jira_epic_link_field"
-                    placeholder="customfield_10014" />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <div class="checkbox-group">
-                  <input type="checkbox" id="jira_cache_enabled" v-model="form.jira_cache_enabled" />
-                  <label for="jira_cache_enabled">Cache fetched data (recommended — speeds up repeat visits)</label>
-                </div>
-              </div>
-
-              <details class="advanced-settings">
-                <summary>Advanced Settings</summary>
-                <div class="advanced-content">
-                  <div class="form-group form-group--narrow">
-                    <label for="jira_api_version">Jira REST API Version</label>
-                    <select id="jira_api_version" v-model="form.jira_api_version">
-                      <option value="2">v2 — Jira Server / Data Center</option>
-                      <option value="3">v3 — Jira Cloud</option>
-                    </select>
-                    <p class="form-hint">Use v2 for on-premise Jira. Use v3 for Atlassian Cloud.</p>
-                  </div>
-                </div>
-              </details>
-            </div>
-
-            <!-- Auth section -->
-            <div class="form-section">
-              <div class="form-section-title">Log In to Jira</div>
               <div class="form-group">
                 <label for="jira_auth_method">Login Method</label>
                 <select id="jira_auth_method" v-model="form.jira_auth_method">
@@ -179,10 +111,8 @@
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Test connection -->
-            <div class="form-section">
+              <!-- Test connection -->
               <div class="connection-test-row">
                 <button class="btn btn-secondary" @click="testConnection" :disabled="testing">
                   {{ testing ? 'Testing…' : '⚡ Test Connection' }}
@@ -191,6 +121,77 @@
                   {{ testResultText }}
                 </div>
               </div>
+            </div>
+
+            <!-- Project, fields & advanced (revealed after successful connection test) -->
+            <div v-if="stepConnect" class="form-section">
+              <div class="form-section-title">Project &amp; Fields</div>
+
+              <!-- Project picker -->
+              <div v-if="projects.length > 0" class="form-group">
+                <label for="jira_project_picker">Select Project</label>
+                <div class="field-with-action">
+                  <select id="jira_project_picker" v-model="selectedProject" @change="onProjectChange">
+                    <option value="">— Choose a project —</option>
+                    <option v-for="p in projects" :key="p.key" :value="p.key">{{ p.name }} ({{ p.key }})</option>
+                  </select>
+                </div>
+                <p class="form-hint">Select a project and we'll build the issue filter automatically.</p>
+              </div>
+
+              <!-- Story points + epic link -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="jira_story_points_field">Story Points Field ID</label>
+                  <div class="field-with-action">
+                    <input type="text" id="jira_story_points_field" v-model="form.jira_story_points_field"
+                      placeholder="customfield_10016" />
+                    <button type="button" class="btn btn-secondary btn-sm" @click="detectFields" :disabled="detectingFields">
+                      {{ detectingFields ? 'Detecting…' : 'Auto-detect' }}
+                    </button>
+                  </div>
+                  <p class="form-hint" id="fields-hint">{{ fieldsHint }}</p>
+                </div>
+                <div class="form-group">
+                  <label for="jira_epic_link_field">Epic Link Field ID</label>
+                  <input type="text" id="jira_epic_link_field" v-model="form.jira_epic_link_field"
+                    placeholder="customfield_10014" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="checkbox-group">
+                  <input type="checkbox" id="jira_cache_enabled" v-model="form.jira_cache_enabled" />
+                  <label for="jira_cache_enabled">Cache fetched data (recommended — speeds up repeat visits)</label>
+                </div>
+              </div>
+
+              <!-- JQL advanced -->
+              <details class="advanced-settings" ref="jqlDetails">
+                <summary>Advanced: Custom Issue Filter (JQL)</summary>
+                <div class="advanced-content">
+                  <div class="form-group">
+                    <label for="jira_jql_query">Issue Filter (JQL)</label>
+                    <input type="text" id="jira_jql_query" v-model="form.jira_jql_query"
+                      placeholder="project = MYPROJECT AND issuetype in (Story, Bug, Task) ORDER BY created DESC" />
+                    <p class="form-hint">Set automatically when you select a project above.</p>
+                  </div>
+                </div>
+              </details>
+
+              <details class="advanced-settings">
+                <summary>Advanced Settings</summary>
+                <div class="advanced-content">
+                  <div class="form-group form-group--narrow">
+                    <label for="jira_api_version">Jira REST API Version</label>
+                    <select id="jira_api_version" v-model="form.jira_api_version">
+                      <option value="2">v2 — Jira Server / Data Center</option>
+                      <option value="3">v3 — Jira Cloud</option>
+                    </select>
+                    <p class="form-hint">Use v2 for on-premise Jira. Use v3 for Atlassian Cloud.</p>
+                  </div>
+                </div>
+              </details>
             </div>
 
           </div><!-- /jira section -->
@@ -619,6 +620,11 @@ onMounted(async () => {
     if (workflowSteps.value.length > 0) {
       workflowVisible.value = true
       stepWorkflow.value = true
+    }
+
+    // Restore post-connection section for previously configured Jira setups
+    if (inputMode.value === 'jira' && form.jira_url) {
+      stepConnect.value = true
     }
   } catch (err) {
     showNotification?.('Failed to load configuration: ' + err.message, 'error')
