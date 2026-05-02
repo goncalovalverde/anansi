@@ -121,6 +121,20 @@
                   {{ testResultText }}
                 </div>
               </div>
+
+              <details class="advanced-settings">
+                <summary>Advanced Settings</summary>
+                <div class="advanced-content">
+                  <div class="form-group form-group--narrow">
+                    <label for="jira_api_version">Jira REST API Version</label>
+                    <select id="jira_api_version" v-model="form.jira_api_version">
+                      <option value="2">v2 — Jira Server / Data Center</option>
+                      <option value="3">v3 — Jira Cloud</option>
+                    </select>
+                    <p class="form-hint">Use v2 for on-premise Jira. Use v3 for Atlassian Cloud.</p>
+                  </div>
+                </div>
+              </details>
             </div>
 
             <!-- Project, fields & advanced (revealed after successful connection test) -->
@@ -175,20 +189,6 @@
                     <input type="text" id="jira_jql_query" v-model="form.jira_jql_query"
                       placeholder="project = MYPROJECT AND issuetype in (Story, Bug, Task) ORDER BY created DESC" />
                     <p class="form-hint">Set automatically when you select a project above.</p>
-                  </div>
-                </div>
-              </details>
-
-              <details class="advanced-settings">
-                <summary>Advanced Settings</summary>
-                <div class="advanced-content">
-                  <div class="form-group form-group--narrow">
-                    <label for="jira_api_version">Jira REST API Version</label>
-                    <select id="jira_api_version" v-model="form.jira_api_version">
-                      <option value="2">v2 — Jira Server / Data Center</option>
-                      <option value="3">v3 — Jira Cloud</option>
-                    </select>
-                    <p class="form-hint">Use v2 for on-premise Jira. Use v3 for Atlassian Cloud.</p>
                   </div>
                 </div>
               </details>
