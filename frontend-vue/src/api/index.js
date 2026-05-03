@@ -34,5 +34,6 @@ export const Api = {
   getStatus:  (id) => apiFetch(`/api/data/${id}/status`),
   getCharts:  (id) => apiFetch(`/api/charts/${id}`),
   getInsights: (id) => apiFetch(`/api/insights/${id}`),
+  getFlow:    (id) => apiFetch(`/api/flow/${id}`),
   clearCache: ()   => apiFetch('/api/data/cache', { method: 'DELETE' }),
 }

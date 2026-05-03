@@ -347,6 +347,88 @@ class Backlog:
 
         return callouts
 
+    def draw_flow_efficiency(self) -> str:
+        df = self.treemap_data
+        done_col = self.done_step
+        in_prog_col = self.in_progress_step
+        done_data = df[df["Status"] == done_col]
+        if done_data.empty or "Cycle Time" not in df.columns:
+            return go.Figure(layout={"title": "flow_efficiency unavailable: No completed items"}).to_json()
+        done_count = len(done_data)
+        in_prog_count = int(df[in_prog_col].notna().sum()) if in_prog_col in df.columns else 0
+        total = done_count + in_prog_count
+        efficiency = round(done_count / total * 100, 1) if total > 0 else 0
+        color = "#52BE80" if efficiency > 40 else ("#F5A623" if efficiency >= 20 else "#D35400")
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=efficiency,
+            number={"suffix": "%", "font": {"size": 28}},
+            gauge={
+                "axis": {"range": [0, 100]},
+                "bar": {"color": color},
+                "steps": [
+                    {"range": [0, 20], "color": "#fdeee5"},
+                    {"range": [20, 40], "color": "#fff3dc"},
+                    {"range": [40, 100], "color": "#e8f8f0"},
+                ],
+                "threshold": {"line": {"color": "#2C3E50", "width": 2}, "thickness": 0.75, "value": efficiency},
+            },
+        ))
+        return fig.to_json()
+
+    def draw_wip_trend(self) -> str:
+        import pandas as pd
+        df = self.treemap_data
+        in_prog_col = self.in_progress_step
+        done_col = self.done_step
+        if in_prog_col not in df.columns:
+            return go.Figure(layout={"title": "wip_trend unavailable: No in-progress date column"}).to_json()
+        started = pd.to_datetime(df[in_prog_col], errors="coerce").dropna()
+        if started.empty:
+            return go.Figure(layout={"title": "wip_trend unavailable: No in-progress data"}).to_json()
+        date_min = started.min()
+        date_max = pd.Timestamp.now() if done_col not in df.columns else max(
+            started.max(),
+            pd.to_datetime(df[done_col], errors="coerce").dropna().max() if done_col in df.columns else started.max()
+        )
+        weeks = pd.date_range(start=date_min, end=date_max, freq="W")
+        wip_counts = []
+        for week_end in weeks:
+            in_prog = df[in_prog_col].notna() & (pd.to_datetime(df[in_prog_col], errors="coerce") <= week_end)
+            if done_col in df.columns:
+                not_done = df[done_col].isna() | (pd.to_datetime(df[done_col], errors="coerce") > week_end)
+            else:
+                not_done = pd.Series([True] * len(df))
+            count = (in_prog & not_done).sum()
+            wip_counts.append({"week": week_end, "wip": int(count)})
+        wip_df = pd.DataFrame(wip_counts)
+        if wip_df.empty:
+            return go.Figure(layout={"title": "wip_trend unavailable: No data"}).to_json()
+        color = ANANSI_COLORS[2] if (len(wip_df) >= 4 and wip_df["wip"].iloc[-4:].mean() > wip_df["wip"].iloc[-8:-4].mean() * 1.2) else ANANSI_COLORS[0]
+        fig = go.Figure(go.Scatter(x=wip_df["week"], y=wip_df["wip"], mode="lines+markers", line={"color": color, "width": 2}, name="WIP"))
+        fig.update_layout(xaxis={"title": "Week"}, yaxis={"title": "Items in Progress"})
+        return fig.to_json()
+
+    def draw_throughput(self) -> str:
+        import pandas as pd
+        import numpy as np
+        df = self.treemap_data
+        done_col = self.done_step
+        if done_col not in df.columns:
+            return go.Figure(layout={"title": "throughput unavailable: No done date column"}).to_json()
+        done_dates = pd.to_datetime(df[done_col], errors="coerce").dropna()
+        if done_dates.empty:
+            return go.Figure(layout={"title": "throughput unavailable: No completed items"}).to_json()
+        weekly = done_dates.dt.to_period("W").value_counts().sort_index()
+        weeks = [str(p.start_time.date()) for p in weekly.index]
+        counts = weekly.values.tolist()
+        rolling = pd.Series(counts).rolling(4, min_periods=1).mean().round(1).tolist()
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=weeks, y=counts, name="Completed", marker_color=ANANSI_COLORS[0]))
+        fig.add_trace(go.Scatter(x=weeks, y=rolling, mode="lines", name="4-week avg", line={"color": ANANSI_COLORS[1], "width": 2, "dash": "dot"}))
+        fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
+        return fig.to_json()
+
     # ------------------------------------------------------------------ #
     #  Data preparation                                                    #
     # ------------------------------------------------------------------ #

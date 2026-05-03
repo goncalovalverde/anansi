@@ -33,12 +33,12 @@
         <span class="sidebar-item-label">Dashboard</span>
       </router-link>
 
-      <button class="sidebar-item" aria-disabled="true" title="Flow — coming soon" aria-label="Flow (coming soon)">
+      <router-link to="/flow" class="sidebar-item" :class="{ active: route.path === '/flow' }" title="Flow" aria-label="Flow">
         <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <path d="M3 12 C6 6, 9 18, 12 12 C15 6, 18 18, 21 12"/>
         </svg>
         <span class="sidebar-item-label">Flow</span>
-      </button>
+      </router-link>
 
       <button class="sidebar-item" aria-disabled="true" title="Trends — coming soon" aria-label="Trends (coming soon)">
         <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">

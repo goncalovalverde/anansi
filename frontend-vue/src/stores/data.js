@@ -23,6 +23,7 @@ export const useDataStore = defineStore('data', {
       hasData: false,
       insights: null,
       callouts: null,
+      flowCharts: null,
       progress: { loaded: 0, total: 0 },
     }
   },
@@ -35,6 +36,7 @@ export const useDataStore = defineStore('data', {
     setLoading(v) { this.isLoading = v },
     setProgress(loaded, total) { this.progress = { loaded, total } },
     setInsights(data) { this.insights = data },
+    setFlowCharts(data) { this.flowCharts = data },
     setCharts(charts, datasetId, saveTimestamp) {
       this.charts = charts
       this.kpis = charts.kpis || null
@@ -54,6 +56,7 @@ export const useDataStore = defineStore('data', {
       this.kpis = null
       this.insights = null
       this.callouts = null
+      this.flowCharts = null
       this.hasData = false
       this.progress = { loaded: 0, total: 0 }
       localStorage.removeItem(STORAGE_KEY)

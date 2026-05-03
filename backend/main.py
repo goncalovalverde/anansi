@@ -13,6 +13,7 @@ import api.config
 import api.data
 import api.charts
 import api.insights
+import api.flow
 
 app = FastAPI(title="Anansi", description="Jira/CSV backlog analytics dashboard")
 
@@ -30,6 +31,7 @@ app.include_router(api.config.router)
 app.include_router(api.data.router)
 app.include_router(api.charts.router)
 app.include_router(api.insights.router)
+app.include_router(api.flow.router)
 
 _frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend-vue", "dist")
 if os.path.isdir(_frontend_dir):
