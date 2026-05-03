@@ -172,6 +172,26 @@ def get_jira_projects(body: dict = None, db: sqlite3.Connection = Depends(get_db
         raise HTTPException(status_code=502, detail=f"Failed to fetch projects: {exc}")
 
 
+@router.post("/jira-issue-types")
+def get_jira_issue_types(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
+    """Return all issue types available in the connected Jira instance."""
+    import reader.jira as jira_reader
+
+    jira_config = config_service.build_jira_config(db, cache=False)
+    if body:
+        jira_config = _merge_overrides(jira_config, body)
+
+    try:
+        jr = jira_reader.Jira(jira_config, [], database.DB_PATH)
+        jira_instance = jr.get_jira_instance()
+        types = jira_instance.issue_types()
+        return {"issue_types": sorted(set(t.name for t in types))}
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch issue types: {exc}")
+
+
 @router.post("/jira-fields")
 def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
     """Return custom fields that likely map to story points or epic link."""
@@ -204,25 +224,3 @@ def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db))
         raise HTTPException(status_code=502, detail=f"Failed to fetch fields: {exc}")
 
 
-@router.post("/jira-projects")
-def get_jira_projects(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
-    import reader.jira as jira_reader
-
-    jira_config = config_service.build_jira_config(db, cache=False)
-    if body:
-        jira_config = _merge_overrides(jira_config, body)
-
-    try:
-        jr = jira_reader.Jira(jira_config, [], database.DB_PATH)
-        jira_instance = jr.get_jira_instance()
-        projects = jira_instance.projects()
-        return {
-            "projects": [
-                {"key": p.key, "name": p.name}
-                for p in sorted(projects, key=lambda x: x.name)
-            ]
-        }
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to fetch projects: {exc}")

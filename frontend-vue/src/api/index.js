@@ -23,6 +23,7 @@ export const Api = {
   getJiraStatuses: (d) => apiFetch('/api/config/jira-statuses',    { method: 'POST', ...json(d || {}) }),
   getJiraProjects: (d) => apiFetch('/api/config/jira-projects',    { method: 'POST', ...json(d || {}) }),
   getJiraFields:   (d) => apiFetch('/api/config/jira-fields',      { method: 'POST', ...json(d || {}) }),
+  getJiraIssueTypes: (d) => apiFetch('/api/config/jira-issue-types', { method: 'POST', ...json(d || {}) }),
 
   loadData:     ()   => apiFetch('/api/data/load', { method: 'POST' }),
   uploadCsv:    (file) => {

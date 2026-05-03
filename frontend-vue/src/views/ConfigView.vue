@@ -286,6 +286,15 @@
           <div class="form-section">
             <div class="form-section-title">Issue Types to Track</div>
             <p class="form-hint">"Total" is always included. Add the types relevant to your team.</p>
+
+            <template v-if="availableIssueTypes.length > 0">
+              <div class="workflow-panel-title" style="margin-bottom:0.4rem;">Available (click to add →)</div>
+              <div class="status-chips" style="margin-bottom:1rem;">
+                <button v-for="t in availableIssueTypes" :key="t" type="button"
+                  class="status-chip" @click="addIssueType(t)">{{ t }}</button>
+              </div>
+            </template>
+
             <div class="tag-list">
               <span v-for="t in issueTypes" :key="t" class="tag">
                 {{ t }}
@@ -413,8 +422,17 @@ function addWorkflowManual() {
 }
 
 // ── Issue types ───────────────────────────────────────────────────────────
-const issueTypes = ref([])
-const typeInput  = ref('')
+const issueTypes    = ref([])
+const allIssueTypes = ref([])
+const typeInput     = ref('')
+
+const availableIssueTypes = computed(() =>
+  allIssueTypes.value.filter(t => !issueTypes.value.includes(t))
+)
+
+function addIssueType(t) {
+  if (!issueTypes.value.includes(t)) issueTypes.value.push(t)
+}
 
 function addType() {
   const v = typeInput.value.trim()
@@ -462,8 +480,13 @@ async function testConnection() {
     testResultClass.value = 'success'
 
     try {
-      const { statuses } = await Api.getJiraStatuses(collectFormData())
+      const formData = collectFormData()
+      const [{ statuses }, issueTypesResult] = await Promise.all([
+        Api.getJiraStatuses(formData),
+        Api.getJiraIssueTypes(formData).catch(() => ({ issue_types: [] })),
+      ])
       allStatuses.value = statuses || []
+      allIssueTypes.value = issueTypesResult.issue_types || []
       workflowVisible.value = true
       testResultText.value = `✓ Connected — ${allStatuses.value.length} workflow statuses available`
       await nextTick()
@@ -471,7 +494,7 @@ async function testConnection() {
 
       // Load project picker
       try {
-        const { projects: ps } = await Api.getJiraProjects(collectFormData())
+        const { projects: ps } = await Api.getJiraProjects(formData)
         if (ps?.length) {
           projects.value = ps
           const match = form.jira_jql_query.match(/project\s*=\s*["']?([A-Z0-9_]+)["']?/i)
