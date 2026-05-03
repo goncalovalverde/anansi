@@ -56,8 +56,13 @@ class Backlog:
             df[c] = pd.to_datetime(df[c], errors="coerce")
         long = df.melt(id_vars="Epic Name", value_vars=date_cols, var_name="Stage", value_name="Date")
         long = long.dropna(subset=["Date"])
+        color_map = {
+            self.done_step: ANANSI_COLORS[0],
+            self.in_progress_step: ANANSI_COLORS[1],
+        }
         fig = px.scatter(
             long, x="Date", y="Epic Name", color="Stage",
+            color_discrete_map=color_map,
             title=f"{self.done_step} and {self.in_progress_step} dates",
         )
         return fig.to_json()
@@ -111,6 +116,7 @@ class Backlog:
             x_end=self.done_step,
             y="Summary",
             color="Epic Name",
+            color_discrete_sequence=ANANSI_COLORS,
             title=subtitle if subtitle else None,
         )
         fig.update_layout(yaxis={"visible": True, "automargin": True})
@@ -137,6 +143,8 @@ class Backlog:
             x=self.done_step,
             y="Epic Name",
             size="Cycle Time",
+            color="Epic Name",
+            color_discrete_sequence=ANANSI_COLORS,
             title="When things were done and how big",
         )
         return fig.to_json()
