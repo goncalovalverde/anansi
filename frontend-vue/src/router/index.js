@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import DashboardView from '@/views/DashboardView.vue'
 import ConfigView from '@/views/ConfigView.vue'
 import FlowView from '@/views/FlowView.vue'
+import TrendsView from '@/views/TrendsView.vue'
 
 export default createRouter({
   history: createWebHashHistory(),
@@ -9,5 +10,6 @@ export default createRouter({
     { path: '/', component: DashboardView },
     { path: '/config', component: ConfigView },
     { path: '/flow', component: FlowView },
+    { path: '/trends', component: TrendsView },
   ],
 })

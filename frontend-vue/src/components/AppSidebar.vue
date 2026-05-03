@@ -40,13 +40,13 @@
         <span class="sidebar-item-label">Flow</span>
       </router-link>
 
-      <button class="sidebar-item" aria-disabled="true" title="Trends — coming soon" aria-label="Trends (coming soon)">
+      <router-link to="/trends" class="sidebar-item" :class="{ active: route.path === '/trends' }" title="Trends" aria-label="Trends">
         <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
           <polyline points="3 17 8 12 13 16 21 7"/>
           <polyline points="15 7 21 7 21 13"/>
         </svg>
         <span class="sidebar-item-label">Trends</span>
-      </button>
+      </router-link>
     </div>
 
     <!-- Bottom nav group -->

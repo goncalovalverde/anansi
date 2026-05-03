@@ -429,6 +429,87 @@ class Backlog:
         fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
         return fig.to_json()
 
+    def draw_cumulative_flow(self) -> str:
+        import pandas as pd
+        df = self.treemap_data
+        done_col = self.done_step
+        created_col = "Created"
+        if created_col not in df.columns:
+            return go.Figure(layout={"title": "cumulative_flow unavailable: No Created date column"}).to_json()
+        created = pd.to_datetime(df[created_col], errors="coerce").dropna()
+        if done_col in df.columns:
+            done_dates = pd.to_datetime(df[done_col], errors="coerce").dropna()
+        else:
+            done_dates = pd.Series([], dtype="datetime64[ns]")
+        if created.empty:
+            return go.Figure(layout={"title": "cumulative_flow unavailable: No date data"}).to_json()
+        date_min = created.min()
+        date_max = max(created.max(), done_dates.max() if len(done_dates) > 0 else created.max())
+        dates = pd.date_range(start=date_min, end=date_max, freq="W")
+        cum_created = [(d, int((created <= d).sum())) for d in dates]
+        cum_done = [(d, int((done_dates <= d).sum())) for d in dates] if len(done_dates) > 0 else [(d, 0) for d in dates]
+        xs = [str(d.date()) for d in dates]
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=xs, y=[c[1] for c in cum_created], mode="lines", name="Created", line={"color": ANANSI_COLORS[1], "width": 2}, fill="tonexty", fillcolor="rgba(0,123,133,0.1)"))
+        fig.add_trace(go.Scatter(x=xs, y=[c[1] for c in cum_done], mode="lines", name="Completed", line={"color": ANANSI_COLORS[0], "width": 2}))
+        fig.update_layout(xaxis={"tickformat": "%b %Y", "tickangle": -30}, yaxis={"title": "Cumulative items"})
+        return fig.to_json()
+
+    def draw_monthly_throughput(self) -> str:
+        import pandas as pd
+        import numpy as np
+        df = self.treemap_data
+        done_col = self.done_step
+        if done_col not in df.columns:
+            return go.Figure(layout={"title": "monthly_throughput unavailable: No done date"}).to_json()
+        done_dates = pd.to_datetime(df[done_col], errors="coerce").dropna()
+        if done_dates.empty:
+            return go.Figure(layout={"title": "monthly_throughput unavailable: No completed items"}).to_json()
+        monthly = done_dates.dt.to_period("M").value_counts().sort_index()
+        xs = [str(p) for p in monthly.index]
+        ys = monthly.values.tolist()
+        x_nums = np.arange(len(ys))
+        if len(ys) >= 2:
+            m, b = np.polyfit(x_nums, ys, 1)
+            trend = [round(m * i + b, 1) for i in x_nums]
+        else:
+            trend = ys[:]
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=xs, y=ys, name="Monthly completions", marker_color=ANANSI_COLORS[0]))
+        fig.add_trace(go.Scatter(x=xs, y=trend, mode="lines", name="Trend", line={"color": ANANSI_COLORS[2], "width": 2, "dash": "dot"}))
+        fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
+        return fig.to_json()
+
+    def draw_epic_progress(self) -> str:
+        import pandas as pd
+        import plotly.express as px
+        df = self.treemap_data
+        done_col = self.done_step
+        if done_col not in df.columns:
+            return go.Figure(layout={"title": "epic_progress unavailable: No done date"}).to_json()
+        done_data = df[df["Status"] == done_col].copy()
+        done_data[done_col] = pd.to_datetime(done_data[done_col], errors="coerce")
+        epic_groups = done_data.groupby("Epic Name")[done_col]
+        epic_first = epic_groups.min().dropna()
+        epic_last = epic_groups.max().dropna()
+        epic_count = done_data.groupby("Epic Name").size()
+        epics = sorted(set(epic_first.index) & set(epic_last.index))
+        if not epics:
+            return go.Figure(layout={"title": "epic_progress unavailable: No completed items"}).to_json()
+        epic_data = []
+        for epic in epics:
+            epic_data.append({
+                "Epic": epic,
+                "Start": epic_first[epic],
+                "End": epic_last[epic],
+                "Count": int(epic_count.get(epic, 1)),
+            })
+        epic_df = pd.DataFrame(epic_data)
+        fig = px.timeline(epic_df, x_start="Start", x_end="End", y="Epic", color="Epic",
+                          color_discrete_sequence=ANANSI_COLORS)
+        fig.update_layout(showlegend=False, yaxis={"automargin": True})
+        return fig.to_json()
+
     # ------------------------------------------------------------------ #
     #  Data preparation                                                    #
     # ------------------------------------------------------------------ #
