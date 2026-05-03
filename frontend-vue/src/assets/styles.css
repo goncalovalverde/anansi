@@ -142,6 +142,8 @@ a:hover { color: var(--accent-hover); }
   gap: 2px;
   transition: all 0.15s ease;
   padding: 0;
+  overflow: hidden;
+  max-width: 100%;
 }
 .sidebar-item:hover {
   color: rgba(255,255,255,0.9);
@@ -161,6 +163,10 @@ a:hover { color: var(--accent-hover); }
   text-transform: uppercase;
   letter-spacing: 0.05em;
   line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* ── Top bar ── */
@@ -761,6 +767,7 @@ main { padding: 2rem 0; }
 .kpi-box {
   background: var(--bg-card);
   border: 1px solid var(--border);
+  border-top: 3px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 1rem 1.25rem;
   display: flex;
@@ -1085,10 +1092,10 @@ details.advanced-settings .advanced-content {
   justify-content: center;
   gap: 0.5rem;
   height: 100%;
-  padding: 1.5rem;
+  padding: 24px;
   text-align: center;
-  color: var(--text-muted);
-  font-size: 0.82rem;
+  color: #888;
+  font-size: 13px;
 }
-.chart-empty-state svg { opacity: 0.4; }
-.chart-empty-link { color: var(--accent); font-size: 0.78rem; }
+.chart-empty-state svg { opacity: 0.4; color: var(--color-border); width: 32px; height: 32px; }
+.chart-empty-link { color: var(--color-primary); font-size: 13px; text-decoration: none; font-weight: 600; }

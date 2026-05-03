@@ -6,6 +6,8 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+ANANSI_COLORS = ['#007B85', '#F5A623', '#D35400', '#2C3E50', '#5DADE2', '#A569BD', '#52BE80']
+
 
 class Backlog:
     def __init__(self, cycle_data: pd.DataFrame, config: dict):
@@ -34,6 +36,16 @@ class Backlog:
         fig = px.treemap(
             done_data,
             path=["Epic Name", "Type", "Composed"],
+            color="Epic Name",
+            color_discrete_sequence=ANANSI_COLORS,
+        )
+        fig.update_traces(
+            texttemplate="%{label}",
+            textinfo="label",
+            hovertemplate="%{label}<br>Count: %{value}<br>Parent: %{parent}<extra></extra>",
+            textfont_size=11,
+            marker_line_width=2,
+            marker_line_color="#F9F9F7",
         )
         return fig.to_json()
 
@@ -53,19 +65,34 @@ class Backlog:
     def draw_pbis_epic(self, status: str) -> str:
         fig = px.histogram(
             self.treemap_data,
-            x=[status],
+            x=status,
             title=f"{status} PBI's per Epic",
             color="Epic Name",
+            color_discrete_sequence=ANANSI_COLORS,
         )
         return fig.to_json()
 
     def draw_story_points(self) -> str:
-        fig = px.histogram(
-            self.treemap_data,
-            x=["Story Points"],
-            title="Story points delivered",
+        sp_col = "Story Points"
+        if sp_col not in self.treemap_data.columns:
+            return go.Figure(
+                layout={"title": "story_points unavailable: Story Points column missing"}
+            ).to_json()
+        df = self.treemap_data.copy()
+        df[sp_col] = pd.to_numeric(df[sp_col], errors="coerce").fillna(0)
+        agg = df.groupby("Epic Name", as_index=False)[sp_col].sum()
+        if agg[sp_col].sum() == 0:
+            return go.Figure(
+                layout={"title": "story_points unavailable: No story points data"}
+            ).to_json()
+        fig = px.bar(
+            agg,
+            x="Epic Name",
+            y=sp_col,
             color="Epic Name",
+            color_discrete_sequence=ANANSI_COLORS,
         )
+        fig.update_layout(xaxis=dict(type="category", tickangle=-30, automargin=True))
         return fig.to_json()
 
     def draw_timeline(self) -> str:
@@ -92,9 +119,10 @@ class Backlog:
     def draw_type_issue(self) -> str:
         fig = px.histogram(
             self.treemap_data,
-            x=["Type"],
+            x="Type",
             title="Type of issue",
             color="Epic Name",
+            color_discrete_sequence=ANANSI_COLORS,
         )
         return fig.to_json()
 
@@ -106,7 +134,7 @@ class Backlog:
             ).to_json()
         fig = px.scatter(
             done_data,
-            x=[self.done_step],
+            x=self.done_step,
             y="Epic Name",
             size="Cycle Time",
             title="When things were done and how big",

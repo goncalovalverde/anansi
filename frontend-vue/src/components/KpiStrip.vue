@@ -12,7 +12,7 @@
     <div class="kpi-box" id="kpi-wip" :style="{ borderTop: `3px solid ${(kpis?.in_progress_count ?? 0) > 100 ? 'var(--color-alert)' : 'var(--color-primary)'}` }">
       <div class="kpi-value" :style="{ color: (kpis?.in_progress_count ?? 0) > 100 ? 'var(--color-alert)' : 'var(--color-neutral)' }">{{ kpis?.in_progress_count ?? '—' }}</div>
       <div class="kpi-label">In Progress</div>
-      <div class="kpi-hint" v-if="(kpis?.in_progress_count ?? 0) > 100">High WIP — consider limiting work in progress</div>
+      <div class="kpi-hint" v-if="(kpis?.in_progress_count ?? 0) > 100">High WIP - consider limiting work in progress</div>
     </div>
     <div :class="['kpi-box kpi-cycle', trendClass]" id="kpi-cycle" style="border-top: 3px solid var(--color-primary)">
       <div class="kpi-value" style="color: var(--color-neutral)">{{ cycleText }}</div>

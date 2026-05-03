@@ -104,9 +104,11 @@ function getTheme() {
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { family: 'Inter, Roboto, sans-serif', color: '#2C3E50', size: 12 },
-    margin: { t: 16, r: 16, b: 40, l: 50 },
+    margin: { t: 16, r: 40, b: 40, l: 50 },
     colorway: ['#007B85','#F5A623','#D35400','#2C3E50','#5DADE2','#A569BD','#52BE80'],
     legend: { orientation: 'h', y: -0.15, xanchor: 'center', x: 0.5 },
+    xaxis: { automargin: true },
+    yaxis: { automargin: true },
   }
 }
 
@@ -164,6 +166,12 @@ function renderCharts(charts) {
     delete layout.title
 
     // Per-chart layout additions
+    const HISTOGRAM_KEYS = ['pbis_created', 'pbis_done', 'story_points', 'type_issue']
+    if (key === 'treemap') {
+      layout.margin = { t: 8, r: 8, b: 8, l: 8 }
+    } else if (HISTOGRAM_KEYS.includes(key)) {
+      layout.margin = Object.assign({}, layout.margin, { r: 50, b: 60 })
+    }
     if (key === 'distribution' || key === 'timeline_size') {
       layout.xaxis = Object.assign({}, layout.xaxis || {}, { tickformat: '%b %Y', tickangle: -30 })
     }
@@ -173,6 +181,9 @@ function renderCharts(charts) {
     if (key === 'timeline_size') {
       layout.xaxis = Object.assign({}, layout.xaxis || {}, { title: { text: 'Completion date' } })
       layout.yaxis = Object.assign({}, layout.yaxis || {}, { title: { text: 'Cycle time (days)' } })
+    }
+    if (key === 'story_points') {
+      layout.xaxis = Object.assign({}, layout.xaxis || {}, { type: 'category', tickangle: -30, automargin: true })
     }
 
     window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
