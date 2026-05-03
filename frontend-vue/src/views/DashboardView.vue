@@ -79,6 +79,7 @@ import { ref, watch, onMounted } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { useConfigStore } from '@/stores/config.js'
 import { useDataLoader } from '@/composables/useDataLoader.js'
+import { usePlotlyTheme } from '@/composables/usePlotlyTheme.js'
 import StatusBar from '@/components/StatusBar.vue'
 import KpiStrip from '@/components/KpiStrip.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -88,6 +89,7 @@ import InsightBar from '@/components/InsightBar.vue'
 const store = useDataStore()
 const configStore = useConfigStore()
 const loader = useDataLoader()
+const { applyTheme } = usePlotlyTheme()
 
 const chartRefs = ref([])
 
@@ -223,7 +225,9 @@ watch(() => store.charts, (charts) => {
 })
 
 // Re-render when theme changes (no network call)
-watch(() => configStore.theme, () => {
+watch(() => configStore.theme, (theme) => {
+  const ids = CHART_META.map(m => m.containerId)
+  applyTheme(theme === 'dark', ids)
   if (store.charts) renderCharts(store.charts)
 })
 
