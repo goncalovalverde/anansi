@@ -131,6 +131,8 @@ function renderCharts(charts) {
     if (!el) continue
     if (!charts[key]) {
       el.innerHTML = '<div class="chart-placeholder"><span class="chart-placeholder-icon">📊</span><span>No data</span></div>'
+      const calloutEl = el.parentElement?.querySelector('.chart-callout')
+      if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
     const fig = charts[key]
@@ -144,6 +146,8 @@ function renderCharts(charts) {
         <span class="chart-placeholder-hint">Your team may not use story points, or the field ID needs configuring.<br>
           <a href="#/config">Update Story Points Field ID →</a></span>
       </div>`
+      const calloutEl = el.parentElement?.querySelector('.chart-callout')
+      if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
 
@@ -161,9 +165,11 @@ function renderCharts(charts) {
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
-          <span>This chart needs more data — try loading a wider date range or check your workflow configuration.</span>
+          <span>This chart needs more data - try loading a wider date range or check your workflow configuration.</span>
           <a href="#/config" class="chart-empty-link">Go to Configuration →</a>
         </div>`
+      const calloutEl = el.parentElement?.querySelector('.chart-callout')
+      if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
 
@@ -194,6 +200,20 @@ function renderCharts(charts) {
     }
 
     window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
+
+    // Callouts
+    const callouts = store.callouts || {}
+    const callout = callouts[key]
+    const calloutEl = el.parentElement?.querySelector('.chart-callout')
+    if (calloutEl) {
+      if (callout?.message) {
+        calloutEl.textContent = callout.message
+        calloutEl.className = `chart-callout callout-${callout.severity}`
+        calloutEl.style.display = ''
+      } else {
+        calloutEl.style.display = 'none'
+      }
+    }
   }
 }
 

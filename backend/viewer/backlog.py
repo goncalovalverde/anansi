@@ -278,6 +278,75 @@ class Backlog:
         insights.sort(key=lambda x: order.get(x["type"], 3))
         return insights[:5]
 
+    def get_callouts(self) -> dict:
+        import pandas as pd
+        df = self.treemap_data
+        done_col = self.done_step
+        callouts = {}
+
+        # treemap
+        done_data = df[df["Status"] == done_col]
+        if done_data.empty:
+            callouts["treemap"] = {"message": "No completed work to display - items may not be reaching Done status", "severity": "alert"}
+        else:
+            n_epics = done_data["Epic Name"].nunique()
+            if n_epics == 1:
+                callouts["treemap"] = {"message": "Only 1 epic has completed items - are other epics blocked or not yet started?", "severity": "warn"}
+
+        # pbis_done
+        done_count = int(df[done_col].notna().sum()) if done_col in df.columns else 0
+        if done_count == 0:
+            callouts["pbis_done"] = {"message": "No items completed in this period", "severity": "alert"}
+
+        # story_points
+        sp_col = "Story Points"
+        if sp_col not in df.columns or pd.to_numeric(df[sp_col], errors="coerce").fillna(0).sum() == 0:
+            callouts["story_points"] = {"message": "No story points recorded - check that story point field ID is configured correctly", "severity": "warn"}
+        else:
+            by_epic = df.groupby("Epic Name")[sp_col].apply(lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum())
+            total_sp = by_epic.sum()
+            if total_sp > 0:
+                top_pct = by_epic.max() / total_sp
+                if top_pct > 0.6:
+                    callouts["story_points"] = {"message": "One epic is consuming most delivery capacity - other areas may be under-resourced", "severity": "warn"}
+
+        # type_issue - bug ratio
+        if "Type" in df.columns:
+            total = len(df)
+            bug_types = {"bug", "defect"}
+            bugs = df["Type"].str.lower().isin(bug_types).sum()
+            if total > 0:
+                ratio = round(bugs / total * 100, 1)
+                if ratio > 25:
+                    callouts["type_issue"] = {"message": f"High defect ratio ({ratio}%) - more than 1 in 4 items is a bug or defect", "severity": "alert"}
+                elif bugs == 0:
+                    callouts["type_issue"] = {"message": "No bugs or defects in this period", "severity": "ok"}
+
+        # timeline - slowest item
+        if "Cycle Time" in df.columns and done_col in df.columns:
+            ct_df = df[df[done_col].notna() & df["Cycle Time"].notna() & (df["Cycle Time"] > 0)]
+            if not ct_df.empty:
+                avg_ct = ct_df["Cycle Time"].mean()
+                max_row = ct_df.loc[ct_df["Cycle Time"].idxmax()]
+                max_ct = int(max_row["Cycle Time"])
+                if max_ct > 60:
+                    name = str(max_row.get("Summary", "An item"))[:50]
+                    callouts["timeline"] = {"message": f"{name} has been in progress for {max_ct} days", "severity": "alert"}
+                elif avg_ct > 30:
+                    callouts["timeline"] = {"message": f"Average item age is {round(avg_ct)} days - consider breaking work into smaller pieces", "severity": "warn"}
+
+        # timeline_size - outliers (> 3x average)
+        if "Cycle Time" in df.columns:
+            ct_vals = df["Cycle Time"].dropna()
+            ct_vals = ct_vals[ct_vals > 0]
+            if len(ct_vals) > 0:
+                avg_ct = ct_vals.mean()
+                outliers = (ct_vals > 3 * avg_ct).sum()
+                if outliers > 0:
+                    callouts["timeline_size"] = {"message": f"{outliers} item{'s' if outliers > 1 else ''} took more than 3 times the average to complete", "severity": "warn"}
+
+        return callouts
+
     # ------------------------------------------------------------------ #
     #  Data preparation                                                    #
     # ------------------------------------------------------------------ #

@@ -46,6 +46,7 @@ def get_charts(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
         raw_charts = backlog.get_all_charts()
         charts = {key: json.loads(value) for key, value in raw_charts.items()}
         charts["kpis"] = backlog.get_kpis()
+        charts["callouts"] = backlog.get_callouts()
     except Exception as exc:
         raise HTTPException(
             status_code=500, detail=f"Chart rendering failed: {exc}"

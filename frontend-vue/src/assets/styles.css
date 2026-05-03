@@ -1122,3 +1122,7 @@ details.advanced-settings .advanced-content {
 .insight-pill-dot {
   width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0;
 }
+
+.callout-ok    { color: #0a6640; background: #f0faf5; }
+.callout-warn  { color: #7a4a00; background: #fffbf0; }
+.callout-alert { color: #7a2a00; background: #fff5f0; }
