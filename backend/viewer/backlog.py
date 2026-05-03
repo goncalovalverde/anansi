@@ -62,7 +62,7 @@ class Backlog:
         )
         return fig.to_json()
 
-    def draw_pbis_epic(self, status: str) -> str:
+    def draw_issues_histogram(self, status: str) -> str:
         fig = px.histogram(
             self.treemap_data,
             x=status,
@@ -149,8 +149,8 @@ class Backlog:
         chart_methods = {
             "treemap": self.draw_treemap,
             "distribution": self.draw_distribution,
-            "pbis_done": lambda: self.draw_pbis_epic(self.done_step),
-            "pbis_created": lambda: self.draw_pbis_epic("Created"),
+            "pbis_done": lambda: self.draw_issues_histogram(self.done_step),
+            "pbis_created": lambda: self.draw_issues_histogram("Created"),
             "story_points": self.draw_story_points,
             "timeline": self.draw_timeline,
             "type_issue": self.draw_type_issue,
