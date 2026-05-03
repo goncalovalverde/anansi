@@ -112,6 +112,7 @@ function getTheme() {
   }
 }
 
+// Note: treemap shares this same PLOTLY_CONFIG path (displayModeBar: 'hover')
 const PLOTLY_CONFIG = {
   displayModeBar: 'hover',
   responsive: true,
@@ -130,7 +131,7 @@ function renderCharts(charts) {
     }
     const fig = charts[key]
     const isEmpty = !fig.data || fig.data.length === 0 ||
-      (fig.data[0] && (!fig.data[0].x || fig.data[0].x.length === 0))
+      fig.data.every(t => !t.x || t.x.length === 0)
 
     if (key === 'story_points' && isEmpty) {
       el.innerHTML = `<div class="chart-placeholder">
@@ -166,9 +167,11 @@ function renderCharts(charts) {
     delete layout.title
 
     // Per-chart layout additions
-    const HISTOGRAM_KEYS = ['pbis_created', 'pbis_done', 'story_points', 'type_issue']
+    const HISTOGRAM_KEYS = ['pbis_created', 'pbis_done', 'type_issue']
     if (key === 'treemap') {
       layout.margin = { t: 8, r: 8, b: 8, l: 8 }
+    } else if (key === 'story_points') {
+      layout.margin = Object.assign({}, layout.margin, { r: 50, b: 70 })
     } else if (HISTOGRAM_KEYS.includes(key)) {
       layout.margin = Object.assign({}, layout.margin, { r: 50, b: 60 })
     }
