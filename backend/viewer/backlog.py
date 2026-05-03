@@ -213,6 +213,71 @@ class Backlog:
             "cycle_trend": cycle_trend,
         }
 
+    def get_insights(self) -> list:
+        import datetime
+        df = self.treemap_data
+        done_col = self.done_step
+        in_prog_col = self.in_progress_step
+        insights = []
+
+        # 1. Completed count check
+        done_count = int(df[done_col].notna().sum()) if done_col in df.columns else 0
+        if done_count == 0:
+            insights.append({"type": "alert", "message": "No items marked Done - delivery may be stalled"})
+        elif done_count > 0:
+            insights.append({"type": "ok", "message": f"{done_count} items completed this period"})
+
+        # 2. WIP check
+        in_prog = int(df[in_prog_col].notna().sum()) if in_prog_col in df.columns else 0
+        if in_prog > 100:
+            insights.append({"type": "alert", "message": f"High WIP - {in_prog} items active simultaneously"})
+        elif in_prog > 50:
+            insights.append({"type": "warn", "message": f"WIP is elevated ({in_prog} items) - consider limiting parallel work"})
+
+        # 3. Cycle time check
+        if "Cycle Time" in df.columns and done_count > 0:
+            ct = df["Cycle Time"].dropna()
+            ct = ct[ct > 0]
+            if len(ct) > 0:
+                avg = round(float(ct.mean()), 1)
+                if avg > 30:
+                    insights.append({"type": "warn", "message": f"Average cycle time is {avg} days - items are taking over a month to complete"})
+                elif avg <= 10:
+                    insights.append({"type": "ok", "message": f"Cycle time is healthy at {avg} days on average"})
+
+        # 4. Bug ratio check
+        bug_types = {"bug", "defect"}
+        if "Type" in df.columns:
+            total = len(df)
+            bugs = df["Type"].str.lower().isin(bug_types).sum()
+            if total > 0:
+                ratio = round(bugs / total * 100, 1)
+                if ratio > 30:
+                    insights.append({"type": "alert", "message": f"Bug ratio is {ratio}% - quality issues may be affecting delivery"})
+                elif ratio > 15:
+                    insights.append({"type": "warn", "message": f"Bug ratio is {ratio}% - worth monitoring"})
+
+        # 5. Backlog growth (created dates)
+        if "Created" in df.columns:
+            created = df["Created"].dropna()
+            if len(created) > 0:
+                import pandas as pd
+                created = pd.to_datetime(created, errors="coerce").dropna()
+                if len(created) > 0:
+                    mid = created.median()
+                    first_half = (created <= mid).sum()
+                    second_half = (created > mid).sum()
+                    if first_half > 0 and second_half > first_half * 1.2:
+                        pct = round((second_half - first_half) / first_half * 100)
+                        insights.append({"type": "warn", "message": f"Backlog grew {pct}% this period - more is being added than completed"})
+                    elif second_half < first_half:
+                        insights.append({"type": "ok", "message": "Backlog is shrinking - good sign of delivery focus"})
+
+        # Sort: alert first, then warn, then ok; cap at 5
+        order = {"alert": 0, "warn": 1, "ok": 2}
+        insights.sort(key=lambda x: order.get(x["type"], 3))
+        return insights[:5]
+
     # ------------------------------------------------------------------ #
     #  Data preparation                                                    #
     # ------------------------------------------------------------------ #

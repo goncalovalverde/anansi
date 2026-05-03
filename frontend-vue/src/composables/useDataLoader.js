@@ -101,13 +101,17 @@ export function useDataLoader() {
   }
 
   async function _render(datasetId, saveTimestamp, gen) {
-    store.setStatus('loading', 'Rendering charts…')
+    store.setStatus('loading', 'Rendering charts...')
     try {
-      const charts = await Api.getCharts(datasetId)
+      const [charts, insights] = await Promise.all([
+        Api.getCharts(datasetId),
+        Api.getInsights(datasetId).catch(() => []),
+      ])
       if (gen !== generation) return
 
       store.setCharts(charts, datasetId, saveTimestamp)
-      store.setStatus('ready', 'Ready', `Dataset: ${datasetId.substring(0, 8)}…`)
+      store.setInsights(insights)
+      store.setStatus('ready', 'Ready', `Dataset: ${datasetId.substring(0, 8)}...`)
       store.setLoading(false)
     } catch (err) {
       if (gen !== generation) return

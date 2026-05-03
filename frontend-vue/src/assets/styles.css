@@ -1099,3 +1099,26 @@ details.advanced-settings .advanced-content {
 }
 .chart-empty-state svg { opacity: 0.4; color: var(--color-border); width: 32px; height: 32px; }
 .chart-empty-link { color: var(--color-primary); font-size: 13px; text-decoration: none; font-weight: 600; }
+
+.insight-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 0 16px 0;
+}
+.insight-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid;
+}
+.insight-pill.ok    { background: #e8f8f0; border-color: #a8e6c8; color: #0a6640; }
+.insight-pill.warn  { background: #fff3dc; border-color: #f5c87a; color: #7a4a00; }
+.insight-pill.alert { background: #fdeee5; border-color: #f5b896; color: #7a2a00; }
+.insight-pill-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0;
+}

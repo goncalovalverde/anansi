@@ -8,6 +8,9 @@
       <!-- KPI strip -->
       <KpiStrip />
 
+      <!-- Insight pills -->
+      <InsightBar />
+
       <!-- Empty state -->
       <EmptyState v-if="!store.hasData" @load="loader.load(false)" />
 
@@ -80,6 +83,7 @@ import StatusBar from '@/components/StatusBar.vue'
 import KpiStrip from '@/components/KpiStrip.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ChartCard from '@/components/ChartCard.vue'
+import InsightBar from '@/components/InsightBar.vue'
 
 const store = useDataStore()
 const configStore = useConfigStore()
