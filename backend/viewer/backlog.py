@@ -62,11 +62,11 @@ class Backlog:
         )
         return fig.to_json()
 
-    def draw_issues_histogram(self, status: str) -> str:
+    def draw_issues_histogram(self, date_column: str) -> str:
         fig = px.histogram(
             self.treemap_data,
-            x=status,
-            title=f"{status} PBI's per Epic",
+            x=date_column,
+            title=f"{date_column} PBI's per Epic",
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
         )
