@@ -1,16 +1,19 @@
 <template>
   <div class="chart-card">
     <div class="chart-card-header">
-      <h3>{{ title }}</h3>
-      <button class="chart-export-btn" @click="exportPng" :aria-label="`Export ${title} as PNG`" title="Export PNG">⬇ PNG</button>
+      <div>
+        <div class="chart-card-title">{{ title }}</div>
+        <div class="chart-card-desc">{{ description }}</div>
+      </div>
+      <button class="chart-export-btn" @click="exportPng" :aria-label="`Export ${title} as PNG`" title="Export PNG">⬇</button>
     </div>
-    <p v-if="description" class="chart-description">{{ description }}</p>
-    <div :id="chartId" class="chart-container" ref="chartEl">
+    <div :id="chartId" class="chart-card-body" ref="chartEl">
       <div class="chart-placeholder">
         <span class="chart-placeholder-icon">{{ icon }}</span>
         <span>Load data to render</span>
       </div>
     </div>
+    <div class="chart-callout"></div>
   </div>
 </template>
 
