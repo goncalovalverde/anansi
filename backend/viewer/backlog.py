@@ -138,8 +138,11 @@ class Backlog:
         return fig.to_json()
 
     def draw_issues_histogram(self, date_column: str) -> str:
+        df = self.treemap_data.dropna(subset=[date_column])
+        if df.empty:
+            return go.Figure(layout={"title": f"No data for {date_column}"}).to_json()
         fig = px.histogram(
-            self.treemap_data,
+            df,
             x=date_column,
             title=f"{date_column} PBI's per Epic",
             color="Epic Name",
