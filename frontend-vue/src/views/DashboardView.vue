@@ -53,9 +53,11 @@
             <h2 class="chart-section-title" id="section-delivery">🚀 Delivery Pace</h2>
             <p class="chart-section-desc">Track how much work is being completed and the story point velocity broken down by Epic.</p>
           </div>
-          <div class="chart-row-half">
+          <div class="chart-row-full">
             <ChartCard ref="chartRefs[3]" chart-id="chart-pbis-done" title="Completed Issues Over Time"
               description="When were items marked Done? Use this to spot sprint completion patterns or dry spells." icon="✅" />
+          </div>
+          <div class="chart-row-full">
             <ChartCard ref="chartRefs[4]" chart-id="chart-story-points" title="Story Points Delivered"
               description="How many story points were delivered per Epic? Compare effort investment across product areas." icon="📊" />
           </div>
