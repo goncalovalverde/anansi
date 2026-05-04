@@ -50,9 +50,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { Api } from '@/api/index.js'
+import { PLOTLY_CONFIG, EMPTY_PLACEHOLDER_HTML, ERROR_STATE_HTML, applyTheme, isErrorFigure, deferRender } from '@/composables/useChartRenderer.js'
 import StatusBar from '@/components/StatusBar.vue'
 import ChartCard from '@/components/ChartCard.vue'
 
@@ -69,66 +70,33 @@ const CHART_META = [
   { key: 'timeline_size',   containerId: 'chart-flow-timeline-size' },
 ]
 
-function getTheme() {
-  return {
-    paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { family: 'Inter, Roboto, sans-serif', color: '#2C3E50', size: 12 },
-    margin: { t: 16, r: 40, b: 40, l: 50 },
-    colorway: ['#007B85','#F5A623','#D35400','#2C3E50','#5DADE2','#A569BD','#52BE80'],
-    legend: { orientation: 'h', y: -0.15, xanchor: 'center', x: 0.5 },
-    xaxis: { automargin: true },
-    yaxis: { automargin: true },
-  }
-}
-
-const PLOTLY_CONFIG = {
-  displayModeBar: 'hover',
-  responsive: true,
-  displaylogo: false,
-  modeBarButtonsToRemove: ['select2d','lasso2d','autoScale2d','toggleSpikelines','hoverClosestCartesian','hoverCompareCartesian'],
-}
-
 function renderCharts(charts) {
   if (!charts || !window.Plotly) return
-  const theme = getTheme()
   for (const { key, containerId } of CHART_META) {
     const el = document.getElementById(containerId)
     if (!el) continue
+    const calloutEl = el.parentElement?.querySelector('.chart-callout')
+
     if (!charts[key]) {
-      el.innerHTML = '<div class="chart-placeholder"><span class="chart-placeholder-icon">📊</span><span>No data</span></div>'
+      el.innerHTML = EMPTY_PLACEHOLDER_HTML
+      if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
     const fig = charts[key]
-    const titleText = (typeof fig.layout?.title === 'string' ? fig.layout.title : fig.layout?.title?.text) || ''
-    const isError = titleText.includes('unavailable') || titleText.includes('failed') || titleText.includes('No completed')
-
-    const calloutEl = el.parentElement?.querySelector('.chart-callout')
-    if (isError) {
-      el.innerHTML = `<div class="chart-empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>This chart needs more data.</span></div>`
+    if (isErrorFigure(fig)) {
+      el.innerHTML = ERROR_STATE_HTML
       if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
 
-    const figLayout = fig.layout || {}
-    const layout = {
-      ...figLayout,
-      paper_bgcolor: theme.paper_bgcolor,
-      plot_bgcolor:  theme.plot_bgcolor,
-      font:          theme.font,
-      colorway:      theme.colorway,
-      margin:  { ...(figLayout.margin || {}), ...theme.margin },
-      legend:  { ...(figLayout.legend || {}), ...theme.legend },
-      xaxis:   { ...(figLayout.xaxis  || {}), ...(theme.xaxis  || {}) },
-      yaxis:   { ...(figLayout.yaxis  || {}), ...(theme.yaxis  || {}) },
-    }
+    const layout = applyTheme(fig.layout)
     delete layout.title
 
     if (key === 'distribution' || key === 'timeline_size') {
-      layout.xaxis = Object.assign({}, layout.xaxis || {}, { tickformat: '%b %Y', tickangle: -30 })
+      layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30 }
     }
     if (key === 'timeline') {
-      layout.yaxis = Object.assign({}, layout.yaxis || {}, { automargin: true })
+      layout.yaxis = { ...layout.yaxis, automargin: true }
     }
 
     window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
@@ -164,7 +132,7 @@ onMounted(() => {
 })
 
 function scheduleRender(charts) {
-  nextTick(() => requestAnimationFrame(() => renderCharts(charts)))
+  deferRender(() => renderCharts(charts))
 }
 </script>
 

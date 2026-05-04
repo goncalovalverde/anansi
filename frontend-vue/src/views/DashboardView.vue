@@ -75,9 +75,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { useDataLoader } from '@/composables/useDataLoader.js'
+import { PLOTLY_CONFIG, EMPTY_PLACEHOLDER_HTML, ERROR_STATE_HTML, applyTheme, isErrorFigure, deferRender } from '@/composables/useChartRenderer.js'
 import StatusBar from '@/components/StatusBar.vue'
 import KpiStrip from '@/components/KpiStrip.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -101,35 +102,15 @@ const CHART_META = [
   { key: 'timeline_size', containerId: 'chart-timeline-size' },
 ]
 
-function getTheme() {
-  return {
-    paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { family: 'Inter, Roboto, sans-serif', color: '#2C3E50', size: 12 },
-    margin: { t: 16, r: 40, b: 40, l: 50 },
-    colorway: ['#007B85','#F5A623','#D35400','#2C3E50','#5DADE2','#A569BD','#52BE80'],
-    legend: { orientation: 'h', y: -0.15, xanchor: 'center', x: 0.5 },
-    xaxis: { automargin: true },
-    yaxis: { automargin: true },
-  }
-}
-
-// Note: treemap shares this same PLOTLY_CONFIG path (displayModeBar: 'hover')
-const PLOTLY_CONFIG = {
-  displayModeBar: 'hover',
-  responsive: true,
-  displaylogo: false,
-  modeBarButtonsToRemove: ['select2d','lasso2d','autoScale2d','toggleSpikelines','hoverClosestCartesian','hoverCompareCartesian'],
-}
-
 function renderCharts(charts) {
-  const theme = getTheme()
+  const HISTOGRAM_KEYS = ['pbis_created', 'pbis_done', 'type_issue']
   for (const { key, containerId } of CHART_META) {
     const el = document.getElementById(containerId)
     if (!el) continue
+    const calloutEl = el.parentElement?.querySelector('.chart-callout')
+
     if (!charts[key]) {
-      el.innerHTML = '<div class="chart-placeholder"><span class="chart-placeholder-icon">📊</span><span>No data</span></div>'
-      const calloutEl = el.parentElement?.querySelector('.chart-callout')
+      el.innerHTML = EMPTY_PLACEHOLDER_HTML
       if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
@@ -144,76 +125,43 @@ function renderCharts(charts) {
         <span class="chart-placeholder-hint">Your team may not use story points, or the field ID needs configuring.<br>
           <a href="#/config">Update Story Points Field ID →</a></span>
       </div>`
-      const calloutEl = el.parentElement?.querySelector('.chart-callout')
       if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
 
-    // Detect error figures returned by Python (title contains error message)
-    const titleText = (typeof fig.layout?.title === 'string' ? fig.layout.title :
-      fig.layout?.title?.text) || ''
-    const isError = titleText.includes('unavailable') || titleText.includes('failed') ||
-      titleText.includes('No completed') || titleText.includes('needs more data')
-
-    if (isError) {
-      el.innerHTML = `
-        <div class="chart-empty-state">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>This chart needs more data - try loading a wider date range or check your workflow configuration.</span>
-          <a href="#/config" class="chart-empty-link">Go to Configuration →</a>
-        </div>`
-      const calloutEl = el.parentElement?.querySelector('.chart-callout')
+    if (isErrorFigure(fig)) {
+      el.innerHTML = ERROR_STATE_HTML
       if (calloutEl) calloutEl.style.display = 'none'
       continue
     }
 
-    const figLayout = fig.layout || {}
-    const layout = {
-      ...figLayout,
-      paper_bgcolor: theme.paper_bgcolor,
-      plot_bgcolor:  theme.plot_bgcolor,
-      font:          theme.font,
-      colorway:      theme.colorway,
-      margin:  { ...(figLayout.margin || {}), ...theme.margin },
-      legend:  { ...(figLayout.legend || {}), ...theme.legend },
-      xaxis:   { ...(figLayout.xaxis  || {}), ...(theme.xaxis  || {}) },
-      yaxis:   { ...(figLayout.yaxis  || {}), ...(theme.yaxis  || {}) },
-    }
+    const layout = applyTheme(fig.layout)
     delete layout.title
 
-    // Per-chart layout additions
-    const HISTOGRAM_KEYS = ['pbis_created', 'pbis_done', 'type_issue']
     if (key === 'treemap') {
       layout.margin = { t: 8, r: 8, b: 8, l: 8 }
     } else if (key === 'story_points') {
-      layout.margin = Object.assign({}, layout.margin, { r: 50, b: 70 })
+      layout.margin = { ...layout.margin, r: 50, b: 70 }
     } else if (HISTOGRAM_KEYS.includes(key)) {
-      layout.margin = Object.assign({}, layout.margin, { r: 50, b: 60 })
+      layout.margin = { ...layout.margin, r: 50, b: 60 }
     }
     if (key === 'distribution' || key === 'timeline_size') {
-      layout.xaxis = Object.assign({}, layout.xaxis || {}, { tickformat: '%b %Y', tickangle: -30 })
+      layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30 }
     }
     if (key === 'timeline') {
-      layout.yaxis = Object.assign({}, layout.yaxis || {}, { automargin: true })
+      layout.yaxis = { ...layout.yaxis, automargin: true }
     }
     if (key === 'timeline_size') {
-      layout.xaxis = Object.assign({}, layout.xaxis || {}, { title: { text: 'Completion date' } })
-      layout.yaxis = Object.assign({}, layout.yaxis || {}, { title: { text: 'Cycle time (days)' } })
+      layout.xaxis = { ...layout.xaxis, title: { text: 'Completion date' } }
+      layout.yaxis = { ...layout.yaxis, title: { text: 'Cycle time (days)' } }
     }
     if (key === 'story_points') {
-      layout.xaxis = Object.assign({}, layout.xaxis || {}, { type: 'category', tickangle: -30, automargin: true })
+      layout.xaxis = { ...layout.xaxis, type: 'category', tickangle: -30, automargin: true }
     }
 
     window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
 
-    // Callouts
-    const callouts = store.callouts || {}
-    const callout = callouts[key]
-    const calloutEl = el.parentElement?.querySelector('.chart-callout')
+    const callout = (store.callouts || {})[key]
     if (calloutEl) {
       if (callout?.message) {
         calloutEl.textContent = callout.message
@@ -227,7 +175,7 @@ function renderCharts(charts) {
 }
 
 function scheduleRender(charts) {
-  nextTick(() => requestAnimationFrame(() => renderCharts(charts)))
+  deferRender(() => renderCharts(charts))
 }
 
 // Re-render when charts change (new data loaded)
