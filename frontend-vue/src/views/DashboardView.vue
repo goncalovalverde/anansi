@@ -24,19 +24,18 @@
             <p class="chart-section-desc">Understand what work exists, how it is structured across Epics, and what types of issues dominate the backlog.</p>
           </div>
           <div class="chart-row-half">
-            <div class="chart-card">
-              <div class="chart-card-header">
-                <div>
-                  <div class="chart-card-title">🗺 Work by Epic</div>
-                  <div class="chart-card-desc">{{ treemapShowAll ? 'All issues grouped by Epic — green = Done, orange = In Progress, dark = To Do.' : 'What has been shipped? Drill into each Epic to see completed Stories and Bugs.' }}</div>
-                </div>
+            <ChartCard
+              chart-id="chart-treemap"
+              :title="'🗺 Work by Epic'"
+              :description="treemapShowAll ? 'All issues grouped by Epic — green = Done, orange = In Progress, dark = To Do.' : 'What has been shipped? Drill into each Epic to see completed Stories and Bugs.'"
+              icon="🗺"
+            >
+              <template #controls>
                 <button class="btn btn-secondary btn-sm" @click="toggleTreemap">
                   {{ treemapShowAll ? 'Completed only' : 'All work' }}
                 </button>
-              </div>
-              <div id="chart-treemap" class="chart-card-body"></div>
-              <div class="chart-callout"></div>
-            </div>
+              </template>
+            </ChartCard>
             <ChartCard ref="chartRefs[1]" chart-id="chart-pbis-created" title="New Issues Created Over Time"
               description="Is the backlog growing? Each bar shows new issues created per period, grouped by Epic." icon="📝" />
           </div>

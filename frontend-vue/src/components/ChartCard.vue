@@ -5,6 +5,7 @@
         <div class="chart-card-title">{{ title }}</div>
         <div class="chart-card-desc">{{ description }}</div>
       </div>
+      <slot name="controls" />
       <button class="chart-export-btn" @click="exportPng" :aria-label="`Export ${title} as PNG`" title="Export PNG">⬇</button>
     </div>
     <div :id="chartId" class="chart-card-body" ref="chartEl">
