@@ -212,16 +212,17 @@ def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db))
         custom_fields = [f for f in fields if f["id"].startswith("customfield_")]
         logger.debug("Available custom fields: %s", [(f["id"], f["name"]) for f in custom_fields])
 
+        # Story points: match on the field name containing the phrase "story point".
+        # Short tokens like "sp" or "points" are intentionally excluded — they match
+        # unrelated fields as substrings (e.g. "sp" in "Responsible", "points" in
+        # "Touchpoints"). Schema type alone is also too broad (any numeric field matches).
+        def _is_sp_name(name: str) -> bool:
+            n = name.lower()
+            return "story point" in n or "storypoint" in n
         story_candidates = [
             {"id": f["id"], "name": f["name"]}
             for f in fields
-            if f["id"].startswith("customfield_")
-            and (
-                any(kw in f.get("name", "").lower() for kw in (
-                    "story point", "story_point", "story points", "points", "sp", "estimate"
-                ))
-                or "story" in f.get("schema", {}).get("custom", "").lower()
-            )
+            if f["id"].startswith("customfield_") and _is_sp_name(f.get("name", ""))
         ]
         # For epic link, match on the well-known Jira schema custom types first
         # (locale-independent), then fall back to keyword matching on the name.
