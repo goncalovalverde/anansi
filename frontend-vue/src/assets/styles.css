@@ -391,9 +391,6 @@ main { padding: 2rem 0; }
   width: 100%;
   height: 260px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--text-muted);
   font-size: 0.8rem;
 }
@@ -410,6 +407,10 @@ main { padding: 2rem 0; }
   gap: 0.4rem;
 }
 .chart-placeholder {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
   display: flex; flex-direction: column; align-items: center;
   gap: 0.5rem; padding: 2rem; text-align: center;
 }
@@ -1058,12 +1059,15 @@ details.advanced-settings .advanced-content {
 
 /* ── Chart error / empty state ── */
 .chart-empty-state {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  height: 100%;
   padding: 24px;
   text-align: center;
   color: #888;
