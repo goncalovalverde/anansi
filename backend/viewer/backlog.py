@@ -542,7 +542,15 @@ class Backlog:
             right_on="Epic Key",
             how="left",
         )
-        merged["Epic Name"] = merged["Epic Name"].fillna("No Epic")
+        # When Epic issues are in the dataset their Summary becomes the Epic Name.
+        # When they are not fetched (e.g. JQL filters to Stories/Bugs/Tasks only),
+        # fall back to the raw Epic Link key so grouping still works meaningfully
+        # rather than collapsing everything into "No Epic".
+        merged["Epic Name"] = (
+            merged["Epic Name"]
+            .fillna(merged.get("Epic Link"))
+            .fillna("No Epic")
+        )
 
         jira_url = self.config.get("jira", {}).get("url", "")
         merged["Key"] = merged["Key"].apply(
