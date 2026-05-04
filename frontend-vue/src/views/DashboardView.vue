@@ -124,7 +124,11 @@ function renderTreemap(charts) {
   const layout = applyTheme(fig.layout, el)
   delete layout.title
   layout.margin = { t: 8, r: 8, b: 8, l: 8 }
-  plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
+  // Treemap colour schemes differ between modes (Epic Name vs Progress bucket).
+  // Plotly.react doesn't reliably reconcile such structural differences, so
+  // always use a clean newPlot for the treemap container.
+  el.innerHTML = ''
+  window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
   const callout = (store.callouts || {})[key]
   if (calloutEl) {
     if (callout?.message) {
