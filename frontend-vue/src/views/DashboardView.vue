@@ -24,8 +24,19 @@
             <p class="chart-section-desc">Understand what work exists, how it is structured across Epics, and what types of issues dominate the backlog.</p>
           </div>
           <div class="chart-row-half">
-            <ChartCard ref="chartRefs[0]" chart-id="chart-treemap" title="Completed Work by Epic"
-              description="What has been shipped? Drill into each Epic to see completed Stories and Bugs." icon="🗺" />
+            <div class="chart-card">
+              <div class="chart-card-header">
+                <div>
+                  <div class="chart-card-title">🗺 Work by Epic</div>
+                  <div class="chart-card-desc">{{ treemapShowAll ? 'All issues grouped by Epic — green = Done, orange = In Progress, dark = To Do.' : 'What has been shipped? Drill into each Epic to see completed Stories and Bugs.' }}</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" @click="toggleTreemap">
+                  {{ treemapShowAll ? 'Completed only' : 'All work' }}
+                </button>
+              </div>
+              <div id="chart-treemap" class="chart-card-body"></div>
+              <div class="chart-callout"></div>
+            </div>
             <ChartCard ref="chartRefs[1]" chart-id="chart-pbis-created" title="New Issues Created Over Time"
               description="Is the backlog growing? Each bar shows new issues created per period, grouped by Epic." icon="📝" />
           </div>
@@ -89,6 +100,7 @@ const store = useDataStore()
 const loader = useDataLoader()
 
 const chartRefs = ref([])
+const treemapShowAll = ref(true)
 
 // Chart metadata — order matches ChartCard refs above
 const CHART_META = [
@@ -102,9 +114,40 @@ const CHART_META = [
   { key: 'timeline_size', containerId: 'chart-timeline-size' },
 ]
 
+function renderTreemap(charts) {
+  const el = document.getElementById('chart-treemap')
+  if (!el || !charts) return
+  const calloutEl = el.parentElement?.querySelector('.chart-callout')
+  const key = treemapShowAll.value ? 'treemap_all' : 'treemap'
+  const fig = charts[key]
+  if (!fig) { el.innerHTML = EMPTY_PLACEHOLDER_HTML; return }
+  if (isErrorFigure(fig)) { el.innerHTML = ERROR_STATE_HTML; return }
+  const layout = applyTheme(fig.layout, el)
+  delete layout.title
+  layout.margin = { t: 8, r: 8, b: 8, l: 8 }
+  plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
+  const callout = (store.callouts || {})[key]
+  if (calloutEl) {
+    if (callout?.message) {
+      calloutEl.textContent = callout.message
+      calloutEl.className = `chart-callout callout-${callout.severity}`
+      calloutEl.style.display = ''
+    } else {
+      calloutEl.style.display = 'none'
+    }
+  }
+}
+
+function toggleTreemap() {
+  treemapShowAll.value = !treemapShowAll.value
+  deferRender(() => renderTreemap(store.charts))
+}
+
 function renderCharts(charts) {
+  renderTreemap(charts)
   const HISTOGRAM_KEYS = ['pbis_created', 'pbis_done', 'type_issue']
   for (const { key, containerId } of CHART_META) {
+    if (key === 'treemap') continue  // handled by renderTreemap
     const el = document.getElementById(containerId)
     if (!el) continue
     const calloutEl = el.parentElement?.querySelector('.chart-callout')

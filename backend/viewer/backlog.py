@@ -62,7 +62,17 @@ class Backlog:
     #  Chart methods — each returns a Plotly JSON string                   #
     # ------------------------------------------------------------------ #
 
+    def _normalize_status(self, status: str) -> str:
+        """Bucket arbitrary Jira status names into 3 display categories."""
+        s = str(status).lower()
+        if status == self.done_step or any(k in s for k in ("done", "closed", "resolved", "released", "complete")):
+            return "Done"
+        if status == self.in_progress_step or any(k in s for k in ("progress", "review", "active", "doing", "development", "dev")):
+            return "In Progress"
+        return "To Do"
+
     def draw_treemap(self) -> str:
+        """Treemap of completed work only, coloured by Epic."""
         done_data = self.treemap_data[self.treemap_data["Status"] == self.done_step]
         if done_data.empty:
             return go.Figure(
@@ -78,6 +88,33 @@ class Backlog:
             texttemplate="%{label}",
             textinfo="label",
             hovertemplate="%{label}<br>Count: %{value}<br>Parent: %{parent}<extra></extra>",
+            textfont_size=11,
+            marker_line_width=2,
+            marker_line_color="#F9F9F7",
+        )
+        return fig.to_json()
+
+    def draw_treemap_all(self) -> str:
+        """Treemap of all work, coloured by normalized status bucket."""
+        df = self.treemap_data.copy()
+        if df.empty:
+            return go.Figure(layout={"title": "No data available"}).to_json()
+        df["Progress"] = df["Status"].apply(self._normalize_status)
+        color_map = {
+            "Done":        ANANSI_COLORS[0],
+            "In Progress": ANANSI_COLORS[1],
+            "To Do":       ANANSI_COLORS[3],
+        }
+        fig = px.treemap(
+            df,
+            path=["Epic Name", "Type", "Composed"],
+            color="Progress",
+            color_discrete_map=color_map,
+        )
+        fig.update_traces(
+            texttemplate="%{label}",
+            textinfo="label",
+            hovertemplate="%{label}<br>Count: %{value}<br>Status: %{color}<br>Parent: %{parent}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
             marker_line_color="#F9F9F7",
@@ -188,7 +225,8 @@ class Backlog:
 
     def get_all_charts(self) -> dict:
         chart_methods = {
-            "treemap": self.draw_treemap,
+            "treemap":     self.draw_treemap,
+            "treemap_all": self.draw_treemap_all,
             "distribution": self.draw_distribution,
             "pbis_done": lambda: self.draw_issues_histogram(self.done_step),
             "pbis_created": lambda: self.draw_issues_histogram("Created"),
