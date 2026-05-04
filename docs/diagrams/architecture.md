@@ -4,18 +4,40 @@
 
 ```mermaid
 graph TD
-    Browser[Browser\nVue 3 SPA] -->|REST| FastAPI[FastAPI backend]
-    FastAPI --> ConfigSvc[ConfigService]
-    FastAPI --> DataSvc[DataService]
-    FastAPI --> BacklogViewer[viewer.Backlog]
-    ConfigSvc --> SQLite[(SQLite anansi.db)]
-    DataSvc --> SQLite
-    DataSvc --> JiraReader[reader.Jira]
-    DataSvc --> CSVReader[reader.CSV]
-    JiraReader --> JiraAPI[Jira Cloud API]
-    JiraReader --> SQLiteCache[SQLite cache\ndataset_rows table]
-    CSVReader -->|in-memory| DataSvc
-    BacklogViewer -->|Plotly JSON| Browser
+    Browser["Browser\nVue 3 SPA"] -->|REST| FastAPI["FastAPI backend"]
+
+    subgraph api ["API Routes"]
+        ChartsAPI["/api/charts\ntreemap · timeline · kpis · callouts"]
+        FlowAPI["/api/flow\nefficiency · wip_trend · throughput"]
+        TrendsAPI["/api/trends\ncumulative_flow · monthly · epic_progress"]
+        InsightsAPI["/api/insights\nalert / warn / ok pills"]
+        ConfigAPI["/api/config"]
+        DataAPI["/api/data"]
+    end
+
+    FastAPI --> ChartsAPI
+    FastAPI --> FlowAPI
+    FastAPI --> TrendsAPI
+    FastAPI --> InsightsAPI
+    FastAPI --> ConfigAPI
+    FastAPI --> DataAPI
+
+    ChartsAPI  --> BacklogViewer["viewer.Backlog\nget_all_charts · get_kpis\nget_callouts · get_insights\ndraw_flow_* · draw_trend_*"]
+    FlowAPI    --> BacklogViewer
+    TrendsAPI  --> BacklogViewer
+    InsightsAPI --> BacklogViewer
+
+    ConfigAPI --> ConfigSvc[ConfigService]
+    DataAPI   --> DataSvc[DataService]
+
+    ConfigSvc --> SQLite[("SQLite anansi.db")]
+    DataSvc   --> SQLite
+    DataSvc   --> JiraReader["reader.Jira"]
+    DataSvc   --> CSVReader["reader.CSV (in-memory)"]
+    JiraReader --> JiraAPI["Jira Cloud API"]
+    JiraReader --> SQLiteCache["SQLite cache\ndataset_rows table"]
+
+    BacklogViewer -->|"Plotly JSON\n+ callouts + insights"| FastAPI
 ```
 
 ## 2. SQLite Schema ERD
@@ -87,8 +109,12 @@ sequenceDiagram
     end
     B->>API: GET /api/charts/{dataset_id}
     API->>DB: SELECT dataset_rows
-    API-->>B: {treemap, distribution, pbis_done, ...kpis}
+    API-->>B: {treemap, distribution, pbis_done, ...kpis, callouts}
+    B->>API: GET /api/insights/{dataset_id}
+    API-->>B: [{type, message}, ...]
     B->>B: Plotly.newPlot() x8
+    B->>B: InsightBar renders alert/warn/ok pills
+    B->>B: ChartCard callout strips rendered per chart
 ```
 
 ## 4. Sequence Diagram — CSV Upload Flow
@@ -112,4 +138,70 @@ sequenceDiagram
     end
     B->>B: persist dataset_id to localStorage
     B-->>U: ✅ filename — "Ready, go to Dashboard"
+```
+
+## 5. Vue Component Hierarchy
+
+```mermaid
+graph TD
+    App --> AppSidebar
+    App --> AppTopBar
+    App --> RouterView
+
+    RouterView --> DashboardView
+    RouterView --> FlowView
+    RouterView --> TrendsView
+    RouterView --> ConfigView
+
+    subgraph dashboard ["DashboardView (/)"]
+        DashboardView --> KpiStrip
+        DashboardView --> InsightBar
+        DashboardView --> ChartCard8["ChartCard x8\ntreemap · pbis_created · type_issue\npbis_done · story_points\ntimeline · distribution · timeline_size"]
+    end
+
+    subgraph flow ["FlowView (/flow)"]
+        FlowView --> ChartCard6["ChartCard x6\nflow_efficiency · wip_trend · throughput\ntimeline · distribution · timeline_size"]
+    end
+
+    subgraph trends ["TrendsView (/trends)"]
+        TrendsView --> ChartCard3["ChartCard x3\ncumulative_flow · monthly_throughput · epic_progress"]
+    end
+
+    DashboardView --> usePlotlyTheme["usePlotlyTheme (composable)\napplyTheme(isDark, containerIds)"]
+    FlowView      --> usePlotlyTheme
+    TrendsView    --> usePlotlyTheme
+
+    AppSidebar --> configStore["configStore\ntheme · toggleTheme · init"]
+    usePlotlyTheme -.->|Plotly.relayout| ChartCard8
+    usePlotlyTheme -.->|Plotly.relayout| ChartCard6
+    usePlotlyTheme -.->|Plotly.relayout| ChartCard3
+```
+
+## 6. Sequence Diagram — Flow / Trends Chart Load
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant API as FastAPI
+    participant DB as SQLite
+
+    Note over B: User clicks Flow or Trends in sidebar
+    B->>B: Vue Router navigates to /flow or /trends
+    B->>B: FlowView / TrendsView onMounted
+    alt store.flowCharts already set
+        B->>B: re-render from store (no network call)
+    else no cached flow charts
+        B->>API: GET /api/flow/{dataset_id}
+        API->>DB: SELECT dataset_rows
+        API->>API: Backlog.draw_flow_efficiency / draw_wip_trend / draw_throughput
+        API-->>B: {flow_efficiency, wip_trend, throughput, timeline, distribution, timeline_size}
+        B->>B: store.setFlowCharts(data)
+        B->>B: Plotly.newPlot() x6
+    end
+
+    Note over B: User toggles dark mode
+    B->>B: configStore.toggleTheme()
+    B->>B: document.documentElement.classList.toggle('dark-mode')
+    B->>B: usePlotlyTheme.applyTheme(isDark, containerIds)
+    B->>B: Plotly.relayout() on each active chart container
 ```
