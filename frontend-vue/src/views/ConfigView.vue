@@ -531,16 +531,16 @@ async function detectFields() {
   detectingFields.value = true
   try {
     const { story_points, epic_link, all_custom_fields } = await Api.getJiraFields(collectFormData())
-    if (story_points?.length && !form.jira_story_points_field) {
+    if (story_points?.length) {
       form.jira_story_points_field = story_points[0].id
       showNotification?.(`Story Points field detected: ${story_points[0].name} (${story_points[0].id})`, 'success')
-    } else if (!story_points?.length) {
+    } else {
       showNotification?.('No story points field found — your team may not use story points.', 'info')
     }
-    if (epic_link?.length && !form.jira_epic_link_field) {
+    if (epic_link?.length) {
       form.jira_epic_link_field = epic_link[0].id
       showNotification?.(`Epic Link field detected: ${epic_link[0].name} (${epic_link[0].id})`, 'success')
-    } else if (!epic_link?.length) {
+    } else {
       showNotification?.('No epic link field found — epics may use a different field name.', 'info')
     }
     const detected = [story_points?.length && 'story points', epic_link?.length && 'epic link'].filter(Boolean)
