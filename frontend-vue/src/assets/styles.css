@@ -389,13 +389,14 @@ main { padding: 2rem 0; }
 .chart-card-body {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 320px;
   overflow: hidden;
   color: var(--text-muted);
   font-size: 0.8rem;
 }
-.chart-row-full .chart-card-body { height: 280px; }
-.chart-row-third .chart-card-body { height: 200px; }
+.chart-row-full .chart-card-body { height: 420px; }
+.chart-row-third .chart-card-body { height: 220px; }
+.chart-row-treemap { grid-template-columns: 3fr 2fr; }
 .chart-callout {
   font-size: 0.78rem;
   color: var(--text-muted);

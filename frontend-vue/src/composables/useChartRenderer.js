@@ -34,7 +34,7 @@ export const ERROR_STATE_HTML = `
     <a href="#/config" class="chart-empty-link">Go to Configuration -&gt;</a>
   </div>`
 
-const DEFAULT_CHART_HEIGHT = 260
+const DEFAULT_CHART_HEIGHT = 320
 
 /**
  * Deep-merges Plotly theme defaults onto a figure's existing layout.
@@ -57,7 +57,7 @@ export function applyTheme(figLayout, el = null) {
     colorway: ANANSI_COLORS,
     height:   (el?.clientHeight) || DEFAULT_CHART_HEIGHT,
     margin:   { ...(base.margin || {}), t: 16, r: 40, b: 40, l: 50 },
-    legend:   { ...(base.legend || {}), orientation: 'h', y: -0.15, xanchor: 'center', x: 0.5 },
+    legend:   { ...(base.legend || {}), orientation: 'v', x: 1.02, y: 1, xanchor: 'left', font: { size: 10 } },
     xaxis:    { ...(base.xaxis  || {}), automargin: true },
     yaxis:    { ...(base.yaxis  || {}), automargin: true },
   }

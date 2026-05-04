@@ -23,7 +23,7 @@
             <h2 class="chart-section-title" id="section-backlog">📦 Backlog Composition</h2>
             <p class="chart-section-desc">Understand what work exists, how it is structured across Epics, and what types of issues dominate the backlog.</p>
           </div>
-          <div class="chart-row-half">
+           <div class="chart-row-half chart-row-treemap">
             <ChartCard
               chart-id="chart-treemap"
               :title="'🗺 Work by Epic'"
@@ -124,11 +124,14 @@ function renderTreemap(charts) {
   const layout = applyTheme(fig.layout, el)
   delete layout.title
   layout.margin = { t: 8, r: 8, b: 8, l: 8 }
+  layout.uniformtext = { minsize: 10, mode: 'hide' }
+  // Modify traces to collapse to Epic → Type on first render (drillable)
+  const data = (fig.data || []).map(t => ({ ...t, maxdepth: 2 }))
   // Treemap colour schemes differ between modes (Epic Name vs Progress bucket).
   // Plotly.react doesn't reliably reconcile such structural differences, so
   // always use a clean newPlot for the treemap container.
   el.innerHTML = ''
-  window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
+  window.Plotly.newPlot(el, data, layout, PLOTLY_CONFIG)
   const callout = (store.callouts || {})[key]
   if (calloutEl) {
     if (callout?.message) {
@@ -187,9 +190,12 @@ function renderCharts(charts) {
     if (key === 'treemap') {
       layout.margin = { t: 8, r: 8, b: 8, l: 8 }
     } else if (key === 'story_points') {
-      layout.margin = { ...layout.margin, r: 50, b: 70 }
+      layout.margin = { ...layout.margin, r: 200, b: 40 }
     } else if (HISTOGRAM_KEYS.includes(key)) {
-      layout.margin = { ...layout.margin, r: 50, b: 60 }
+      layout.margin = { ...layout.margin, r: 200, b: 40 }
+    } else {
+      // All other charts: give the right-side vertical legend room
+      layout.margin = { ...layout.margin, r: 180 }
     }
     if (key === 'distribution' || key === 'timeline_size') {
       layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30 }
