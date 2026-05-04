@@ -530,7 +530,7 @@ function onProjectChange() {
 async function detectFields() {
   detectingFields.value = true
   try {
-    const { story_points, epic_link } = await Api.getJiraFields(collectFormData())
+    const { story_points, epic_link, all_custom_fields } = await Api.getJiraFields(collectFormData())
     if (story_points?.length && !form.jira_story_points_field) {
       form.jira_story_points_field = story_points[0].id
       showNotification?.(`Story Points field detected: ${story_points[0].name} (${story_points[0].id})`, 'success')
@@ -544,9 +544,13 @@ async function detectFields() {
       showNotification?.('No epic link field found — epics may use a different field name.', 'info')
     }
     const detected = [story_points?.length && 'story points', epic_link?.length && 'epic link'].filter(Boolean)
-    fieldsHint.value = detected.length
-      ? `Detected: ${detected.join(' and ')}. Values pre-filled — verify and save.`
-      : 'No matching fields found. Enter IDs manually.'
+    if (detected.length) {
+      fieldsHint.value = `Detected: ${detected.join(' and ')}. Values pre-filled — verify and save.`
+    } else if (all_custom_fields?.length) {
+      fieldsHint.value = `No fields auto-matched. Available custom fields: ${all_custom_fields.map(f => `${f.name} (${f.id})`).join(', ')}`
+    } else {
+      fieldsHint.value = 'No matching fields found. Enter IDs manually.'
+    }
   } catch (err) {
     showNotification?.('Auto-detect failed: ' + err.message, 'error')
   } finally {

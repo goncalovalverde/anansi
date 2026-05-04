@@ -1,4 +1,5 @@
 import sqlite3
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 import sys, os
@@ -8,6 +9,7 @@ import database
 import services.config_service as config_service
 
 router = APIRouter(prefix="/api/config", tags=["config"])
+logger = logging.getLogger(__name__)
 
 
 def get_db():
@@ -205,19 +207,37 @@ def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db))
         jr = jira_reader.Jira(jira_config, [], database.DB_PATH)
         jira_instance = jr.get_jira_instance()
         fields = jira_instance.fields()
+
+        # Log all custom fields to aid debugging
+        custom_fields = [f for f in fields if f["id"].startswith("customfield_")]
+        logger.debug("Available custom fields: %s", [(f["id"], f["name"]) for f in custom_fields])
+
         story_candidates = [
             {"id": f["id"], "name": f["name"]}
             for f in fields
-            if any(kw in f["name"].lower() for kw in ("story point", "story_point", "points", "sp"))
+            if any(kw in f["name"].lower() for kw in (
+                "story point", "story_point", "story points", "points", "sp", "estimate"
+            ))
             and f["id"].startswith("customfield_")
         ]
         epic_candidates = [
             {"id": f["id"], "name": f["name"]}
             for f in fields
-            if any(kw in f["name"].lower() for kw in ("epic link", "epic_link", "epic name", "parent epic"))
+            if any(kw in f["name"].lower() for kw in (
+                "epic link", "epic_link", "epic name", "parent epic", "epic"
+            ))
             and f["id"].startswith("customfield_")
         ]
-        return {"story_points": story_candidates, "epic_link": epic_candidates}
+        logger.info(
+            "Field detection: story_points=%s epic_link=%s",
+            [f["id"] for f in story_candidates],
+            [f["id"] for f in epic_candidates],
+        )
+        return {
+            "story_points": story_candidates,
+            "epic_link": epic_candidates,
+            "all_custom_fields": custom_fields,
+        }
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:
