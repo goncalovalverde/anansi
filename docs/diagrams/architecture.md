@@ -167,14 +167,11 @@ graph TD
         TrendsView --> ChartCard3["ChartCard x3\ncumulative_flow · monthly_throughput · epic_progress"]
     end
 
-    DashboardView --> usePlotlyTheme["usePlotlyTheme (composable)\napplyTheme(isDark, containerIds)"]
-    FlowView      --> usePlotlyTheme
-    TrendsView    --> usePlotlyTheme
+    DashboardView --> ChartCard8
+    FlowView      --> ChartCard6
+    TrendsView    --> ChartCard3
 
-    AppSidebar --> configStore["configStore\ntheme · toggleTheme · init"]
-    usePlotlyTheme -.->|Plotly.relayout| ChartCard8
-    usePlotlyTheme -.->|Plotly.relayout| ChartCard6
-    usePlotlyTheme -.->|Plotly.relayout| ChartCard3
+    AppSidebar --> routeLink["router-link\n(Dashboard · Flow · Trends · Config)"]
 ```
 
 ## 6. Sequence Diagram — Flow / Trends Chart Load
@@ -198,10 +195,4 @@ sequenceDiagram
         B->>B: store.setFlowCharts(data)
         B->>B: Plotly.newPlot() x6
     end
-
-    Note over B: User toggles dark mode
-    B->>B: configStore.toggleTheme()
-    B->>B: document.documentElement.classList.toggle('dark-mode')
-    B->>B: usePlotlyTheme.applyTheme(isDark, containerIds)
-    B->>B: Plotly.relayout() on each active chart container
 ```

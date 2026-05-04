@@ -1,5 +1,5 @@
 <template>
-  <div :class="['app-root', { 'dark-mode': configStore.theme === 'dark' }]">
+  <div class="app-root">
     <AppSidebar />
     <AppTopBar />
     <div class="app-content">
@@ -12,12 +12,9 @@
 </template>
 
 <script setup>
-import { reactive, provide, onMounted } from 'vue'
+import { reactive, provide } from 'vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 import AppTopBar from '@/components/AppTopBar.vue'
-import { useConfigStore } from '@/stores/config.js'
-
-const configStore = useConfigStore()
 
 // Global notification — provided to all children via inject
 const notif = reactive({ message: '', type: 'info', show: false })
@@ -30,10 +27,6 @@ function showNotification(message, type = 'info') {
   notifTimer = setTimeout(() => { notif.show = false }, 4000)
 }
 provide('showNotification', showNotification)
-
-onMounted(() => {
-  configStore.init()
-})
 </script>
 
 <style scoped>

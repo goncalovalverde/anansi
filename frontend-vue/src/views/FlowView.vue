@@ -52,17 +52,13 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useDataStore } from '@/stores/data.js'
-import { useConfigStore } from '@/stores/config.js'
 import { Api } from '@/api/index.js'
-import { usePlotlyTheme } from '@/composables/usePlotlyTheme.js'
 import StatusBar from '@/components/StatusBar.vue'
 import ChartCard from '@/components/ChartCard.vue'
 
 const store = useDataStore()
-const configStore = useConfigStore()
 const loading = ref(false)
 const error = ref(null)
-const { applyTheme } = usePlotlyTheme()
 
 const CHART_META = [
   { key: 'flow_efficiency', containerId: 'chart-flow-efficiency' },
@@ -144,10 +140,8 @@ async function fetchAndRender() {
   }
 }
 
-watch(() => configStore.theme, (theme) => {
-  const ids = CHART_META.map(m => m.containerId)
-  applyTheme(theme === 'dark', ids)
-  if (store.flowCharts) renderCharts(store.flowCharts)
+watch(() => store.flowCharts, (charts) => {
+  if (charts) renderCharts(charts)
 })
 
 onMounted(() => {

@@ -49,21 +49,6 @@
   --transition: 0.18s ease;
 }
 
-/* ── Dark mode override ── */
-.app-root.dark-mode {
-  --bg-primary:   #141C27;
-  --bg-secondary: #1A2535;
-  --bg-card:      #1E2D3F;
-  --bg-input:     #243347;
-  --border:       #2C3E50;
-  --border-focus: #007B85;
-  --text-primary:   #E8EDF2;
-  --text-secondary: #9DAAB5;
-  --text-muted:     #7A8A95;
-  --shadow:    0 1px 4px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.5);
-}
-
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; scroll-behavior: smooth; }
@@ -743,19 +728,6 @@ main { padding: 2rem 0; }
   .action-bar { flex-wrap: wrap; }
 }
 
-/* ── Theme toggle ── */
-.theme-toggle {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-  border-radius: var(--radius);
-  padding: 0.35rem 0.65rem;
-  cursor: pointer;
-  font-size: 0.85rem;
-  transition: all var(--transition);
-}
-.theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
-
 /* ── KPI strip ── */
 .kpi-strip {
   display: grid;
@@ -1126,19 +1098,3 @@ details.advanced-settings .advanced-content {
 .callout-ok    { color: #0a6640; background: #f0faf5; }
 .callout-warn  { color: #7a4a00; background: #fffbf0; }
 .callout-alert { color: #7a2a00; background: #fff5f0; }
-
-:root.dark-mode {
-  --color-bg:      #111d2b;
-  --color-surface: #1a2332;
-  --color-neutral: #e8eaf0;
-  --color-border:  rgba(255,255,255,0.1);
-  --bg-primary:   #0d1821;
-  --bg-secondary: #1a2332;
-  --bg-card:      #1a2332;
-  --bg-input:     #243040;
-  --border:       rgba(255,255,255,0.12);
-  --text-primary:   #e8eaf0;
-  --text-secondary: #aab8c8;
-  --text-muted:     #6a7a8a;
-  --accent-light:   rgba(0,123,133,0.25);
-}
