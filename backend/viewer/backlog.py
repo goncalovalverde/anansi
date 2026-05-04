@@ -14,14 +14,49 @@ class Backlog:
         self.cycle_data = cycle_data
         self.config = config
         workflow = config.get("Workflow", [])
-        self.done_step = workflow[-1] if workflow else "Done"
-        self.in_progress_step = config.get("start_step") or (workflow[1] if len(workflow) > 1 else "In Progress")
+
+        raw_done = workflow[-1] if workflow else "Done"
+        self.done_step = self._resolve_step(cycle_data, raw_done, workflow, reversed_order=True)
+        if self.done_step != raw_done:
+            logger.warning(
+                "Configured done step '%s' not found in data. Falling back to '%s'.",
+                raw_done, self.done_step,
+            )
+
+        raw_in_prog = config.get("start_step") or (workflow[1] if len(workflow) > 1 else "In Progress")
+        self.in_progress_step = self._resolve_step(cycle_data, raw_in_prog, workflow, reversed_order=False)
+        if self.in_progress_step != raw_in_prog:
+            logger.warning(
+                "Configured in-progress step '%s' not found in data. Falling back to '%s'.",
+                raw_in_prog, self.in_progress_step,
+            )
+
         self.link_ref = (
             '<a href="{}browse/{}" style="cursor:pointer" '
             'target="_blank" rel="noopener noreferrer">{}</a>'
         )
         self.treemap_data = self.get_treemap_data(cycle_data)
         self.treemap_data = self.calculate_cycle_time(self.treemap_data)
+
+    @staticmethod
+    def _resolve_step(df: pd.DataFrame, preferred: str, workflow: list, reversed_order: bool) -> str:
+        """Return preferred if it is a column in df, otherwise the nearest
+        matching column. For done_step (reversed_order=True) common terminal
+        names are tried before workflow steps so 'Done' beats 'In Review'."""
+        if preferred in df.columns:
+            return preferred
+        if reversed_order:
+            common = ("Done", "Resolved", "Closed", "Completed", "Complete", "Released")
+        else:
+            common = ("In Progress", "In Development", "In Dev", "Doing", "Active")
+        for candidate in common:
+            if candidate in df.columns:
+                return candidate
+        steps = list(reversed(workflow)) if reversed_order else workflow
+        for step in steps:
+            if step in df.columns:
+                return step
+        return preferred  # give up — charts will surface their own error
 
     # ------------------------------------------------------------------ #
     #  Chart methods — each returns a Plotly JSON string                   #
