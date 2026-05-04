@@ -215,19 +215,32 @@ def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db))
         story_candidates = [
             {"id": f["id"], "name": f["name"]}
             for f in fields
-            if any(kw in f["name"].lower() for kw in (
-                "story point", "story_point", "story points", "points", "sp", "estimate"
-            ))
-            and f["id"].startswith("customfield_")
+            if f["id"].startswith("customfield_")
+            and (
+                any(kw in f.get("name", "").lower() for kw in (
+                    "story point", "story_point", "story points", "points", "sp", "estimate"
+                ))
+                or "story" in f.get("schema", {}).get("custom", "").lower()
+            )
         ]
+        # For epic link, match on the well-known Jira schema custom types first
+        # (locale-independent), then fall back to keyword matching on the name.
+        EPIC_SCHEMA_TYPES = ("gh-epic-link", "gh-epic-label", "greenhopper-epic")
         epic_candidates = [
             {"id": f["id"], "name": f["name"]}
             for f in fields
-            if any(kw in f["name"].lower() for kw in (
-                "epic link", "epic_link", "epic name", "parent epic", "epic"
-            ))
-            and f["id"].startswith("customfield_")
+            if f["id"].startswith("customfield_")
+            and (
+                any(t in f.get("schema", {}).get("custom", "").lower() for t in EPIC_SCHEMA_TYPES)
+                or any(kw in f.get("name", "").lower() for kw in (
+                    "epic link", "epic_link", "epic name", "parent epic", "epic"
+                ))
+            )
         ]
+        # Sort: schema-matched epics first (most reliable), name-matched second
+        epic_candidates.sort(
+            key=lambda f: 0 if any(t in f.get("schema", {}).get("custom", "").lower() for t in EPIC_SCHEMA_TYPES) else 1
+        )
         logger.info(
             "Field detection: story_points=%s epic_link=%s",
             [f["id"] for f in story_candidates],
