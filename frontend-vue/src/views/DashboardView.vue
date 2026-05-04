@@ -149,9 +149,43 @@ function toggleTreemap() {
   deferRender(() => renderTreemap(store.charts))
 }
 
+// Static per-chart layout overrides, merged over applyTheme defaults at render time.
+// The right margin (r) is computed dynamically from trace name lengths — see legendRightMargin().
+const CHART_LAYOUT_OVERRIDES = {
+  story_points: {
+    margin:  { b: 40 },
+    xaxis:   { type: 'category', tickangle: -30, automargin: true },
+  },
+  pbis_created: { margin: { b: 40 } },
+  pbis_done:    { margin: { b: 40 } },
+  type_issue:   { margin: { b: 40 } },
+  distribution: {
+    xaxis: { tickformat: '%b %Y', tickangle: -30 },
+  },
+  timeline: {
+    yaxis: { automargin: true },
+  },
+  timeline_size: {
+    xaxis: { tickformat: '%b %Y', tickangle: -30, title: { text: 'Completion date' } },
+    yaxis: { title: { text: 'Cycle time (days)' } },
+  },
+}
+
+/**
+ * Computes the right margin needed to fit the vertical legend.
+ * Measures the longest trace name and converts to pixels (~7px/char at size 10),
+ * capped at 30 chars to avoid extreme margins for very long epic names.
+ * Range: 80–240px.
+ */
+function legendRightMargin(fig) {
+  const names = (fig.data || []).map(t => (t.name || '').length)
+  if (!names.length) return 120
+  const maxLen = Math.min(Math.max(...names), 30)
+  return Math.min(Math.max(maxLen * 7 + 32, 80), 240)
+}
+
 function renderCharts(charts) {
   renderTreemap(charts)
-  const HISTOGRAM_KEYS = ['pbis_created', 'pbis_done', 'type_issue']
   for (const { key, containerId } of CHART_META) {
     if (key === 'treemap') continue  // handled by renderTreemap
     const el = document.getElementById(containerId)
@@ -187,29 +221,11 @@ function renderCharts(charts) {
     const layout = applyTheme(fig.layout, el)
     delete layout.title
 
-    if (key === 'treemap') {
-      layout.margin = { t: 8, r: 8, b: 8, l: 8 }
-    } else if (key === 'story_points') {
-      layout.margin = { ...layout.margin, r: 200, b: 40 }
-    } else if (HISTOGRAM_KEYS.includes(key)) {
-      layout.margin = { ...layout.margin, r: 200, b: 40 }
-    } else {
-      // All other charts: give the right-side vertical legend room
-      layout.margin = { ...layout.margin, r: 180 }
-    }
-    if (key === 'distribution' || key === 'timeline_size') {
-      layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30 }
-    }
-    if (key === 'timeline') {
-      layout.yaxis = { ...layout.yaxis, automargin: true }
-    }
-    if (key === 'timeline_size') {
-      layout.xaxis = { ...layout.xaxis, title: { text: 'Completion date' } }
-      layout.yaxis = { ...layout.yaxis, title: { text: 'Cycle time (days)' } }
-    }
-    if (key === 'story_points') {
-      layout.xaxis = { ...layout.xaxis, type: 'category', tickangle: -30, automargin: true }
-    }
+    const overrides = CHART_LAYOUT_OVERRIDES[key] || {}
+    const r = legendRightMargin(fig)
+    layout.margin = { ...layout.margin, r, ...(overrides.margin || {}) }
+    if (overrides.xaxis) layout.xaxis = { ...layout.xaxis, ...overrides.xaxis }
+    if (overrides.yaxis) layout.yaxis = { ...layout.yaxis, ...overrides.yaxis }
 
     plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
 
