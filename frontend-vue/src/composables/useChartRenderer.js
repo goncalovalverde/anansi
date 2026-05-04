@@ -34,12 +34,20 @@ export const ERROR_STATE_HTML = `
     <a href="#/config" class="chart-empty-link">Go to Configuration -&gt;</a>
   </div>`
 
+const DEFAULT_CHART_HEIGHT = 260
+
 /**
  * Deep-merges Plotly theme defaults onto a figure's existing layout.
  * Preserves all axis config (type, tickformat, tickangle, etc.) from the
  * backend while layering theme overrides (bgcolor, font, colorway) on top.
+ *
+ * @param {object} figLayout - The layout from the backend figure.
+ * @param {HTMLElement|null} el - The container element. When provided, its
+ *   clientHeight is used as layout.height so Plotly never overflows the card.
+ *   Falls back to DEFAULT_CHART_HEIGHT (260px) when el is absent or has no
+ *   measured height (e.g. hidden tabs, collapsed panels).
  */
-export function applyTheme(figLayout) {
+export function applyTheme(figLayout, el = null) {
   const base = figLayout || {}
   return {
     ...base,
@@ -47,6 +55,7 @@ export function applyTheme(figLayout) {
     plot_bgcolor:  'rgba(0,0,0,0)',
     font:     { family: 'Inter, Roboto, sans-serif', color: '#2C3E50', size: 12 },
     colorway: ANANSI_COLORS,
+    height:   (el?.clientHeight) || DEFAULT_CHART_HEIGHT,
     margin:   { ...(base.margin || {}), t: 16, r: 40, b: 40, l: 50 },
     legend:   { ...(base.legend || {}), orientation: 'h', y: -0.15, xanchor: 'center', x: 0.5 },
     xaxis:    { ...(base.xaxis  || {}), automargin: true },
