@@ -168,8 +168,13 @@
                 </div>
                 <div class="form-group">
                   <label for="jira_epic_link_field">Epic Link Field ID</label>
-                  <input type="text" id="jira_epic_link_field" v-model="form.jira_epic_link_field"
-                    placeholder="customfield_10014" />
+                  <div class="field-with-action">
+                    <input type="text" id="jira_epic_link_field" v-model="form.jira_epic_link_field"
+                      placeholder="customfield_10014" />
+                    <button type="button" class="btn btn-secondary btn-sm" @click="detectFields" :disabled="detectingFields">
+                      {{ detectingFields ? 'Detecting…' : 'Auto-detect' }}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -534,9 +539,13 @@ async function detectFields() {
     }
     if (epic_link?.length && !form.jira_epic_link_field) {
       form.jira_epic_link_field = epic_link[0].id
+      showNotification?.(`Epic Link field detected: ${epic_link[0].name} (${epic_link[0].id})`, 'success')
+    } else if (!epic_link?.length) {
+      showNotification?.('No epic link field found — epics may use a different field name.', 'info')
     }
-    fieldsHint.value = story_points?.length
-      ? `Detected ${story_points.length} candidate(s). Values pre-filled — verify and save.`
+    const detected = [story_points?.length && 'story points', epic_link?.length && 'epic link'].filter(Boolean)
+    fieldsHint.value = detected.length
+      ? `Detected: ${detected.join(' and ')}. Values pre-filled — verify and save.`
       : 'No matching fields found. Enter IDs manually.'
   } catch (err) {
     showNotification?.('Auto-detect failed: ' + err.message, 'error')
