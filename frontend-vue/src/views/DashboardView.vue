@@ -23,7 +23,7 @@
             <h2 class="chart-section-title" id="section-backlog">📦 Backlog Composition</h2>
             <p class="chart-section-desc">Understand what work exists, how it is structured across Epics, and what types of issues dominate the backlog.</p>
           </div>
-           <div class="chart-row-half chart-row-treemap">
+          <div class="chart-row-full">
             <ChartCard
               chart-id="chart-treemap"
               :title="'🗺 Work by Epic'"
@@ -36,6 +36,8 @@
                 </button>
               </template>
             </ChartCard>
+          </div>
+          <div class="chart-row-full">
             <ChartCard ref="chartRefs[1]" chart-id="chart-pbis-created" title="New Issues Created Over Time"
               description="Is the backlog growing? Each bar shows new issues created per period, grouped by Epic." icon="📝" />
           </div>
