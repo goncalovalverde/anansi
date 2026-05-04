@@ -121,7 +121,7 @@ def load_data_task(dataset_id: str, db_path: str) -> None:
 
         reader_config = config_service.build_reader_config(conn)
         df = reader.read_data(reader_config, db_path, progress_callback=progress_callback)
-        store_dataframe(conn, dataset_id, df)
+        save_dataframe(conn, dataset_id, df)
         update_dataset_status(conn, dataset_id, "ready")
         logger.info("Dataset %s loaded successfully (%d rows)", dataset_id, len(df))
     except Exception as exc:

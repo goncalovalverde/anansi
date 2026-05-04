@@ -95,7 +95,7 @@ async def upload_csv(
         return {"dataset_id": existing_id, "cached": True}
 
     dataset_id = data_service.create_dataset(db, config_hash, "csv")
-    data_service.store_dataframe(db, dataset_id, df)
+    data_service.save_dataframe(db, dataset_id, df)
     data_service.update_dataset_status(db, dataset_id, "ready")
 
     return {"dataset_id": dataset_id, "cached": False}
