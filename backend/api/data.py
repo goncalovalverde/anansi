@@ -101,7 +101,7 @@ async def upload_csv(
     return {"dataset_id": dataset_id, "cached": False}
 
 
-
+@router.delete("/cache")
 def clear_cache(db: sqlite3.Connection = Depends(get_db)):
     cursor = db.execute("SELECT COUNT(*) FROM datasets")
     count = cursor.fetchone()[0]
