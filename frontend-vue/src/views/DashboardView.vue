@@ -78,7 +78,7 @@
 import { ref, watch, onMounted } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { useDataLoader } from '@/composables/useDataLoader.js'
-import { PLOTLY_CONFIG, EMPTY_PLACEHOLDER_HTML, ERROR_STATE_HTML, applyTheme, isErrorFigure, deferRender } from '@/composables/useChartRenderer.js'
+import { PLOTLY_CONFIG, EMPTY_PLACEHOLDER_HTML, ERROR_STATE_HTML, applyTheme, isErrorFigure, deferRender, plotChart } from '@/composables/useChartRenderer.js'
 import StatusBar from '@/components/StatusBar.vue'
 import KpiStrip from '@/components/KpiStrip.vue'
 import EmptyState from '@/components/EmptyState.vue'
@@ -159,7 +159,7 @@ function renderCharts(charts) {
       layout.xaxis = { ...layout.xaxis, type: 'category', tickangle: -30, automargin: true }
     }
 
-    window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
+    plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
 
     const callout = (store.callouts || {})[key]
     if (calloutEl) {

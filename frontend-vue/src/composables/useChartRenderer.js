@@ -86,3 +86,13 @@ export function isErrorFigure(fig) {
 export function deferRender(fn) {
   nextTick(() => requestAnimationFrame(fn))
 }
+
+/**
+ * Clears the container and renders a new Plotly chart.
+ * Clearing first removes any placeholder HTML pre-rendered in the template,
+ * preventing it from overlaying the chart after position:absolute was added.
+ */
+export function plotChart(el, data, layout, config) {
+  el.innerHTML = ''
+  window.Plotly.newPlot(el, data, layout, config)
+}

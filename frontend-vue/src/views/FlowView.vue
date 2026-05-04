@@ -53,7 +53,7 @@
 import { ref, watch, onMounted } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { Api } from '@/api/index.js'
-import { PLOTLY_CONFIG, EMPTY_PLACEHOLDER_HTML, ERROR_STATE_HTML, applyTheme, isErrorFigure, deferRender } from '@/composables/useChartRenderer.js'
+import { PLOTLY_CONFIG, EMPTY_PLACEHOLDER_HTML, ERROR_STATE_HTML, applyTheme, isErrorFigure, deferRender, plotChart } from '@/composables/useChartRenderer.js'
 import StatusBar from '@/components/StatusBar.vue'
 import ChartCard from '@/components/ChartCard.vue'
 
@@ -99,7 +99,7 @@ function renderCharts(charts) {
       layout.yaxis = { ...layout.yaxis, automargin: true }
     }
 
-    window.Plotly.newPlot(el, fig.data || [], layout, PLOTLY_CONFIG)
+    plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
     if (calloutEl) calloutEl.style.display = 'none'
   }
 }
