@@ -81,6 +81,7 @@ function renderCharts(charts) {
 
     const layout = applyTheme(fig.layout)
     delete layout.title
+    layout.height = el.clientHeight
 
     if (key === 'epic_progress') {
       layout.yaxis = { ...layout.yaxis, automargin: true }

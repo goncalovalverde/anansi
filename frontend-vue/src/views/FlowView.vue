@@ -91,6 +91,7 @@ function renderCharts(charts) {
 
     const layout = applyTheme(fig.layout)
     delete layout.title
+    layout.height = el.clientHeight
 
     if (key === 'distribution' || key === 'timeline_size') {
       layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30 }

@@ -137,6 +137,7 @@ function renderCharts(charts) {
 
     const layout = applyTheme(fig.layout)
     delete layout.title
+    layout.height = el.clientHeight
 
     if (key === 'treemap') {
       layout.margin = { t: 8, r: 8, b: 8, l: 8 }
