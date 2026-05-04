@@ -65,17 +65,27 @@ class Jira:
         issue_data["Status"].append(issue.fields.status.name)
 
         story_points_field = self.jira_config.get("story_points_field")
-        if story_points_field:
-            issue_data["Story Points"].append(
-                getattr(issue.fields, story_points_field, None)
-            )
+        issue_data["Story Points"].append(
+            getattr(issue.fields, story_points_field, None) if story_points_field else None
+        )
 
         epic_link_field = self.jira_config.get("epic_link_field")
+        epic_link = None
+
         if epic_link_field:
-            epic_link = getattr(issue.fields, epic_link_field, None)
-            if epic_link is None:
-                epic_link = "No Epic"
-            issue_data["Epic Link"].append(epic_link)
+            val = getattr(issue.fields, epic_link_field, None)
+            if val is not None:
+                # Some Jira versions return a string key; others return an object.
+                epic_link = val.key if hasattr(val, "key") else str(val)
+
+        # Fallback: next-gen / team-managed projects expose the epic via parent.
+        if not epic_link:
+            parent = getattr(issue.fields, "parent", None)
+            if parent and getattr(getattr(parent, "fields", None), "issuetype", None):
+                if parent.fields.issuetype.name == "Epic":
+                    epic_link = parent.key
+
+        issue_data["Epic Link"].append(epic_link or "No Epic")
 
         history_item = {step: NaT for step in self.workflow}
 
