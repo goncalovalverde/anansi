@@ -171,7 +171,18 @@ function renderCharts(charts) {
       continue
     }
 
-    const layout = Object.assign({}, fig.layout || {}, theme)
+    const figLayout = fig.layout || {}
+    const layout = {
+      ...figLayout,
+      paper_bgcolor: theme.paper_bgcolor,
+      plot_bgcolor:  theme.plot_bgcolor,
+      font:          theme.font,
+      colorway:      theme.colorway,
+      margin:  { ...(figLayout.margin || {}), ...theme.margin },
+      legend:  { ...(figLayout.legend || {}), ...theme.legend },
+      xaxis:   { ...(figLayout.xaxis  || {}), ...(theme.xaxis  || {}) },
+      yaxis:   { ...(figLayout.yaxis  || {}), ...(theme.yaxis  || {}) },
+    }
     delete layout.title
 
     // Per-chart layout additions
