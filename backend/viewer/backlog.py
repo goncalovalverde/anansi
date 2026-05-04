@@ -572,8 +572,10 @@ class Backlog:
 
     def calculate_cycle_time(self, treemap_data: pd.DataFrame) -> pd.DataFrame:
         if self.done_step in treemap_data.columns and self.in_progress_step in treemap_data.columns:
+            done_dt = pd.to_datetime(treemap_data[self.done_step], errors="coerce")
+            start_dt = pd.to_datetime(treemap_data[self.in_progress_step], errors="coerce")
             treemap_data["Cycle Time"] = pd.to_numeric(
-                (treemap_data[self.done_step] - treemap_data[self.in_progress_step]).dt.days,
+                (done_dt - start_dt).dt.days,
                 downcast="integer",
             )
         else:
