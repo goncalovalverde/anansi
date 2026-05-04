@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { Api } from '@/api/index.js'
 import StatusBar from '@/components/StatusBar.vue'
@@ -143,7 +143,7 @@ async function fetchAndRender() {
   try {
     const charts = await Api.getFlow(store.datasetId)
     store.setFlowCharts(charts)
-    renderCharts(charts)
+    scheduleRender(charts)
   } catch (err) {
     error.value = `Failed to load flow charts: ${err.message}`
   } finally {
@@ -152,16 +152,20 @@ async function fetchAndRender() {
 }
 
 watch(() => store.flowCharts, (charts) => {
-  if (charts) renderCharts(charts)
+  if (charts) scheduleRender(charts)
 })
 
 onMounted(() => {
   if (store.flowCharts) {
-    renderCharts(store.flowCharts)
+    scheduleRender(store.flowCharts)
   } else if (store.datasetId) {
     fetchAndRender()
   }
 })
+
+function scheduleRender(charts) {
+  nextTick(() => requestAnimationFrame(() => renderCharts(charts)))
+}
 </script>
 
 <style scoped>

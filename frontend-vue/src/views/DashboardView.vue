@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { useDataLoader } from '@/composables/useDataLoader.js'
 import StatusBar from '@/components/StatusBar.vue'
@@ -226,18 +226,21 @@ function renderCharts(charts) {
   }
 }
 
+function scheduleRender(charts) {
+  nextTick(() => requestAnimationFrame(() => renderCharts(charts)))
+}
+
 // Re-render when charts change (new data loaded)
 watch(() => store.charts, (charts) => {
-  if (charts) renderCharts(charts)
+  if (charts) scheduleRender(charts)
 })
 
 onMounted(() => {
   if (store.datasetId) {
     loader.restore(store.datasetId)
   }
-  // If charts already in store (e.g. navigating back from config), re-render immediately
   if (store.charts) {
-    renderCharts(store.charts)
+    scheduleRender(store.charts)
   }
 })
 </script>

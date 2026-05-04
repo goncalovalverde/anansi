@@ -43,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useDataStore } from '@/stores/data.js'
 import { Api } from '@/api/index.js'
 import StatusBar from '@/components/StatusBar.vue'
@@ -130,7 +130,7 @@ async function fetchAndRender() {
   try {
     const charts = await Api.getTrends(store.datasetId)
     store.setTrendsCharts(charts)
-    renderCharts(charts)
+    scheduleRender(charts)
   } catch (err) {
     error.value = `Failed to load trend charts: ${err.message}`
   } finally {
@@ -139,16 +139,20 @@ async function fetchAndRender() {
 }
 
 watch(() => store.trendsCharts, (charts) => {
-  if (charts) renderCharts(charts)
+  if (charts) scheduleRender(charts)
 })
 
 onMounted(() => {
   if (store.trendsCharts) {
-    renderCharts(store.trendsCharts)
+    scheduleRender(store.trendsCharts)
   } else if (store.datasetId) {
     fetchAndRender()
   }
 })
+
+function scheduleRender(charts) {
+  nextTick(() => requestAnimationFrame(() => renderCharts(charts)))
+}
 </script>
 
 <style scoped>
