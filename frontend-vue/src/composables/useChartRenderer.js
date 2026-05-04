@@ -88,11 +88,15 @@ export function deferRender(fn) {
 }
 
 /**
- * Clears the container and renders a new Plotly chart.
- * Clearing first removes any placeholder HTML pre-rendered in the template,
- * preventing it from overlaying the chart after position:absolute was added.
+ * Renders or updates a Plotly chart in the given container.
+ * - First render: clears any placeholder HTML, then calls Plotly.newPlot.
+ * - Subsequent renders: calls Plotly.react (diff-based update, no full repaint).
  */
 export function plotChart(el, data, layout, config) {
-  el.innerHTML = ''
-  window.Plotly.newPlot(el, data, layout, config)
+  if (el._fullLayout) {
+    window.Plotly.react(el, data, layout, config)
+  } else {
+    el.innerHTML = ''
+    window.Plotly.newPlot(el, data, layout, config)
+  }
 }
