@@ -104,10 +104,13 @@ class Jira:
         issues = []
         i = 0
         chunk_size = 100
+        # Request all fields including custom fields (story points, epic link, etc.)
+        fields = ["*all", "changelog"]
         while True:
             chunk = jira.search_issues(
                 self.jira_config["jql_query"],
                 expand="changelog",
+                fields=fields,
                 maxResults=chunk_size,
                 startAt=i,
             )
