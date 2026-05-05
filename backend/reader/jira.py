@@ -2,6 +2,7 @@ from jira import JIRA
 import dateutil.parser
 import hashlib
 import logging
+import requests
 from pandas import NaT, DataFrame
 
 import reader.cache
@@ -65,9 +66,15 @@ class Jira:
         issue_data["Status"].append(issue.fields.status.name)
 
         story_points_field = self.jira_config.get("story_points_field")
-        issue_data["Story Points"].append(
-            getattr(issue.fields, story_points_field, None) if story_points_field else None
-        )
+        sp_value = None
+        if story_points_field:
+            sp_value = getattr(issue.fields, story_points_field, None)
+            # Log first few issues to debug
+            if issue.key in ("PNC-499", "PNC-498", "PNC-497"):
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"{issue.key}: {story_points_field}={sp_value} (type: {type(sp_value).__name__})")
+        issue_data["Story Points"].append(sp_value)
 
         epic_link_field = self.jira_config.get("epic_link_field")
         epic_link = None
@@ -100,27 +107,87 @@ class Jira:
             issue_data[workflow_step].append(history_item[workflow_step])
 
     def get_issues(self, progress_callback=None) -> list:
-        jira = self.get_jira_instance()
+        """Fetch issues using REST API directly to ensure all fields are returned."""
+        jira_url = self.jira_config["url"].rstrip("/")
+        jql = self.jira_config["jql_query"]
+        
+        # Build auth for REST call
+        auth = None
+        headers = {}
+        if self.jira_config.get("auth_method") == "pat":
+            headers["Authorization"] = f"Bearer {self.jira_config.get('pat_token', '')}"
+        elif self.jira_config.get("username") and self.jira_config.get("password"):
+            auth = (self.jira_config["username"], self.jira_config["password"])
+        
         issues = []
         i = 0
         chunk_size = 100
-        # Request all fields including custom fields (story points, epic link, etc.)
-        fields = ["*all", "changelog"]
+        
         while True:
-            chunk = jira.search_issues(
-                self.jira_config["jql_query"],
-                expand="changelog",
-                fields=fields,
-                maxResults=chunk_size,
-                startAt=i,
-            )
-            i += chunk_size
-            issues += chunk.iterable
+            url = f"{jira_url}/rest/api/2/search"
+            params = {
+                "jql": jql,
+                "startAt": i,
+                "maxResults": chunk_size,
+                "expand": "changelog",
+                "fields": "*all",
+            }
+            
+            try:
+                resp = requests.get(url, params=params, headers=headers, auth=auth, timeout=30, verify=False)
+                resp.raise_for_status()
+                data = resp.json()
+            except Exception as e:
+                logger.error(f"REST API call failed: {e}. Falling back to python-jira.")
+                # Fallback to python-jira library
+                jira = self.get_jira_instance()
+                chunk = jira.search_issues(
+                    jql, expand="changelog", maxResults=chunk_size, startAt=i
+                )
+                issues += list(chunk.iterable)
+                if i >= chunk.total:
+                    break
+                i += chunk_size
+                continue
+            
+            # Wrap REST response as issue-like objects for get_issue_data()
+            for issue_dict in data.get("issues", []):
+                issue = self._wrap_issue(issue_dict)
+                issues.append(issue)
+            
             if progress_callback:
-                progress_callback(len(issues), chunk.total)
-            if i >= chunk.total:
+                progress_callback(len(issues), data.get("total", chunk_size))
+            
+            if i + chunk_size >= data.get("total", 0):
                 break
+            i += chunk_size
+        
         return issues
+    
+    @staticmethod
+    def _wrap_issue(issue_dict: dict):
+        """Convert REST API issue dict to object with .key, .fields, .changelog attributes."""
+        class FieldsWrapper:
+            def __init__(self, fields_dict):
+                for key, val in fields_dict.items():
+                    if isinstance(val, dict) and ("name" in val or "displayName" in val):
+                        # Create object for nested structures like issuetype, creator, status
+                        setattr(self, key, type('obj', (), val)())
+                    else:
+                        setattr(self, key, val)
+        
+        class HistoryWrapper:
+            def __init__(self, histories):
+                self.histories = histories
+        
+        class IssueWrapper:
+            def __init__(self):
+                self.key = issue_dict["key"]
+                self.fields = FieldsWrapper(issue_dict.get("fields", {}))
+                changelog_data = issue_dict.get("changelog", {})
+                self.changelog = HistoryWrapper(changelog_data.get("histories", []))
+        
+        return IssueWrapper()
 
     def get_jira_data(self, progress_callback=None) -> DataFrame:
         if self.jira_config.get("cache") and self.cache.is_valid():
