@@ -247,6 +247,13 @@ class Backlog:
     def draw_issues_by_status(self) -> str:
         """Stacked bar chart: count of issues per status, stacked by issue type, ordered by workflow."""
         df = self.raw_data.copy()
+        print(f"\n>>> draw_issues_by_status: raw_data has {len(df)} rows")
+        print(f">>> Columns: {list(df.columns)}")
+        if "Status" in df.columns:
+            print(f">>> Status value counts: {df['Status'].value_counts().to_dict()}")
+        if "Type" in df.columns:
+            print(f">>> Type value counts: {df['Type'].value_counts().to_dict()}")
+        
         if df.empty or "Status" not in df.columns or "Type" not in df.columns:
             return go.Figure(
                 layout={"title": "No data — Status and Type columns required"}
