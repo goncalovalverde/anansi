@@ -88,8 +88,12 @@ function renderCharts(charts) {
     const layout = applyTheme(fig.layout, el)
     delete layout.title
 
-    if (key === 'distribution' || key === 'timeline_size') {
+    if (key === 'distribution') {
       layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30 }
+    }
+    if (key === 'timeline_size') {
+      layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30, title: { text: 'Completion date' } }
+      layout.yaxis = { ...layout.yaxis, title: { text: 'Cycle Time' }, showticklabels: false }
     }
 
     plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
