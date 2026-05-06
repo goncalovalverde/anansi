@@ -247,7 +247,6 @@ class Backlog:
     def draw_issues_by_status(self) -> str:
         """Stacked bar chart: count of issues per status, stacked by issue type, ordered by workflow."""
         df = self.raw_data.copy()
-        print(f"\n>>> draw_issues_by_status: raw_data has {len(df)} rows")
         
         if df.empty or "Status" not in df.columns or "Type" not in df.columns:
             return go.Figure(
@@ -255,11 +254,8 @@ class Backlog:
             ).to_json()
         
         total_issues = len(df)
-        # Drop rows where Status is NaN to get actual issue counts
         df_with_status = df.dropna(subset=["Status"])
         issues_with_status = len(df_with_status)
-        
-        print(f">>> Total issues: {total_issues}, Issues with Status: {issues_with_status}")
         
         if df_with_status.empty:
             return go.Figure(
@@ -270,9 +266,6 @@ class Backlog:
         grouped = df_with_status.groupby(["Status", "Type"], as_index=False).size()
         grouped.columns = ["Status", "Type", "Count"]
         
-        print(f">>> Grouped dataframe ({len(grouped)} rows):\n{grouped.to_string()}")
-        print(f">>> Total in grouped: {grouped['Count'].sum()}")
-        
         if grouped.empty:
             return go.Figure(
                 layout={"title": "No data available"}
@@ -280,11 +273,7 @@ class Backlog:
         
         # Order statuses by workflow configuration
         workflow = self.config.get("Workflow", [])
-        print(f">>> Workflow from config: {workflow}")
-        
-        # Use all unique statuses from data, ordered by workflow if available, then alphabetically
         all_statuses = grouped["Status"].unique()
-        print(f">>> All unique statuses in data: {sorted(all_statuses)}")
         
         if workflow:
             # Order by workflow, then add any statuses not in workflow
@@ -292,15 +281,11 @@ class Backlog:
         else:
             status_order = sorted(all_statuses)
         
-        print(f">>> Final status_order: {status_order}")
-        
-        print(f">>> Workflow: {workflow}, Status order: {status_order}")
-        
         # Create categorical type for proper ordering
         grouped["Status"] = pd.Categorical(grouped["Status"], categories=status_order, ordered=True)
         grouped = grouped.sort_values("Status")
         
-        # Create stacked bar chart
+        # Create stacked bar chart with explicit height for better rendering
         fig = px.bar(
             grouped,
             x="Status",
@@ -309,6 +294,7 @@ class Backlog:
             color_discrete_sequence=ANANSI_COLORS,
             title=f"Issues by Status ({issues_with_status}/{total_issues} with Status)",
             barmode="stack",
+            height=500,
         )
         fig.update_layout(
             xaxis=dict(type="category", tickangle=-30, automargin=True),
@@ -346,9 +332,6 @@ class Backlog:
             sizes = (5 + 45 * (done_data["Cycle Time"] - min_ct) / (max_ct - min_ct)).tolist()
         else:
             sizes = [15] * len(done_data)
-        
-        print(f"\n>>> Sizes (first 10): {sizes[:10]}")
-        print(f">>> Min size: {min(sizes)}, Max size: {max(sizes)}")
         
         # Build custom hover template
         hover = ("<b>%{hovertext}</b><br>" +
