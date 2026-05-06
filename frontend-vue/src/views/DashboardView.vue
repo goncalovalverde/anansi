@@ -177,7 +177,7 @@ const CHART_LAYOUT_OVERRIDES = {
   },
   timeline_size: {
     xaxis: { tickformat: '%b %Y', tickangle: -30, title: { text: 'Completion date' } },
-    yaxis: { title: { text: 'Epic' } },
+    yaxis: { title: { text: 'Cycle Time' } },
   },
 }
 
