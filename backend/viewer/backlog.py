@@ -79,21 +79,14 @@ class Backlog:
             return go.Figure(
                 layout={"title": f"No completed items — need '{self.done_step}' dates"}
             ).to_json()
-        
-        # Create aggregated data with counts
-        grouped = done_data.groupby(["Epic Name", "Type"]).size().reset_index(name="Count")
-        grouped["Composed"] = grouped.groupby(["Epic Name", "Type"]).cumcount() + 1
-        
         fig = px.treemap(
-            grouped,
-            path=["Epic Name", "Type"],
-            values="Count",
+            done_data,
+            path=["Epic Name", "Type", "Composed"],
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
         )
         fig.update_traces(
-            textposition="middle center",
-            hovertemplate="%{label}<br>Count: %{value}<extra></extra>",
+            hovertemplate="%{label}<br>Parent: %{parent}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
             marker_line_color="#F9F9F7",
@@ -106,25 +99,19 @@ class Backlog:
         if df.empty:
             return go.Figure(layout={"title": "No data available"}).to_json()
         df["Progress"] = df["Status"].apply(self._normalize_status)
-        
-        # Create aggregated data with counts
-        grouped = df.groupby(["Epic Name", "Progress"]).size().reset_index(name="Count")
-        
         color_map = {
             "Done":        ANANSI_COLORS[0],
             "In Progress": ANANSI_COLORS[1],
             "To Do":       ANANSI_COLORS[3],
         }
         fig = px.treemap(
-            grouped,
-            path=["Epic Name", "Progress"],
-            values="Count",
+            df,
+            path=["Epic Name", "Type", "Composed"],
             color="Progress",
             color_discrete_map=color_map,
         )
         fig.update_traces(
-            textposition="middle center",
-            hovertemplate="%{label}<br>Count: %{value}<extra></extra>",
+            hovertemplate="%{label}<br>Status: %{color}<br>Parent: %{parent}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
             marker_line_color="#F9F9F7",
