@@ -186,18 +186,27 @@ class Backlog:
 
     def draw_timeline(self) -> str:
         x_start = self.in_progress_step if self.in_progress_step in self.treemap_data.columns else "Created"
+        
+        # Log what we're looking for
+        logger.info(f"Timeline: x_start={x_start}, done_step={self.done_step}")
+        logger.info(f"  Columns available: {list(self.treemap_data.columns)}")
+        logger.info(f"  {x_start} not null: {self.treemap_data[x_start].notna().sum()}")
+        logger.info(f"  {self.done_step} not null: {self.treemap_data[self.done_step].notna().sum()}")
+        
         data = self.treemap_data.dropna(subset=[x_start, self.done_step]).copy()
+        
+        logger.info(f"  After dropna: {len(data)} rows")
         
         if data.empty:
             return go.Figure(
-                layout={"title": f"No completed items (need '{self.done_step}' dates - check Workflow settings)"}
+                layout={"title": f"No completed items (need '{x_start}' and '{self.done_step}' dates)"}
             ).to_json()
         
         if "Cycle Time" in data.columns and len(data) > 20:
             data = data.nlargest(20, "Cycle Time")
             subtitle = "Showing 20 slowest items by cycle time"
         else:
-            subtitle = ""
+            subtitle = f"Showing all {len(data)} items"
         
         fig = px.timeline(
             data,
