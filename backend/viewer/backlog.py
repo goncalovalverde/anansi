@@ -73,10 +73,11 @@ class Backlog:
 
     def draw_treemap(self) -> str:
         """Treemap of completed work only, coloured by Epic."""
-        done_data = self.treemap_data[self.treemap_data["Status"] == self.done_step]
+        # Filter to issues with a done_step date (completed items)
+        done_data = self.treemap_data[self.treemap_data[self.done_step].notna()].copy()
         if done_data.empty:
             return go.Figure(
-                layout={"title": f"No completed items — Status must be '{self.done_step}' to appear here"}
+                layout={"title": f"No completed items — need '{self.done_step}' dates"}
             ).to_json()
         fig = px.treemap(
             done_data,
@@ -85,8 +86,8 @@ class Backlog:
             color_discrete_sequence=ANANSI_COLORS,
         )
         fig.update_traces(
-            texttemplate="%{label}",
-            textinfo="label",
+            texttemplate="%{label}<br>%{value}",
+            textinfo="label+value",
             hovertemplate="%{label}<br>Count: %{value}<br>Parent: %{parent}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
@@ -112,8 +113,8 @@ class Backlog:
             color_discrete_map=color_map,
         )
         fig.update_traces(
-            texttemplate="%{label}",
-            textinfo="label",
+            texttemplate="%{label}<br>%{value}",
+            textinfo="label+value",
             hovertemplate="%{label}<br>Count: %{value}<br>Status: %{color}<br>Parent: %{parent}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
