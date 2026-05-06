@@ -91,7 +91,7 @@ class Backlog:
             color_discrete_sequence=ANANSI_COLORS,
         )
         fig.update_traces(
-            hovertemplate="%{label}<br>Count: %{value}<br>Parent: %{parent}<extra></extra>",
+            hovertemplate="%{label}<br>Count: %{value}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
             marker_line_color="#F9F9F7",
@@ -121,7 +121,7 @@ class Backlog:
             color_discrete_map=color_map,
         )
         fig.update_traces(
-            hovertemplate="%{label}<br>Count: %{value}<br>Status: %{color}<br>Parent: %{parent}<extra></extra>",
+            hovertemplate="%{label}<br>Count: %{value}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
             marker_line_color="#F9F9F7",
