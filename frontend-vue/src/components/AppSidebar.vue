@@ -2,20 +2,7 @@
   <nav class="app-sidebar" aria-label="Main navigation">
     <!-- Logo -->
     <div class="sidebar-logo">
-      <svg class="logo-spider" xmlns="http://www.w3.org/2000/svg" viewBox="-2 0 36 36" fill="none" aria-hidden="true">
-        <line x1="10" y1="14" x2="1"  y2="9"  stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="9"  y1="17" x2="0"  y2="17" stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="10" y1="20" x2="1"  y2="25" stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="11" y1="23" x2="4"  y2="30" stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="22" y1="14" x2="31" y2="9"  stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="23" y1="17" x2="32" y2="17" stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="22" y1="20" x2="31" y2="25" stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="21" y1="23" x2="28" y2="30" stroke="#007B85" stroke-width="1.8" stroke-linecap="round"/>
-        <polygon points="16,5 19,7 19,11 16,13 13,11 13,7" fill="#007B85"/>
-        <polygon points="16,13 21,16 21,22 16,25 11,22 11,16" fill="#007B85"/>
-        <polygon points="12,25 15,27 15,31 12,33 9,31 9,27"  fill="#F5A623"/>
-        <polygon points="20,25 23,27 23,31 20,33 17,31 17,27" fill="#F5A623"/>
-      </svg>
+      <img class="logo-image" src="/logo.png" alt="Anansi logo" />
       <span class="sidebar-wordmark">ANANSI</span>
     </div>
 
