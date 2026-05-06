@@ -280,7 +280,19 @@ class Backlog:
         
         # Order statuses by workflow configuration
         workflow = self.config.get("Workflow", [])
-        status_order = workflow if workflow else sorted(grouped["Status"].unique())
+        print(f">>> Workflow from config: {workflow}")
+        
+        # Use all unique statuses from data, ordered by workflow if available, then alphabetically
+        all_statuses = grouped["Status"].unique()
+        print(f">>> All unique statuses in data: {sorted(all_statuses)}")
+        
+        if workflow:
+            # Order by workflow, then add any statuses not in workflow
+            status_order = [s for s in workflow if s in all_statuses] + [s for s in all_statuses if s not in workflow]
+        else:
+            status_order = sorted(all_statuses)
+        
+        print(f">>> Final status_order: {status_order}")
         
         print(f">>> Workflow: {workflow}, Status order: {status_order}")
         
