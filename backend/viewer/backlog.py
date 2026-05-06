@@ -35,6 +35,7 @@ class Backlog:
             '<a href="{}browse/{}" style="cursor:pointer" '
             'target="_blank" rel="noopener noreferrer">{}</a>'
         )
+        self.raw_data = cycle_data.copy()  # Store raw unfiltered data for charts like issues_by_status
         self.treemap_data = self.get_treemap_data(cycle_data)
         self.treemap_data = self.calculate_cycle_time(self.treemap_data)
 
@@ -245,7 +246,7 @@ class Backlog:
 
     def draw_issues_by_status(self) -> str:
         """Stacked bar chart: count of issues per status, stacked by issue type, ordered by workflow."""
-        df = self.treemap_data.copy()
+        df = self.raw_data.copy()
         if df.empty or "Status" not in df.columns or "Type" not in df.columns:
             return go.Figure(
                 layout={"title": "No data — Status and Type columns required"}
