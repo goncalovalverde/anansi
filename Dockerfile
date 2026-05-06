@@ -28,8 +28,14 @@ COPY log_config.yaml .
 # Copy frontend build from builder stage
 COPY --from=frontend-builder /app/frontend-vue/dist frontend-vue/dist
 
+# Create data directory for persistence
+RUN mkdir -p /app/data
+
 # Expose port 9000
 EXPOSE 9000
+
+# Volume for persistent database storage
+VOLUME ["/app/data"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
