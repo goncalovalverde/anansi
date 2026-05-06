@@ -313,7 +313,15 @@ class Backlog:
             size="Cycle Time",
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
+            hover_name="Summary",
+            hover_data={"Cycle Time": True, self.done_step: False, "Epic Name": False},
             title="When things were done and how big",
+        )
+        fig.update_traces(
+            hovertemplate="<b>%{hovertext}</b><br>" +
+                         f"{self.done_step}: %{{x|%Y-%m-%d}}<br>" +
+                         "Cycle Time: %{customdata[0]} days<br>" +
+                         "Epic: %{y}<extra></extra>"
         )
         return fig.to_json()
 
