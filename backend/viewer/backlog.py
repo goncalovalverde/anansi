@@ -87,7 +87,6 @@ class Backlog:
         )
         fig.update_traces(
             texttemplate="%{label}<br>%{value}",
-            textinfo="label+value",
             hovertemplate="%{label}<br>Count: %{value}<br>Parent: %{parent}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
@@ -114,7 +113,6 @@ class Backlog:
         )
         fig.update_traces(
             texttemplate="%{label}<br>%{value}",
-            textinfo="label+value",
             hovertemplate="%{label}<br>Count: %{value}<br>Status: %{color}<br>Parent: %{parent}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
