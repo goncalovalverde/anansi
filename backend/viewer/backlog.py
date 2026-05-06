@@ -266,6 +266,10 @@ class Backlog:
         grouped = df_with_status.groupby(["Status", "Type"], as_index=False).size()
         grouped.columns = ["Status", "Type", "Count"]
         
+        logger.info(f">>> draw_issues_by_status: raw_data has {len(df)} rows")
+        logger.info(f">>> Issues with status: {issues_with_status}")
+        logger.info(f">>> Grouped dataframe:\n{grouped.to_string()}")
+        
         if grouped.empty:
             return go.Figure(
                 layout={"title": "No data available"}
@@ -300,6 +304,9 @@ class Backlog:
             xaxis=dict(type="category", tickangle=-30, automargin=True),
             yaxis=dict(title="Count"),
         )
+        logger.info(f">>> Figure data after creation: {len(fig.data)} traces")
+        for i, trace in enumerate(fig.data):
+            logger.info(f">>> Trace {i}: name={trace.name}, x={trace.x}, y={trace.y}")
         return fig.to_json()
 
     def draw_timeline_size(self) -> str:
