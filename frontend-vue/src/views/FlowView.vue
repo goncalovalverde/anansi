@@ -31,10 +31,7 @@
           <section class="chart-section" aria-labelledby="section-flow-timeline">
             <div class="chart-section-header">
               <h2 class="chart-section-title" id="section-flow-timeline">Item Timelines</h2>
-              <p class="chart-section-desc">Visualise how long items spent in flight and when they completed.</p>
-            </div>
-            <div class="chart-row-full">
-              <ChartCard chart-id="chart-flow-timeline" title="Item Timeline (Gantt)" description="Each bar is one issue - from In Progress to Done. Long bars indicate slow-moving items." icon="📅" />
+              <p class="chart-section-desc">Visualise when items completed and cycle time distribution.</p>
             </div>
             <div class="chart-row-full">
               <ChartCard chart-id="chart-flow-distribution" title="Done vs In-Progress Date Spread" description="When did items transition? Clusters indicate sprint endings." icon="📊" />
@@ -65,7 +62,6 @@ const CHART_META = [
   { key: 'flow_efficiency', containerId: 'chart-flow-efficiency' },
   { key: 'wip_trend',       containerId: 'chart-flow-wip' },
   { key: 'throughput',      containerId: 'chart-flow-throughput' },
-  { key: 'timeline',        containerId: 'chart-flow-timeline' },
   { key: 'distribution',    containerId: 'chart-flow-distribution' },
   { key: 'timeline_size',   containerId: 'chart-flow-timeline-size' },
 ]
@@ -94,9 +90,6 @@ function renderCharts(charts) {
 
     if (key === 'distribution' || key === 'timeline_size') {
       layout.xaxis = { ...layout.xaxis, tickformat: '%b %Y', tickangle: -30 }
-    }
-    if (key === 'timeline') {
-      layout.yaxis = { ...layout.yaxis, automargin: true }
     }
 
     plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
