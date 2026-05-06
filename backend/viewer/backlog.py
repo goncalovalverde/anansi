@@ -244,71 +244,6 @@ class Backlog:
         )
         return fig.to_json()
 
-    def draw_issues_by_status(self) -> str:
-        """Stacked bar chart: count of issues per status, stacked by issue type, ordered by workflow."""
-        df = self.raw_data.copy()
-        
-        if df.empty or "Status" not in df.columns or "Type" not in df.columns:
-            return go.Figure(
-                layout={"title": "No data — Status and Type columns required"}
-            ).to_json()
-        
-        total_issues = len(df)
-        df_with_status = df.dropna(subset=["Status"])
-        issues_with_status = len(df_with_status)
-        
-        if df_with_status.empty:
-            return go.Figure(
-                layout={"title": f"No data — {total_issues} issues found but none have Status assigned"}
-            ).to_json()
-        
-        # Group by status and type, count issues
-        grouped = df_with_status.groupby(["Status", "Type"], as_index=False).size()
-        grouped.columns = ["Status", "Type", "Count"]
-        
-        logger.info(f">>> draw_issues_by_status: raw_data has {len(df)} rows")
-        logger.info(f">>> Issues with status: {issues_with_status}")
-        logger.info(f">>> Grouped dataframe:\n{grouped.to_string()}")
-        
-        if grouped.empty:
-            return go.Figure(
-                layout={"title": "No data available"}
-            ).to_json()
-        
-        # Order statuses by workflow configuration
-        workflow = self.config.get("Workflow", [])
-        all_statuses = grouped["Status"].unique()
-        
-        if workflow:
-            # Order by workflow, then add any statuses not in workflow
-            status_order = [s for s in workflow if s in all_statuses] + [s for s in all_statuses if s not in workflow]
-        else:
-            status_order = sorted(all_statuses)
-        
-        # Create categorical type for proper ordering
-        grouped["Status"] = pd.Categorical(grouped["Status"], categories=status_order, ordered=True)
-        grouped = grouped.sort_values("Status")
-        
-        # Create stacked bar chart with explicit height for better rendering
-        fig = px.bar(
-            grouped,
-            x="Status",
-            y="Count",
-            color="Type",
-            color_discrete_sequence=ANANSI_COLORS,
-            title=f"Issues by Status ({issues_with_status}/{total_issues} with Status)",
-            barmode="stack",
-            height=500,
-        )
-        fig.update_layout(
-            xaxis=dict(type="category", tickangle=-30, automargin=True),
-            yaxis=dict(title="Count"),
-        )
-        logger.info(f">>> Figure data after creation: {len(fig.data)} traces")
-        for i, trace in enumerate(fig.data):
-            logger.info(f">>> Trace {i}: name={trace.name}, x={trace.x}, y={trace.y}")
-        return fig.to_json()
-
     def draw_timeline_size(self) -> str:
         # Filter to completed issues (have a date in the done step column)
         done_data = self.treemap_data[self.treemap_data[self.done_step].notna()].copy()
@@ -367,7 +302,6 @@ class Backlog:
             "story_points": self.draw_story_points,
             "timeline": self.draw_timeline,
             "type_issue": self.draw_type_issue,
-            "issues_by_status": self.draw_issues_by_status,
             "timeline_size": self.draw_timeline_size,
         }
         results = {}

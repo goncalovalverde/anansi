@@ -45,10 +45,6 @@
             <ChartCard ref="chartRefs[2]" chart-id="chart-type-issue" title="Work Mix by Type"
               description="What proportion is Stories vs Bugs vs Tasks? A high bug ratio signals quality issues." icon="🏷" />
           </div>
-          <div class="chart-row-full">
-            <ChartCard ref="chartRefs[3]" chart-id="chart-issues-by-status" title="Issues by Status"
-              description="How many issues are in each status stage? Each color represents a different issue type." icon="📊" />
-          </div>
         </section>
 
         <!-- Section 2: Delivery Pace -->
@@ -114,7 +110,6 @@ const CHART_META = [
   { key: 'treemap',         containerId: 'chart-treemap' },
   { key: 'pbis_created',    containerId: 'chart-pbis-created' },
   { key: 'type_issue',      containerId: 'chart-type-issue' },
-  { key: 'issues_by_status', containerId: 'chart-issues-by-status' },
   { key: 'pbis_done',       containerId: 'chart-pbis-done' },
   { key: 'story_points',    containerId: 'chart-story-points' },
   { key: 'timeline',        containerId: 'chart-timeline' },
@@ -168,10 +163,6 @@ const CHART_LAYOUT_OVERRIDES = {
   pbis_created: { margin: { b: 40 } },
   pbis_done:    { margin: { b: 40 } },
   type_issue:   { margin: { b: 40 } },
-  issues_by_status: { 
-    margin: { b: 60 },
-    xaxis: { tickangle: -30, automargin: true },
-  },
   distribution: {
     xaxis: { tickformat: '%b %Y', tickangle: -30 },
   },
