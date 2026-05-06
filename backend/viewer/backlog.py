@@ -295,9 +295,12 @@ class Backlog:
         return fig.to_json()
 
     def draw_timeline_size(self) -> str:
+        logger.info("=== draw_timeline_size START ===")
         # Filter to completed issues (have a date in the done step column)
         done_data = self.treemap_data[self.treemap_data[self.done_step].notna()].copy()
+        logger.info(f"Filtered {len(done_data)} completed issues from {len(self.treemap_data)} total")
         if done_data.empty:
+            logger.info(f"No data — No issues have {self.done_step} date assigned")
             return go.Figure(
                 layout={"title": f"No data — No issues have {self.done_step} date assigned"}
             ).to_json()

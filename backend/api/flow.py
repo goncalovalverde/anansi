@@ -36,5 +36,7 @@ def get_flow(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
         try:
             raw[name] = method()
         except Exception as exc:
+            import logging
+            logging.error(f"Error in {name}: {exc}", exc_info=True)
             raw[name] = go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json()
     return {k: json.loads(v) for k, v in raw.items()}
