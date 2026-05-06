@@ -79,12 +79,11 @@ a:hover { color: var(--accent-hover); }
   position: fixed;
   top: 0; left: 0;
   width: 56px; height: 100vh;
-  background: var(--color-bg);
+  background: var(--color-neutral);
   display: flex; flex-direction: column;
   align-items: center;
   padding: 12px 0;
   z-index: 100;
-  border-right: 1px solid #e0e0e0;
 }
 .sidebar-logo {
   display: flex; flex-direction: column;
@@ -98,12 +97,12 @@ a:hover { color: var(--accent-hover); }
   font-size: 0.45rem;
   font-weight: 800;
   letter-spacing: 0.15em;
-  color: var(--color-neutral);
+  color: rgba(255,255,255,0.9);
   text-transform: uppercase;
 }
 .sidebar-divider {
   width: 32px; border: none;
-  border-top: 1px solid rgba(44, 62, 80, 0.15);
+  border-top: 1px solid rgba(255,255,255,0.15);
   margin: 0 0 8px 0;
 }
 .sidebar-nav {
@@ -123,7 +122,7 @@ a:hover { color: var(--accent-hover); }
   border-radius: 8px;
   border: none; background: none;
   cursor: pointer;
-  color: rgba(44, 62, 80, 0.55);
+  color: rgba(255,255,255,0.55);
   text-decoration: none;
   gap: 2px;
   transition: all 0.15s ease;
@@ -132,8 +131,8 @@ a:hover { color: var(--accent-hover); }
   max-width: 100%;
 }
 .sidebar-item:hover {
-  color: var(--color-primary);
-  background: rgba(0, 123, 133, 0.08);
+  color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.08);
 }
 .sidebar-item.active, .sidebar-item.router-link-active {
   background: var(--color-primary);
