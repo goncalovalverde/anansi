@@ -1,5 +1,26 @@
 # Docker Setup for Anansi
 
+## Quick Start
+
+### With Docker Compose (Easiest)
+```bash
+docker-compose up -d
+```
+
+### With Docker Run (Named Volume)
+```bash
+docker volume create anansi-data
+docker run -d --name anansi -p 9000:9000 -v anansi-data:/app/data anansi:latest
+```
+
+### With Docker Run (Host Directory)
+```bash
+mkdir -p ./data
+docker run -d --name anansi -p 9000:9000 -v $(pwd)/data:/app/data anansi:latest
+```
+
+---
+
 ## Building Locally
 
 ```bash
@@ -20,13 +41,15 @@ This automatically:
 - Sets up health checks
 - Auto-restarts on failure
 
-### Option 2: Using Docker CLI
+### Option 2: Using Docker CLI with Named Volume
 
+**Step 1: Create the volume**
 ```bash
-# Create a named volume for the database
 docker volume create anansi-data
+```
 
-# Run the container with volume mount
+**Step 2: Run the container**
+```bash
 docker run -d \
   --name anansi \
   -p 9000:9000 \
@@ -34,13 +57,30 @@ docker run -d \
   anansi:latest
 ```
 
-### Option 3: Using Host Directory Volume
-
+**View logs:**
 ```bash
-# Create a data directory
-mkdir -p ./data
+docker logs anansi
+```
 
-# Run with host directory mount
+**Stop the container:**
+```bash
+docker stop anansi
+```
+
+**Remove the container (but keep volume):**
+```bash
+docker rm anansi
+```
+
+### Option 3: Using Docker CLI with Host Directory Volume
+
+**Step 1: Create data directory**
+```bash
+mkdir -p ./data
+```
+
+**Step 2: Run the container**
+```bash
 docker run -d \
   --name anansi \
   -p 9000:9000 \
@@ -48,7 +88,45 @@ docker run -d \
   anansi:latest
 ```
 
-The dashboard will be available at `http://localhost:9000`
+**Advantages:**
+- Database stored in local `./data` directory
+- Easy to backup: `tar czf backup.tar.gz data/`
+- Easy to see files: `ls -la data/`
+- Git can ignore with `.gitignore` entry: `echo "data/" >> .gitignore`
+
+### Option 4: Using GitHub Container Registry Image
+
+**Pull the latest image:**
+```bash
+docker pull ghcr.io/goncalovalverde/anansi:latest
+```
+
+**Run with named volume:**
+```bash
+docker volume create anansi-data
+docker run -d \
+  --name anansi \
+  -p 9000:9000 \
+  -v anansi-data:/app/data \
+  ghcr.io/goncalovalverde/anansi:latest
+```
+
+**Run with host directory:**
+```bash
+mkdir -p ./data
+docker run -d \
+  --name anansi \
+  -p 9000:9000 \
+  -v $(pwd)/data:/app/data \
+  ghcr.io/goncalovalverde/anansi:latest
+```
+
+## Access the Dashboard
+
+Once running, open your browser:
+```
+http://localhost:9000
+```
 
 ## Volume Management
 
