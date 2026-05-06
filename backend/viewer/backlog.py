@@ -305,6 +305,8 @@ class Backlog:
         # Log epic distribution for debugging
         epic_counts = done_data["Epic Name"].value_counts()
         logger.info(f"Timeline size: {len(done_data)} completed issues, epics: {epic_counts.to_dict()}")
+        logger.info(f"Columns in done_data: {done_data.columns.tolist()}")
+        logger.info(f"Sample Cycle Time values: {done_data['Cycle Time'].head().tolist()}")
         
         fig = px.scatter(
             done_data,
@@ -314,15 +316,16 @@ class Backlog:
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
             hover_name="Summary",
-            hover_data={"Cycle Time": True, self.done_step: False, "Epic Name": False},
+            hover_data=["Cycle Time"],
             title="When things were done and how big",
         )
-        # Build hover template without f-string to avoid escaping issues
+        # Build hover template using customdata[0] for Cycle Time
         hover = ("<b>%{hovertext}</b><br>" +
                  self.done_step + ": %{x|%Y-%m-%d}<br>" +
                  "Cycle Time: %{customdata[0]} days<br>" +
                  "Epic: %{y}<extra></extra>")
         fig.update_traces(hovertemplate=hover)
+        logger.info(f"Figure customdata: {fig.data[0].customdata[:3] if len(fig.data) > 0 and hasattr(fig.data[0], 'customdata') else 'None'}")
         return fig.to_json()
 
     # ------------------------------------------------------------------ #
