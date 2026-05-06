@@ -302,8 +302,9 @@ class Backlog:
                 layout={"title": f"No data — No issues have {self.done_step} date assigned"}
             ).to_json()
         
-        logger.info(f"Timeline size - Cycle Time stats: min={done_data['Cycle Time'].min()}, max={done_data['Cycle Time'].max()}, mean={done_data['Cycle Time'].mean()}")
-        logger.info(f"Sample cycle times: {done_data['Cycle Time'].head(10).tolist()}")
+        print(f"\n>>> Timeline size - Cycle Time stats: min={done_data['Cycle Time'].min()}, max={done_data['Cycle Time'].max()}, mean={done_data['Cycle Time'].mean()}")
+        print(f">>> Sample cycle times: {done_data['Cycle Time'].head(10).tolist()}")
+        print(f">>> Total rows: {len(done_data)}")
         
         # Create text column for hover 
         done_data = done_data.copy()
