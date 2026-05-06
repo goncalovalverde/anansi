@@ -302,9 +302,9 @@ class Backlog:
                 layout={"title": f"No data — No issues have {self.done_step} date assigned"}
             ).to_json()
         
-        # Create text column for hover (can't use customdata with size parameter)
+        # Create text column for hover 
         done_data = done_data.copy()
-        done_data["_hover_text"] = "Cycle Time: " + done_data["Cycle Time"].astype(str) + " days"
+        done_data["_hover_text"] = "Cycle Time: " + done_data["Cycle Time"].astype(int).astype(str) + " days"
         
         fig = px.scatter(
             done_data,
@@ -314,14 +314,14 @@ class Backlog:
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
             hover_name="Summary",
-            hover_data={"_hover_text": True, self.done_step: False, "Epic Name": False, "Cycle Time": False},
+            hover_data=["_hover_text"],
             title="When things were done and how big",
         )
         
-        # Build custom hover template
+        # Build custom hover template using only the formatted text
         hover = ("<b>%{hovertext}</b><br>" +
                  self.done_step + ": %{x|%Y-%m-%d}<br>" +
-                 "%{customdata}<br>" +
+                 "%{customdata[0]}<br>" +
                  "Epic: %{y}<extra></extra>")
         fig.update_traces(hovertemplate=hover)
         return fig.to_json()
