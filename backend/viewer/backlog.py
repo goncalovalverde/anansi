@@ -302,8 +302,6 @@ class Backlog:
                 layout={"title": f"No data — No issues have {self.done_step} date assigned"}
             ).to_json()
         
-        print(f"\n>>> Timeline size - Cycle Time stats: min={done_data['Cycle Time'].min()}, max={done_data['Cycle Time'].max()}, mean={done_data['Cycle Time'].mean()}")
-        
         # Create text column for hover 
         done_data = done_data.copy()
         done_data["_hover_text"] = "Cycle Time: " + done_data["Cycle Time"].astype(int).astype(str) + " days"
@@ -312,7 +310,6 @@ class Backlog:
             done_data,
             x=self.done_step,
             y="Epic Name",
-            size="Cycle Time",
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
             hover_name="Summary",
@@ -320,18 +317,28 @@ class Backlog:
             title="When things were done and how big",
         )
         
-        # Manually scale sizes - Plotly scatter doesn't scale well with categorical Y-axis
-        # Normalize Cycle Time to 5-50 range for marker sizes
+        # Manually scale sizes - normalize Cycle Time to 5-50 range
         min_ct = done_data["Cycle Time"].min()
         max_ct = done_data["Cycle Time"].max()
-        sizes = 5 + 45 * (done_data["Cycle Time"] - min_ct) / (max_ct - min_ct) if max_ct > min_ct else [15] * len(done_data)
+        if max_ct > min_ct:
+            sizes = (5 + 45 * (done_data["Cycle Time"] - min_ct) / (max_ct - min_ct)).tolist()
+        else:
+            sizes = [15] * len(done_data)
+        
+        print(f"\n>>> Sizes (first 10): {sizes[:10]}")
+        print(f">>> Min size: {min(sizes)}, Max size: {max(sizes)}")
         
         # Build custom hover template
         hover = ("<b>%{hovertext}</b><br>" +
                  self.done_step + ": %{x|%Y-%m-%d}<br>" +
                  "%{customdata[0]}<br>" +
                  "Epic: %{y}<extra></extra>")
-        fig.update_traces(hovertemplate=hover, marker=dict(size=sizes))
+        fig.update_traces(hovertemplate=hover)
+        
+        # Update marker sizes for all traces
+        for trace in fig.data:
+            trace.marker.size = sizes
+        
         return fig.to_json()
 
     # ------------------------------------------------------------------ #
