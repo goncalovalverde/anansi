@@ -70,15 +70,11 @@
             <p class="chart-section-desc">Measure how long work takes from start to finish and identify bottlenecks or outliers slowing delivery.</p>
           </div>
           <div class="chart-row-full">
-            <ChartCard ref="chartRefs[6]" chart-id="chart-timeline" title="Item Timeline (Gantt)"
-              description="Each bar is one issue — from 'In Progress' to 'Done'. Long bars indicate slow-moving items." icon="📅" />
-          </div>
-          <div class="chart-row-full">
-            <ChartCard ref="chartRefs[7]" chart-id="chart-distribution" title="Done vs In-Progress Date Spread"
+            <ChartCard ref="chartRefs[6]" chart-id="chart-distribution" title="Done vs In-Progress Date Spread"
               description="When did items transition? Clusters indicate sprint endings; gaps may reveal blocked periods." icon="📈" />
           </div>
           <div class="chart-row-full">
-            <ChartCard ref="chartRefs[8]" chart-id="chart-timeline-size" title="Delivery Size Over Time"
+            <ChartCard ref="chartRefs[7]" chart-id="chart-timeline-size" title="Delivery Size Over Time"
               description="Bubble size = cycle time in days. Large bubbles done recently may indicate items that dragged on." icon="⏱" />
           </div>
         </section>
@@ -112,7 +108,6 @@ const CHART_META = [
   { key: 'type_issue',      containerId: 'chart-type-issue' },
   { key: 'pbis_done',       containerId: 'chart-pbis-done' },
   { key: 'story_points',    containerId: 'chart-story-points' },
-  { key: 'timeline',        containerId: 'chart-timeline' },
   { key: 'distribution',    containerId: 'chart-distribution' },
   { key: 'timeline_size',   containerId: 'chart-timeline-size' },
 ]
@@ -165,9 +160,6 @@ const CHART_LAYOUT_OVERRIDES = {
   type_issue:   { margin: { b: 40 } },
   distribution: {
     xaxis: { tickformat: '%b %Y', tickangle: -30 },
-  },
-  timeline: {
-    yaxis: { automargin: true },
   },
   timeline_size: {
     xaxis: { tickformat: '%b %Y', tickangle: -30, title: { text: 'Completion date' } },

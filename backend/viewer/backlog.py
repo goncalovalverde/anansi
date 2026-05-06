@@ -198,42 +198,6 @@ class Backlog:
         )
         return fig.to_json()
 
-    def draw_timeline(self) -> str:
-        x_start = self.in_progress_step if self.in_progress_step in self.treemap_data.columns else "Created"
-        
-        # Log what we're looking for
-        logger.info(f"Timeline: x_start={x_start}, done_step={self.done_step}")
-        logger.info(f"  Columns available: {list(self.treemap_data.columns)}")
-        logger.info(f"  {x_start} not null: {self.treemap_data[x_start].notna().sum()}")
-        logger.info(f"  {self.done_step} not null: {self.treemap_data[self.done_step].notna().sum()}")
-        
-        data = self.treemap_data.dropna(subset=[x_start, self.done_step]).copy()
-        
-        logger.info(f"  After dropna: {len(data)} rows")
-        
-        if data.empty:
-            return go.Figure(
-                layout={"title": f"No completed items (need '{x_start}' and '{self.done_step}' dates)"}
-            ).to_json()
-        
-        if "Cycle Time" in data.columns and len(data) > 20:
-            data = data.nlargest(20, "Cycle Time")
-            subtitle = "Showing 20 slowest items by cycle time"
-        else:
-            subtitle = f"Showing all {len(data)} items"
-        
-        fig = px.timeline(
-            data,
-            x_start=x_start,
-            x_end=self.done_step,
-            y="Summary",
-            color="Epic Name",
-            color_discrete_sequence=ANANSI_COLORS,
-            title=subtitle if subtitle else None,
-        )
-        fig.update_layout(yaxis={"visible": True, "automargin": True})
-        return fig.to_json()
-
     def draw_type_issue(self) -> str:
         fig = px.histogram(
             self.treemap_data,
@@ -300,7 +264,6 @@ class Backlog:
             "pbis_done": lambda: self.draw_issues_histogram(self.done_step),
             "pbis_created": lambda: self.draw_issues_histogram("Created"),
             "story_points": self.draw_story_points,
-            "timeline": self.draw_timeline,
             "type_issue": self.draw_type_issue,
             "timeline_size": self.draw_timeline_size,
         }
@@ -466,9 +429,9 @@ class Backlog:
                 max_ct = int(max_row["Cycle Time"])
                 if max_ct > 60:
                     name = str(max_row.get("Summary", "An item"))[:50]
-                    callouts["timeline"] = {"message": f"{name} has been in progress for {max_ct} days", "severity": "alert"}
+                    callouts["timeline_size"] = {"message": f"{name} has been in progress for {max_ct} days", "severity": "alert"}
                 elif avg_ct > 30:
-                    callouts["timeline"] = {"message": f"Average item age is {round(avg_ct)} days - consider breaking work into smaller pieces", "severity": "warn"}
+                    callouts["timeline_size"] = {"message": f"Average item age is {round(avg_ct)} days - consider breaking work into smaller pieces", "severity": "warn"}
 
         # timeline_size - outliers (> 3x average)
         if "Cycle Time" in df.columns:
