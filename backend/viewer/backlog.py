@@ -668,6 +668,15 @@ class Backlog:
     # ------------------------------------------------------------------ #
 
     def get_treemap_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Filter to configured issue types to track
+        configured_types = self.config.get("issue_type", [])
+        if configured_types and "Total" in configured_types:
+            # Remove "Total" (it's just a label) and filter to the rest
+            filtered_types = [t for t in configured_types if t != "Total"]
+            if filtered_types:
+                df = df[df["Type"].isin(filtered_types)].copy()
+                logger.info(f"Filtered to tracked types: {filtered_types}, {len(df)} issues remaining")
+        
         non_epics = df.query('Type != "Epic"')
         epics = df.query('Type == "Epic"')
         epics = epics.rename(columns={"Key": "Epic Key", "Summary": "Epic Name"})
