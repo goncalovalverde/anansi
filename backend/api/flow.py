@@ -27,7 +27,6 @@ def get_flow(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
         "flow_efficiency": backlog.draw_flow_efficiency,
         "wip_trend": backlog.draw_wip_trend,
         "throughput": backlog.draw_throughput,
-        "timeline": backlog.draw_timeline,
         "distribution": backlog.draw_distribution,
         "timeline_size": backlog.draw_timeline_size,
     }
