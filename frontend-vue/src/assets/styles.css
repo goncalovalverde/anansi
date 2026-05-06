@@ -396,6 +396,9 @@ main { padding: 2rem 0; }
 }
 .chart-row-full .chart-card-body { height: 420px; }
 .chart-row-third .chart-card-body { height: 220px; }
+
+/* Increase height for issues_by_status to accommodate all 23 Status-Type combinations */
+#chart-issues-by-status { height: 700px !important; }
 .chart-callout {
   font-size: 0.78rem;
   color: var(--text-muted);
