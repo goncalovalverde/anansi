@@ -324,6 +324,7 @@ class Backlog:
                  "%{customdata[0]}<br>" +
                  "Epic: %{y}<extra></extra>")
         fig.update_traces(hovertemplate=hover)
+        fig.update_layout(showlegend=False)
         return fig.to_json()
 
     # ------------------------------------------------------------------ #
