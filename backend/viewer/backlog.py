@@ -320,7 +320,7 @@ class Backlog:
             hover_name="Summary",
             hover_data=["_hover_text"],
             title="When things were done and how big",
-            size_max=60,
+            size_max=40,
         )
         
         # Build custom hover template using only the formatted text
@@ -328,7 +328,7 @@ class Backlog:
                  self.done_step + ": %{x|%Y-%m-%d}<br>" +
                  "%{customdata[0]}<br>" +
                  "Epic: %{y}<extra></extra>")
-        fig.update_traces(hovertemplate=hover)
+        fig.update_traces(hovertemplate=hover, marker=dict(sizemode='diameter'))
         return fig.to_json()
 
     # ------------------------------------------------------------------ #
