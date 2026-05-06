@@ -163,26 +163,42 @@ class Backlog:
             return go.Figure(
                 layout={"title": "story_points unavailable: No story points data"}
             ).to_json()
-        fig = px.bar(
-            agg,
-            x="Epic Name",
-            y=sp_col,
-            color="Epic Name",
-            color_discrete_sequence=ANANSI_COLORS,
+        
+        # Convert to dict to avoid numpy serialization issues
+        agg_dict = agg.to_dict(orient="records")
+        
+        fig = go.Figure()
+        for i, row in enumerate(agg_dict):
+            fig.add_trace(go.Bar(
+                x=[row["Epic Name"]],
+                y=[row[sp_col]],
+                name=row["Epic Name"],
+                marker=dict(color=ANANSI_COLORS[i % len(ANANSI_COLORS)]),
+                legendgroup=row["Epic Name"],
+                showlegend=True,
+            ))
+        
+        fig.update_layout(
+            xaxis=dict(type="category", tickangle=-30, automargin=True, showticklabels=False),
+            barmode="relative",
         )
-        fig.update_layout(xaxis=dict(type="category", tickangle=-30, automargin=True))
         return fig.to_json()
 
     def draw_timeline(self) -> str:
         x_start = self.in_progress_step if self.in_progress_step in self.treemap_data.columns else "Created"
         data = self.treemap_data.dropna(subset=[x_start, self.done_step]).copy()
+        
+        if data.empty:
+            return go.Figure(
+                layout={"title": f"No completed items (need '{self.done_step}' dates - check Workflow settings)"}
+            ).to_json()
+        
         if "Cycle Time" in data.columns and len(data) > 20:
             data = data.nlargest(20, "Cycle Time")
             subtitle = "Showing 20 slowest items by cycle time"
         else:
             subtitle = ""
-        if data.empty:
-            return go.Figure(layout={"title": "No completed items"}).to_json()
+        
         fig = px.timeline(
             data,
             x_start=x_start,
@@ -205,11 +221,59 @@ class Backlog:
         )
         return fig.to_json()
 
+    def draw_issues_by_status(self) -> str:
+        """Stacked bar chart: count of issues per status, stacked by issue type, ordered by workflow."""
+        df = self.treemap_data.copy()
+        if df.empty or "Status" not in df.columns or "Type" not in df.columns:
+            return go.Figure(
+                layout={"title": "No data — Status and Type columns required"}
+            ).to_json()
+        
+        # Drop rows where Status is NaN to get actual issue counts
+        df = df.dropna(subset=["Status"])
+        if df.empty:
+            return go.Figure(
+                layout={"title": "No data — No issues with Status assigned"}
+            ).to_json()
+        
+        # Group by status and type, count issues
+        grouped = df.groupby(["Status", "Type"], as_index=False).size()
+        grouped.columns = ["Status", "Type", "Count"]
+        
+        if grouped.empty:
+            return go.Figure(
+                layout={"title": "No data available"}
+            ).to_json()
+        
+        # Order statuses by workflow configuration
+        workflow = self.config.get("Workflow", [])
+        status_order = workflow if workflow else sorted(grouped["Status"].unique())
+        
+        # Create categorical type for proper ordering
+        grouped["Status"] = pd.Categorical(grouped["Status"], categories=status_order, ordered=True)
+        grouped = grouped.sort_values("Status")
+        
+        # Create stacked bar chart
+        fig = px.bar(
+            grouped,
+            x="Status",
+            y="Count",
+            color="Type",
+            color_discrete_sequence=ANANSI_COLORS,
+            title="Issues by Status",
+            barmode="stack",
+        )
+        fig.update_layout(
+            xaxis=dict(type="category", tickangle=-30, automargin=True),
+            yaxis=dict(title="Count"),
+        )
+        return fig.to_json()
+
     def draw_timeline_size(self) -> str:
         done_data = self.treemap_data[self.treemap_data["Status"] == self.done_step]
         if done_data.empty:
             return go.Figure(
-                layout={"title": f"No completed items — Status must be '{self.done_step}' to appear here"}
+                layout={"title": f"No data — Status must be '{self.done_step}' to appear here (check Workflow settings)"}
             ).to_json()
         fig = px.scatter(
             done_data,
@@ -236,6 +300,7 @@ class Backlog:
             "story_points": self.draw_story_points,
             "timeline": self.draw_timeline,
             "type_issue": self.draw_type_issue,
+            "issues_by_status": self.draw_issues_by_status,
             "timeline_size": self.draw_timeline_size,
         }
         results = {}

@@ -35,6 +35,20 @@ def load_data(
             jira_reader.validate_auth_config(reader_config["jira"])
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc))
+        
+        # Validate JQL query is not empty
+        if not reader_config["jira"]["jql_query"].strip():
+            raise HTTPException(
+                status_code=400, 
+                detail="JQL query is required. Please enter a query in Settings (e.g., 'project = PNC' or leave empty for all issues with a trailing space)."
+            )
+    
+    elif source == "csv":
+        if not reader_config["input"]["csv_file"].strip():
+            raise HTTPException(
+                status_code=400,
+                detail="CSV file path is required. Please enter a file path in Settings."
+            )
 
     config_hash = data_service.compute_config_hash(db)
     existing_id = data_service.find_valid_dataset(db, config_hash)

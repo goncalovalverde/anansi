@@ -112,6 +112,7 @@ def load_dataframe(db: sqlite3.Connection, dataset_id: str) -> DataFrame:
 
 
 def load_data_task(dataset_id: str, db_path: str) -> None:
+    logger.info(f"=== STARTING load_data_task for {dataset_id} ===")
     conn = database.get_db(db_path)
     try:
         update_dataset_status(conn, dataset_id, "loading")
@@ -120,7 +121,10 @@ def load_data_task(dataset_id: str, db_path: str) -> None:
             update_dataset_progress(conn, dataset_id, loaded, total)
 
         reader_config = config_service.build_reader_config(conn)
+        logger.info(f"Reader config: {reader_config}")
         df = reader.read_data(reader_config, db_path, progress_callback=progress_callback)
+        logger.info(f"DataFrame columns: {df.columns.tolist()}")
+        logger.info(f"Story Points column non-null count: {df['Story Points'].notna().sum()}")
         save_dataframe(conn, dataset_id, df)
         update_dataset_status(conn, dataset_id, "ready")
         logger.info("Dataset %s loaded successfully (%d rows)", dataset_id, len(df))
