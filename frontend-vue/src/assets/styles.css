@@ -91,7 +91,7 @@ a:hover { color: var(--accent-hover); }
   padding-bottom: 10px;
   width: 100%;
 }
-.sidebar-logo .logo-spider { width: 28px; height: 28px; }
+.sidebar-logo .logo-image { width: 32px; height: 32px; object-fit: contain; }
 .sidebar-wordmark {
   font-family: 'Raleway', 'Inter', sans-serif;
   font-size: 0.45rem;
