@@ -303,8 +303,6 @@ class Backlog:
             ).to_json()
         
         print(f"\n>>> Timeline size - Cycle Time stats: min={done_data['Cycle Time'].min()}, max={done_data['Cycle Time'].max()}, mean={done_data['Cycle Time'].mean()}")
-        print(f">>> Sample cycle times: {done_data['Cycle Time'].head(10).tolist()}")
-        print(f">>> Total rows: {len(done_data)}")
         
         # Create text column for hover 
         done_data = done_data.copy()
@@ -320,15 +318,20 @@ class Backlog:
             hover_name="Summary",
             hover_data=["_hover_text"],
             title="When things were done and how big",
-            size_max=40,
         )
         
-        # Build custom hover template using only the formatted text
+        # Manually scale sizes - Plotly scatter doesn't scale well with categorical Y-axis
+        # Normalize Cycle Time to 5-50 range for marker sizes
+        min_ct = done_data["Cycle Time"].min()
+        max_ct = done_data["Cycle Time"].max()
+        sizes = 5 + 45 * (done_data["Cycle Time"] - min_ct) / (max_ct - min_ct) if max_ct > min_ct else [15] * len(done_data)
+        
+        # Build custom hover template
         hover = ("<b>%{hovertext}</b><br>" +
                  self.done_step + ": %{x|%Y-%m-%d}<br>" +
                  "%{customdata[0]}<br>" +
                  "Epic: %{y}<extra></extra>")
-        fig.update_traces(hovertemplate=hover, marker=dict(sizemode='diameter'))
+        fig.update_traces(hovertemplate=hover, marker=dict(size=sizes))
         return fig.to_json()
 
     # ------------------------------------------------------------------ #
