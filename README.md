@@ -28,11 +28,13 @@ cd frontend-vue && npm install && npm run build && cd ..
 
 ## Running
 
+### Local Development
+
 ```bash
 ./start.sh
 ```
 
-This installs Python dependencies, builds the frontend (first run only), and starts the backend. Alternatively, run manually:
+This installs Python dependencies, builds the frontend (first run only), and starts the backend on port 8000. Alternatively, run manually:
 
 ```bash
 cd backend
@@ -42,6 +44,37 @@ uvicorn main:app --reload --port 8000
 Then open **http://localhost:8000** in your browser.
 
 > **Rebuild the frontend** after any frontend changes: `cd frontend-vue && npm run build`
+
+### Docker
+
+Build and run with Docker on port 9000:
+
+**Option 1: Docker Compose (Recommended)**
+```bash
+docker-compose up -d
+```
+
+**Option 2: Docker Run with Named Volume**
+```bash
+docker volume create anansi-data
+docker run -d --name anansi -p 9000:9000 -v anansi-data:/app/data anansi:latest
+```
+
+**Option 3: Docker Run with Host Directory**
+```bash
+mkdir -p ./data
+docker run -d --name anansi -p 9000:9000 -v $(pwd)/data:/app/data anansi:latest
+```
+
+**Option 4: From GitHub Container Registry**
+```bash
+docker pull ghcr.io/goncalovalverde/anansi:latest
+docker run -d --name anansi -p 9000:9000 -v anansi-data:/app/data ghcr.io/goncalovalverde/anansi:latest
+```
+
+Then open **http://localhost:9000** in your browser.
+
+See [DOCKER.md](DOCKER.md) for detailed setup, volume management, and backup procedures.
 
 ### Environment variables
 
