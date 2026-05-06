@@ -88,12 +88,8 @@ a:hover { color: var(--accent-hover); }
 .sidebar-logo {
   display: flex; flex-direction: column;
   align-items: center; gap: 4px;
-  padding: 8px;
-  width: calc(100% - 16px);
-  margin: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 10px;
+  width: 100%;
 }
 .sidebar-logo .logo-image { width: 36px; height: 36px; object-fit: contain; }
 .sidebar-wordmark {
