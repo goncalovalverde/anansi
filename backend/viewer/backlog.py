@@ -273,11 +273,17 @@ class Backlog:
         return fig.to_json()
 
     def draw_timeline_size(self) -> str:
-        done_data = self.treemap_data[self.treemap_data["Status"] == self.done_step]
+        # Filter to completed issues (have a date in the done step column)
+        done_data = self.treemap_data[self.treemap_data[self.done_step].notna()].copy()
         if done_data.empty:
             return go.Figure(
-                layout={"title": f"No data — Status must be '{self.done_step}' to appear here (check Workflow settings)"}
+                layout={"title": f"No data — No issues have {self.done_step} date assigned"}
             ).to_json()
+        
+        # Log epic distribution for debugging
+        epic_counts = done_data["Epic Name"].value_counts()
+        logger.info(f"Timeline size: {len(done_data)} completed issues, epics: {epic_counts.to_dict()}")
+        
         fig = px.scatter(
             done_data,
             x=self.done_step,
@@ -644,9 +650,16 @@ class Backlog:
         epics = df.query('Type == "Epic"')
         epics = epics.rename(columns={"Key": "Epic Key", "Summary": "Epic Name"})
 
+        logger.info(f"Data load: {len(non_epics)} non-epics, {len(epics)} epics")
+        
         # Convert "No Epic" to NaN so merge treats it as missing instead of a literal key
         non_epics = non_epics.copy()
+        original_no_epic = (non_epics["Epic Link"] == "No Epic").sum()
         non_epics.loc[non_epics["Epic Link"] == "No Epic", "Epic Link"] = None
+        
+        # Check which non-epics have an Epic Link value
+        has_epic_link = non_epics["Epic Link"].notna().sum()
+        logger.info(f"Epic Links: {has_epic_link} issues linked to epics, {original_no_epic} with 'No Epic'")
 
         merged = pd.merge(
             non_epics,
@@ -655,6 +668,7 @@ class Backlog:
             right_on="Epic Key",
             how="left",
         )
+        
         # When Epic issues are in the dataset their Summary becomes the Epic Name.
         # When they are not fetched (e.g. JQL filters to Stories/Bugs/Tasks only),
         # fall back to the raw Epic Link key so grouping still works meaningfully
@@ -664,6 +678,9 @@ class Backlog:
             .fillna(merged.get("Epic Link"))
             .fillna("No Epic")
         )
+        
+        epic_dist = merged["Epic Name"].value_counts()
+        logger.info(f"Epic distribution after merge: {epic_dist.to_dict()}")
 
         jira_url = self.config.get("jira", {}).get("url", "")
         merged["Key"] = merged["Key"].apply(
