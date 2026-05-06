@@ -79,9 +79,14 @@ class Backlog:
             return go.Figure(
                 layout={"title": f"No completed items — need '{self.done_step}' dates"}
             ).to_json()
+        
+        # Add a count column (each row is 1 issue)
+        done_data["Count"] = 1
+        
         fig = px.treemap(
             done_data,
             path=["Epic Name", "Type", "Composed"],
+            values="Count",
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
         )
@@ -100,6 +105,10 @@ class Backlog:
         if df.empty:
             return go.Figure(layout={"title": "No data available"}).to_json()
         df["Progress"] = df["Status"].apply(self._normalize_status)
+        
+        # Add a count column (each row is 1 issue)
+        df["Count"] = 1
+        
         color_map = {
             "Done":        ANANSI_COLORS[0],
             "In Progress": ANANSI_COLORS[1],
@@ -108,6 +117,7 @@ class Backlog:
         fig = px.treemap(
             df,
             path=["Epic Name", "Type", "Composed"],
+            values="Count",
             color="Progress",
             color_discrete_map=color_map,
         )
