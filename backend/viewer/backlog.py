@@ -641,7 +641,8 @@ class Backlog:
         done_col = self.done_step
         if done_col not in df.columns:
             return go.Figure(layout={"title": "epic_progress unavailable: No done date"}).to_json()
-        done_data = df[df["Status"] == done_col].copy()
+        # Filter to issues with a done_step date (completed items)
+        done_data = df[df[done_col].notna()].copy()
         epic_groups = done_data.groupby("Epic Name")[done_col]
         epic_first = epic_groups.min().dropna()
         epic_last = epic_groups.max().dropna()
