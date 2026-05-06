@@ -316,6 +316,7 @@ class Backlog:
             hover_name="Summary",
             hover_data=["_hover_text"],
             title="When things were done and how big",
+            size_max=60,
         )
         
         # Build custom hover template using only the formatted text
