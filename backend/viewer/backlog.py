@@ -229,15 +229,18 @@ class Backlog:
                 layout={"title": "No data — Status and Type columns required"}
             ).to_json()
         
+        total_issues = len(df)
         # Drop rows where Status is NaN to get actual issue counts
-        df = df.dropna(subset=["Status"])
-        if df.empty:
+        df_with_status = df.dropna(subset=["Status"])
+        issues_with_status = len(df_with_status)
+        
+        if df_with_status.empty:
             return go.Figure(
-                layout={"title": "No data — No issues with Status assigned"}
+                layout={"title": f"No data — {total_issues} issues found but none have Status assigned"}
             ).to_json()
         
         # Group by status and type, count issues
-        grouped = df.groupby(["Status", "Type"], as_index=False).size()
+        grouped = df_with_status.groupby(["Status", "Type"], as_index=False).size()
         grouped.columns = ["Status", "Type", "Count"]
         
         if grouped.empty:
@@ -260,7 +263,7 @@ class Backlog:
             y="Count",
             color="Type",
             color_discrete_sequence=ANANSI_COLORS,
-            title="Issues by Status",
+            title=f"Issues by Status ({issues_with_status}/{total_issues} with Status)",
             barmode="stack",
         )
         fig.update_layout(
