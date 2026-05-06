@@ -89,9 +89,12 @@ class Backlog:
             values="Count",
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
+            hover_name="Composed",
+            hover_data={"Count": True, "Epic Name": False, "Type": False, "Composed": False},
         )
         fig.update_traces(
-            hovertemplate="%{label}<br>Count: %{value}<extra></extra>",
+            textinfo="label+value+percent parent",
+            hovertemplate="<b>%{label}</b><br>Count: %{customdata[0]}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
             marker_line_color="#F9F9F7",
@@ -119,9 +122,12 @@ class Backlog:
             values="Count",
             color="Progress",
             color_discrete_map=color_map,
+            hover_name="Composed",
+            hover_data={"Count": True, "Epic Name": False, "Type": False, "Composed": False, "Progress": False},
         )
         fig.update_traces(
-            hovertemplate="%{label}<br>Count: %{value}<extra></extra>",
+            textinfo="label+value+percent parent",
+            hovertemplate="<b>%{label}</b><br>Count: %{customdata[0]}<extra></extra>",
             textfont_size=11,
             marker_line_width=2,
             marker_line_color="#F9F9F7",
