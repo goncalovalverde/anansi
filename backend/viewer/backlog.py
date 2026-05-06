@@ -644,6 +644,10 @@ class Backlog:
         epics = df.query('Type == "Epic"')
         epics = epics.rename(columns={"Key": "Epic Key", "Summary": "Epic Name"})
 
+        # Convert "No Epic" to NaN so merge treats it as missing instead of a literal key
+        non_epics = non_epics.copy()
+        non_epics.loc[non_epics["Epic Link"] == "No Epic", "Epic Link"] = None
+
         merged = pd.merge(
             non_epics,
             epics[["Epic Key", "Epic Name"]],
