@@ -317,12 +317,12 @@ class Backlog:
             hover_data={"Cycle Time": True, self.done_step: False, "Epic Name": False},
             title="When things were done and how big",
         )
-        fig.update_traces(
-            hovertemplate="<b>%{hovertext}</b><br>" +
-                         f"{self.done_step}: %{{x|%Y-%m-%d}}<br>" +
-                         "Cycle Time: %{customdata[0]} days<br>" +
-                         "Epic: %{y}<extra></extra>"
-        )
+        # Build hover template without f-string to avoid escaping issues
+        hover = ("<b>%{hovertext}</b><br>" +
+                 self.done_step + ": %{x|%Y-%m-%d}<br>" +
+                 "Cycle Time: %{customdata[0]} days<br>" +
+                 "Epic: %{y}<extra></extra>")
+        fig.update_traces(hovertemplate=hover)
         return fig.to_json()
 
     # ------------------------------------------------------------------ #
