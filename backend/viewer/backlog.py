@@ -248,11 +248,6 @@ class Backlog:
         """Stacked bar chart: count of issues per status, stacked by issue type, ordered by workflow."""
         df = self.raw_data.copy()
         print(f"\n>>> draw_issues_by_status: raw_data has {len(df)} rows")
-        print(f">>> Columns: {list(df.columns)}")
-        if "Status" in df.columns:
-            print(f">>> Status value counts: {df['Status'].value_counts().to_dict()}")
-        if "Type" in df.columns:
-            print(f">>> Type value counts: {df['Type'].value_counts().to_dict()}")
         
         if df.empty or "Status" not in df.columns or "Type" not in df.columns:
             return go.Figure(
@@ -264,6 +259,8 @@ class Backlog:
         df_with_status = df.dropna(subset=["Status"])
         issues_with_status = len(df_with_status)
         
+        print(f">>> Total issues: {total_issues}, Issues with Status: {issues_with_status}")
+        
         if df_with_status.empty:
             return go.Figure(
                 layout={"title": f"No data — {total_issues} issues found but none have Status assigned"}
@@ -273,6 +270,9 @@ class Backlog:
         grouped = df_with_status.groupby(["Status", "Type"], as_index=False).size()
         grouped.columns = ["Status", "Type", "Count"]
         
+        print(f">>> Grouped dataframe ({len(grouped)} rows):\n{grouped.to_string()}")
+        print(f">>> Total in grouped: {grouped['Count'].sum()}")
+        
         if grouped.empty:
             return go.Figure(
                 layout={"title": "No data available"}
@@ -281,6 +281,8 @@ class Backlog:
         # Order statuses by workflow configuration
         workflow = self.config.get("Workflow", [])
         status_order = workflow if workflow else sorted(grouped["Status"].unique())
+        
+        print(f">>> Workflow: {workflow}, Status order: {status_order}")
         
         # Create categorical type for proper ordering
         grouped["Status"] = pd.Categorical(grouped["Status"], categories=status_order, ordered=True)
