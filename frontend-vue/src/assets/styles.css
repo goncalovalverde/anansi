@@ -1076,26 +1076,12 @@ details.advanced-settings .advanced-content {
   font-size: 0.78rem;
   color: var(--text-muted);
   white-space: nowrap;
+  display: none;
 }
 .date-range-btns {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
+  display: none;
 }
-.date-range-btn {
-  background: var(--bg-input);
-  border: none;
-  border-right: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  padding: 0.3rem 0.65rem;
-  cursor: pointer;
-  transition: all var(--transition);
-}
-.date-range-btn:last-child { border-right: none; }
-.date-range-btn:hover { background: var(--accent-light); color: var(--accent); }
-.date-range-btn.active { background: var(--accent); color: #fff; }
+
 
 /* ── KPI trend colours ── */
 .kpi-trend-improving { border-color: var(--success) !important; }
