@@ -168,7 +168,10 @@ const CHART_LAYOUT_OVERRIDES = {
   pbis_created: { margin: { b: 40 } },
   pbis_done:    { margin: { b: 40 } },
   type_issue:   { margin: { b: 40 } },
-  issues_by_status: { margin: { b: 40 } },
+  issues_by_status: { 
+    margin: { b: 60 },
+    xaxis: { tickangle: -30, automargin: true },
+  },
   distribution: {
     xaxis: { tickformat: '%b %Y', tickangle: -30 },
   },
