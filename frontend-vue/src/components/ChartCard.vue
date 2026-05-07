@@ -7,6 +7,7 @@
       </div>
       <slot name="controls" />
       <div class="chart-actions">
+        <slot name="actions" />
         <button class="chart-action-btn" @click="toggleMaximize" :aria-label="`Maximize ${title}`" title="Maximize">⛶</button>
         <button class="chart-export-btn" @click="exportPng" :aria-label="`Export ${title} as PNG`" title="Export PNG">⬇</button>
       </div>

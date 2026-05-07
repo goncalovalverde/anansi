@@ -30,7 +30,7 @@
               :description="treemapShowAll ? 'All issues grouped by Epic — green = Done, orange = In Progress, dark = To Do.' : 'What has been shipped? Drill into each Epic to see completed Stories and Bugs.'"
               icon="🗺"
             >
-              <template #controls>
+              <template #actions>
                 <button class="btn btn-secondary btn-sm" @click="toggleTreemap">
                   {{ treemapShowAll ? 'Completed only' : 'All work' }}
                 </button>

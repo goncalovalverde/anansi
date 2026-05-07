@@ -814,6 +814,7 @@ main { padding: 2rem 0; }
   display: flex;
   gap: 0.25rem;
   margin-left: auto;
+  align-items: center;
 }
 
 .chart-action-btn {
@@ -829,6 +830,14 @@ main { padding: 2rem 0; }
 }
 .chart-card:hover .chart-action-btn { opacity: 1; }
 .chart-action-btn:hover { color: var(--accent); background: var(--accent-light); }
+
+/* Buttons in chart-actions appear on hover */
+.chart-actions .btn {
+  opacity: 0;
+}
+.chart-card:hover .chart-actions .btn {
+  opacity: 1;
+}
 
 /* Modal buttons always visible */
 .chart-modal-actions .chart-action-btn {
