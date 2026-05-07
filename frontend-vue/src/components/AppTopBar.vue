@@ -42,7 +42,7 @@ const pageTitle = computed(() => {
 const lastLoadedLabel = computed(() => {
   if (!store.lastLoadedTs) return ''
   const d = new Date(store.lastLoadedTs)
-  return `Last loaded: ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${d.toLocaleDateString()}`
+  return `Last loaded: ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} ${d.toLocaleDateString('en-GB')}`
 })
 
 function refresh() {
