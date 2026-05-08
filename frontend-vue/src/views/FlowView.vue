@@ -15,7 +15,8 @@
         <div v-if="loading" class="flow-loading">Loading flow charts...</div>
         <div v-else-if="error" class="flow-error">{{ error }}</div>
 
-        <div v-show="store.flowCharts">
+        <!-- Only show charts when not loading and no error -->
+        <div v-if="!loading && !error && store.flowCharts">
           <section class="chart-section" aria-labelledby="section-flow-metrics">
             <div class="chart-section-header">
               <h2 class="chart-section-title" id="section-flow-metrics">Flow Metrics</h2>
@@ -24,7 +25,7 @@
             <div class="chart-row-third">
               <ChartCard chart-id="chart-flow-efficiency" title="Flow Efficiency" description="Ratio of completed items to all active items - higher is better." icon="⚡" />
               <ChartCard chart-id="chart-flow-wip" title="WIP Trend" description="Items in progress each week. Spikes indicate bottlenecks." icon="📈" />
-              <ChartCard chart-id="chart-flow-throughput" title="Weekly Throughput" description="Items completed per week with 4-week rolling average." icon="🚀" />
+              <ChartCard chart-id="chart-flow-throughput" title="Weekly throughput" description="Items completed per week. Teal bars are normal weeks, gold are above average, dark bars are below. Dotted line is the 4-week rolling average." icon="🚀" />
             </div>
           </section>
 
@@ -61,7 +62,7 @@ const error = ref(null)
 const CHART_META = [
   { key: 'flow_efficiency', containerId: 'chart-flow-efficiency' },
   { key: 'wip_trend',       containerId: 'chart-flow-wip' },
-  { key: 'throughput',      containerId: 'chart-flow-throughput' },
+  { key: 'throughput_histogram', containerId: 'chart-flow-throughput' },
   { key: 'distribution',    containerId: 'chart-flow-distribution' },
   { key: 'timeline_size',   containerId: 'chart-flow-timeline-size' },
 ]
@@ -97,7 +98,18 @@ function renderCharts(charts) {
     }
 
     plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
-    if (calloutEl) calloutEl.style.display = 'none'
+
+    // Apply backend-computed callout for this chart
+    const backendCallout = charts.callouts?.[key]
+    if (calloutEl) {
+      if (backendCallout?.message) {
+        calloutEl.className = `chart-callout ${backendCallout.severity || ''}`
+        calloutEl.textContent = backendCallout.message
+        calloutEl.style.display = 'block'
+      } else {
+        calloutEl.style.display = 'none'
+      }
+    }
   }
 }
 
@@ -108,7 +120,7 @@ async function fetchAndRender() {
   try {
     const charts = await Api.getFlow(store.datasetId)
     store.setFlowCharts(charts)
-    scheduleRender(charts)
+    // The watcher on store.flowCharts will trigger renderCharts — no explicit call needed
   } catch (err) {
     error.value = `Failed to load flow charts: ${err.message}`
   } finally {
@@ -116,8 +128,17 @@ async function fetchAndRender() {
   }
 }
 
+// Re-render when store data changes (set by fetchAndRender or pre-loaded from cache)
 watch(() => store.flowCharts, (charts) => {
   if (charts) scheduleRender(charts)
+})
+
+// Invalidate and re-fetch when dataset changes
+watch(() => store.datasetId, (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    store.clearFlowCharts()
+    fetchAndRender()
+  }
 })
 
 onMounted(() => {

@@ -45,6 +45,14 @@
             <ChartCard ref="chartRefs[2]" chart-id="chart-type-issue" title="Work Mix by Type"
               description="What proportion is Stories vs Bugs vs Tasks? A high bug ratio signals quality issues." icon="🏷" />
           </div>
+          <div class="chart-row-full">
+            <ChartCard chart-id="chart-epic-investment" title="Epic investment - scope vs effort"
+              description="Left panel shows item count per epic, right shows story points. If an epic looks small on the left but large on the right, its items are unexpectedly complex." icon="📊" />
+          </div>
+          <div class="chart-row-full">
+            <ChartCard chart-id="chart-aging-heatmap" title="Backlog aging heatmap"
+              description="Active items only - not yet Done. Dark red cells mean many old items sitting in that epic. Use this to find where work is piling up and stalling." icon="🔥" />
+          </div>
         </section>
 
         <!-- Section 2: Delivery Pace -->
@@ -106,6 +114,8 @@ const CHART_META = [
   { key: 'treemap',         containerId: 'chart-treemap' },
   { key: 'pbis_created',    containerId: 'chart-pbis-created' },
   { key: 'type_issue',      containerId: 'chart-type-issue' },
+  { key: 'epic_investment', containerId: 'chart-epic-investment' },
+  { key: 'aging_heatmap',    containerId: 'chart-aging-heatmap' },
   { key: 'pbis_done',       containerId: 'chart-pbis-done' },
   { key: 'story_points',    containerId: 'chart-story-points' },
   { key: 'distribution',    containerId: 'chart-distribution' },
@@ -151,6 +161,12 @@ function toggleTreemap() {
 // Static per-chart layout overrides, merged over applyTheme defaults at render time.
 // The right margin (r) is computed dynamically from trace name lengths — see legendRightMargin().
 const CHART_LAYOUT_OVERRIDES = {
+  aging_heatmap: {
+    margin: { l: 120, r: 80, t: 48, b: 16 },
+  },
+  epic_investment: {
+    margin: { t: 40, r: 16, b: 8, l: 16 },
+  },
   story_points: {
     margin:  { b: 40 },
     xaxis:   { type: 'category', tickangle: -30, automargin: true },
@@ -224,6 +240,11 @@ function renderCharts(charts) {
     if (overrides.yaxis) layout.yaxis = { ...layout.yaxis, ...overrides.yaxis }
 
     plotChart(el, fig.data || [], layout, PLOTLY_CONFIG)
+
+    // Special handling: aging_heatmap needs dynamic height based on epic count
+    if (key === 'aging_heatmap' && layout.height) {
+      el.style.minHeight = Math.max(240, layout.height) + 'px'
+    }
 
     const callout = (store.callouts || {})[key]
     if (calloutEl) {

@@ -535,6 +535,10 @@ main { padding: 2rem 0; }
   display: inline-block;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 /* Workflow item (updated for new layout) */
 .workflow-item-name { flex: 1; font-size: 0.875rem; }

@@ -1,15 +1,22 @@
+import json
 import logging
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
 import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+from datetime import datetime
+from typing import Optional, Dict, List
+
+from viewer.backlog_data import BacklogData
+from viewer.chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap  # re-exported for callers
+from viewer.chart_helpers import _create_empty_state_figure               # re-exported for callers
+from viewer.backlog_charts import BacklogChartsMixin
+from viewer.flow_charts import FlowChartsMixin
+from viewer.trend_charts import TrendChartsMixin
 
 logger = logging.getLogger(__name__)
 
-ANANSI_COLORS = ['#007B85', '#F5A623', '#D35400', '#2C3E50', '#5DADE2', '#A569BD', '#52BE80']
 
-
-class Backlog:
+class Backlog(BacklogChartsMixin, FlowChartsMixin, TrendChartsMixin):
     def __init__(self, cycle_data: pd.DataFrame, config: dict):
         self.cycle_data = cycle_data
         self.config = config
@@ -31,6 +38,27 @@ class Backlog:
                 raw_in_prog, self.in_progress_step,
             )
 
+        # Guard: in_progress_step must not equal done_step (e.g. 2-step workflow
+        # where workflow[1] == done step). Re-resolve against common names then
+        # the first non-done workflow column.
+        if self.in_progress_step == self.done_step:
+            fallback = None
+            for candidate in ("In Progress", "In Development", "In Dev", "Doing", "Active"):
+                if candidate in cycle_data.columns and candidate != self.done_step:
+                    fallback = candidate
+                    break
+            if fallback is None:
+                for step in workflow:
+                    if step in cycle_data.columns and step != self.done_step:
+                        fallback = step
+                        break
+            if fallback:
+                logger.warning(
+                    "in_progress_step resolved to done_step '%s'. Using '%s' instead.",
+                    self.done_step, fallback,
+                )
+                self.in_progress_step = fallback
+
         self.link_ref = (
             '<a href="{}browse/{}" style="cursor:pointer" '
             'target="_blank" rel="noopener noreferrer">{}</a>'
@@ -38,6 +66,13 @@ class Backlog:
         self.raw_data = cycle_data.copy()  # Store raw unfiltered data for charts like issues_by_status
         self.treemap_data = self.get_treemap_data(cycle_data)
         self.treemap_data = self.calculate_cycle_time(self.treemap_data)
+
+        self.data = BacklogData.from_cycle_data(self.treemap_data, self.done_step)
+
+        # Convenience aliases — chart methods access these directly; no refactor needed.
+        self._done_df = self.data.done_df
+        self._active_df = self.data.active_df
+        self._ct_df = self.data.ct_df
 
     @staticmethod
     def _resolve_step(df: pd.DataFrame, preferred: str, workflow: list, reversed_order: bool) -> str:
@@ -60,7 +95,7 @@ class Backlog:
         return preferred  # give up — charts will surface their own error
 
     # ------------------------------------------------------------------ #
-    #  Chart methods — each returns a Plotly JSON string                   #
+    #  Status classification (used by mixin chart methods via self)        #
     # ------------------------------------------------------------------ #
 
     def _normalize_status(self, status: str) -> str:
@@ -72,226 +107,74 @@ class Backlog:
             return "In Progress"
         return "To Do"
 
-    def draw_treemap(self) -> str:
-        """Treemap of completed work only, coloured by Epic."""
-        # Filter to issues with a done_step date (completed items)
-        done_data = self.treemap_data[self.treemap_data[self.done_step].notna()].copy()
-        if done_data.empty:
-            return go.Figure(
-                layout={"title": f"No completed items — need '{self.done_step}' dates"}
-            ).to_json()
-        
-        # Add a count column (each row is 1 issue)
-        done_data["Count"] = 1
-        
-        fig = px.treemap(
-            done_data,
-            path=["Epic Name", "Type", "Composed"],
-            values="Count",
-            color="Epic Name",
-            color_discrete_sequence=ANANSI_COLORS,
-            hover_name="Composed",
-            hover_data={"Count": True, "Epic Name": False, "Type": False, "Composed": False},
-        )
-        fig.update_traces(
-            textinfo="label+value+percent parent",
-            hovertemplate="<b>%{label}</b><br>Count: %{customdata[0]}<extra></extra>",
-            textfont_size=11,
-            marker_line_width=2,
-            marker_line_color="#F9F9F7",
-        )
-        return fig.to_json()
-
-    def draw_treemap_all(self) -> str:
-        """Treemap of all work, coloured by normalized status bucket."""
-        df = self.treemap_data.copy()
-        if df.empty:
-            return go.Figure(layout={"title": "No data available"}).to_json()
-        df["Progress"] = df["Status"].apply(self._normalize_status)
-        
-        # Add a count column (each row is 1 issue)
-        df["Count"] = 1
-        
-        color_map = {
-            "Done":        ANANSI_COLORS[0],
-            "In Progress": ANANSI_COLORS[1],
-            "To Do":       ANANSI_COLORS[3],
-        }
-        fig = px.treemap(
-            df,
-            path=["Epic Name", "Type", "Composed"],
-            values="Count",
-            color="Progress",
-            color_discrete_map=color_map,
-            hover_name="Composed",
-            hover_data={"Count": True, "Epic Name": False, "Type": False, "Composed": False, "Progress": False},
-        )
-        fig.update_traces(
-            textinfo="label+value+percent parent",
-            hovertemplate="<b>%{label}</b><br>Count: %{customdata[0]}<extra></extra>",
-            textfont_size=11,
-            marker_line_width=2,
-            marker_line_color="#F9F9F7",
-        )
-        return fig.to_json()
-
-    def draw_distribution(self) -> str:
-        date_cols = [c for c in [self.done_step, self.in_progress_step] if c in self.treemap_data.columns]
-        df = self.treemap_data[["Epic Name"] + date_cols].copy()
-        long = df.melt(id_vars="Epic Name", value_vars=date_cols, var_name="Stage", value_name="Date")
-        long = long.dropna(subset=["Date"])
-        color_map = {
-            self.done_step: ANANSI_COLORS[0],
-            self.in_progress_step: ANANSI_COLORS[1],
-        }
-        fig = px.scatter(
-            long, x="Date", y="Epic Name", color="Stage",
-            color_discrete_map=color_map,
-            title=f"{self.done_step} and {self.in_progress_step} dates",
-        )
-        return fig.to_json()
-
-    def draw_issues_histogram(self, date_column: str) -> str:
-        df = self.treemap_data.dropna(subset=[date_column])
-        if df.empty:
-            return go.Figure(layout={"title": f"No data for {date_column}"}).to_json()
-        fig = px.histogram(
-            df,
-            x=date_column,
-            title=f"{date_column} PBI's per Epic",
-            color="Epic Name",
-            color_discrete_sequence=ANANSI_COLORS,
-        )
-        return fig.to_json()
-
-    def draw_story_points(self) -> str:
-        sp_col = "Story Points"
-        if sp_col not in self.treemap_data.columns:
-            return go.Figure(
-                layout={"title": "story_points unavailable: Story Points column missing"}
-            ).to_json()
-        df = self.treemap_data.copy()
-        df[sp_col] = pd.to_numeric(df[sp_col], errors="coerce").fillna(0)
-        agg = df.groupby("Epic Name", as_index=False)[sp_col].sum()
-        if agg[sp_col].sum() == 0:
-            return go.Figure(
-                layout={"title": "story_points unavailable: No story points data"}
-            ).to_json()
-        
-        # Convert to dict to avoid numpy serialization issues
-        agg_dict = agg.to_dict(orient="records")
-        
-        fig = go.Figure()
-        for i, row in enumerate(agg_dict):
-            fig.add_trace(go.Bar(
-                x=[row["Epic Name"]],
-                y=[row[sp_col]],
-                name=row["Epic Name"],
-                marker=dict(color=ANANSI_COLORS[i % len(ANANSI_COLORS)]),
-                legendgroup=row["Epic Name"],
-                showlegend=True,
-            ))
-        
-        fig.update_layout(
-            xaxis=dict(type="category", tickangle=-30, automargin=True, showticklabels=False),
-            barmode="relative",
-        )
-        return fig.to_json()
-
-    def draw_type_issue(self) -> str:
-        fig = px.histogram(
-            self.treemap_data,
-            x="Type",
-            title="Type of issue",
-            color="Epic Name",
-            color_discrete_sequence=ANANSI_COLORS,
-        )
-        return fig.to_json()
-
-    def draw_timeline_size(self) -> str:
-        # Filter to completed issues (have a date in the done step column)
-        done_data = self.treemap_data[self.treemap_data[self.done_step].notna()].copy()
-        if done_data.empty:
-            return go.Figure(
-                layout={"title": f"No data — No issues have {self.done_step} date assigned"}
-            ).to_json()
-        
-        # Create text column for hover 
-        done_data = done_data.copy()
-        done_data["_hover_text"] = "Cycle Time: " + done_data["Cycle Time"].astype(int).astype(str) + " days"
-        
-        fig = px.scatter(
-            done_data,
-            x=self.done_step,
-            y="Epic Name",
-            color="Epic Name",
-            color_discrete_sequence=ANANSI_COLORS,
-            hover_name="Summary",
-            hover_data=["_hover_text"],
-            title="When things were done and how big",
-        )
-        
-        # Manually scale sizes - normalize Cycle Time to 5-50 range
-        min_ct = done_data["Cycle Time"].min()
-        max_ct = done_data["Cycle Time"].max()
-        if max_ct > min_ct:
-            sizes = (5 + 45 * (done_data["Cycle Time"] - min_ct) / (max_ct - min_ct)).tolist()
-        else:
-            sizes = [15] * len(done_data)
-        
-        # Build custom hover template
-        hover = ("<b>%{hovertext}</b><br>" +
-                 self.done_step + ": %{x|%Y-%m-%d}<br>" +
-                 "%{customdata[0]}<br>" +
-                 "Epic: %{y}<extra></extra>")
-        fig.update_traces(hovertemplate=hover)
-        
-        # Update marker sizes for all traces
-        for trace in fig.data:
-            trace.marker.size = sizes
-        
-        return fig.to_json()
-
     # ------------------------------------------------------------------ #
     #  Aggregate helper                                                    #
     # ------------------------------------------------------------------ #
 
     def get_all_charts(self) -> dict:
+        """Generate all dashboard charts. Returns a dict of parsed Plotly dicts
+        (not JSON strings) so the API layer avoids a redundant encode/decode."""
         chart_methods = {
-            "treemap":     self.draw_treemap,
-            "treemap_all": self.draw_treemap_all,
-            "distribution": self.draw_distribution,
-            "pbis_done": lambda: self.draw_issues_histogram(self.done_step),
-            "pbis_created": lambda: self.draw_issues_histogram("Created"),
-            "story_points": self.draw_story_points,
-            "type_issue": self.draw_type_issue,
-            "timeline_size": self.draw_timeline_size,
+            "treemap":        self.draw_treemap,
+            "treemap_all":    self.draw_treemap_all,
+            "distribution":   self.draw_distribution,
+            "pbis_done":      lambda: self.draw_issues_histogram(self.done_step),
+            "pbis_created":   lambda: self.draw_issues_histogram("Created"),
+            "story_points":   self.draw_story_points,
+            "type_issue":     self.draw_type_issue,
+            "timeline_size":  self.draw_timeline_size,
+            "aging_heatmap":  self.draw_aging_heatmap,
+            "epic_investment": self.draw_epic_investment,
         }
         results = {}
         for name, method in chart_methods.items():
             try:
-                results[name] = method()
+                results[name] = json.loads(method())
             except Exception as exc:
                 logger.exception("Chart '%s' failed: %s", name, exc)
-                results[name] = go.Figure(
-                    layout={"title": f"{name} unavailable: {exc}"}
-                ).to_json()
+                results[name] = json.loads(
+                    go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json()
+                )
+        return results
+
+    def get_flow_charts(self) -> dict:
+        """Generate all Flow tab charts. Returns parsed Plotly dicts."""
+        flow_methods = {
+            "flow_efficiency":      self.draw_flow_efficiency,
+            "wip_trend":            self.draw_wip_trend,
+            "throughput_histogram": self.draw_throughput_histogram,
+            "distribution":         self.draw_distribution,
+            "timeline_size":        self.draw_timeline_size,
+        }
+        results = {}
+        for name, method in flow_methods.items():
+            try:
+                results[name] = json.loads(method())
+            except Exception as exc:
+                logger.error("Chart '%s' failed: %s", name, exc, exc_info=True)
+                results[name] = json.loads(
+                    go.Figure(layout={"title": f"{name} unavailable"}).to_json()
+                )
         return results
 
     def get_kpis(self) -> dict:
         df = self.treemap_data
         total = len(df)
-        done_col = self.done_step
         in_progress_col = self.in_progress_step
 
-        done_count = int(df[done_col].notna().sum()) if done_col in df.columns else 0
-        in_progress_count = int(df[in_progress_col].notna().sum()) if in_progress_col in df.columns else 0
+        done_count = len(self._done_df)
+        if "Status" in df.columns:
+            in_progress_count = int(
+                (df["Status"].apply(self._normalize_status) == "In Progress").sum()
+            )
+        else:
+            in_progress_count = int(df[in_progress_col].notna().sum()) if in_progress_col in df.columns else 0
 
         avg_cycle = 0.0
         cycle_trend = "neutral"
-        if "Cycle Time" in df.columns and done_col in df.columns:
-            ct_df = df[[done_col, "Cycle Time"]].dropna()
-            ct_df = ct_df[ct_df["Cycle Time"] > 0]
+        ct_df = self._ct_df
+        if not ct_df.empty:
+            done_col = self.done_step
             if len(ct_df) >= 4:
                 median_date = ct_df[done_col].median()
                 first_half = ct_df[ct_df[done_col] <= median_date]["Cycle Time"]
@@ -305,7 +188,7 @@ class Backlog:
                         cycle_trend = "worsening"
                     else:
                         cycle_trend = "stable"
-            elif len(ct_df) > 0:
+            else:
                 avg_cycle = round(float(ct_df["Cycle Time"].mean()), 1)
 
         return {
@@ -318,55 +201,50 @@ class Backlog:
 
     def get_insights(self) -> list:
         df = self.treemap_data
-        done_col = self.done_step
         in_prog_col = self.in_progress_step
         insights = []
 
-        # 1. Completed count check
-        done_count = int(df[done_col].notna().sum()) if done_col in df.columns else 0
+        # 1. Completed count check — use pre-computed _done_df
+        done_count = len(self._done_df)
         if done_count == 0:
             insights.append({"type": "alert", "message": "No items marked Done - delivery may be stalled"})
-        elif done_count > 0:
+        else:
             insights.append({"type": "ok", "message": f"{done_count} items completed this period"})
 
         # 2. WIP check
         in_prog = int(df[in_prog_col].notna().sum()) if in_prog_col in df.columns else 0
-        if in_prog > 100:
+        if in_prog > ChartConfig.WIP_HIGH_THRESHOLD:
             insights.append({"type": "alert", "message": f"High WIP - {in_prog} items active simultaneously"})
-        elif in_prog > 50:
+        elif in_prog > ChartConfig.WIP_ELEVATED_THRESHOLD:
             insights.append({"type": "warn", "message": f"WIP is elevated ({in_prog} items) - consider limiting parallel work"})
 
-        # 3. Cycle time check
-        if "Cycle Time" in df.columns and done_count > 0:
-            ct = df["Cycle Time"].dropna()
-            ct = ct[ct > 0]
-            if len(ct) > 0:
-                avg = round(float(ct.mean()), 1)
-                if avg > 30:
-                    insights.append({"type": "warn", "message": f"Average cycle time is {avg} days - items are taking over a month to complete"})
-                elif avg <= 10:
-                    insights.append({"type": "ok", "message": f"Cycle time is healthy at {avg} days on average"})
+        # 3. Cycle time check — use pre-computed _ct_df (done + valid cycle time)
+        if not self._ct_df.empty:
+            avg = round(float(self._ct_df["Cycle Time"].mean()), 1)
+            if avg > ChartConfig.CYCLE_TIME_HIGH_DAYS:
+                insights.append({"type": "warn", "message": f"Average cycle time is {avg} days - items are taking over a month to complete"})
+            elif avg <= ChartConfig.CYCLE_TIME_HEALTHY_DAYS:
+                insights.append({"type": "ok", "message": f"Cycle time is healthy at {avg} days on average"})
 
         # 4. Bug ratio check
-        bug_types = {"bug", "defect"}
         if "Type" in df.columns:
             total = len(df)
-            bugs = df["Type"].str.lower().isin(bug_types).sum()
+            bugs = df["Type"].str.lower().isin({"bug", "defect"}).sum()
             if total > 0:
                 ratio = round(bugs / total * 100, 1)
-                if ratio > 30:
+                if ratio > ChartConfig.BUG_RATIO_HIGH_PCT:
                     insights.append({"type": "alert", "message": f"Bug ratio is {ratio}% - quality issues may be affecting delivery"})
-                elif ratio > 15:
+                elif ratio > ChartConfig.BUG_RATIO_ELEVATED_PCT:
                     insights.append({"type": "warn", "message": f"Bug ratio is {ratio}% - worth monitoring"})
 
-        # 5. Backlog growth (created dates)
+        # 5. Backlog growth — use pre-computed _active_df for current backlog
         if "Created" in df.columns:
             created = df["Created"].dropna()
             if len(created) > 0:
                 mid = created.median()
                 first_half = (created <= mid).sum()
                 second_half = (created > mid).sum()
-                if first_half > 0 and second_half > first_half * 1.2:
+                if first_half > 0 and second_half > first_half * ChartConfig.BACKLOG_GROWTH_RATIO:
                     pct = round((second_half - first_half) / first_half * 100)
                     insights.append({"type": "warn", "message": f"Backlog grew {pct}% this period - more is being added than completed"})
                 elif second_half < first_half:
@@ -379,11 +257,12 @@ class Backlog:
 
     def get_callouts(self) -> dict:
         df = self.treemap_data
-        done_col = self.done_step
         callouts = {}
+        done_data = self._done_df
+        active_df = self._active_df
+        ct_df = self._ct_df
 
         # treemap
-        done_data = df[df["Status"] == done_col]
         if done_data.empty:
             callouts["treemap"] = {"message": "No completed work to display - items may not be reaching Done status", "severity": "alert"}
         else:
@@ -392,8 +271,7 @@ class Backlog:
                 callouts["treemap"] = {"message": "Only 1 epic has completed items - are other epics blocked or not yet started?", "severity": "warn"}
 
         # pbis_done
-        done_count = int(df[done_col].notna().sum()) if done_col in df.columns else 0
-        if done_count == 0:
+        if done_data.empty:
             callouts["pbis_done"] = {"message": "No items completed in this period", "severity": "alert"}
 
         # story_points
@@ -405,7 +283,7 @@ class Backlog:
             total_sp = by_epic.sum()
             if total_sp > 0:
                 top_pct = by_epic.max() / total_sp
-                if top_pct > 0.6:
+                if top_pct > ChartConfig.CALLOUT_EPIC_CONCENTRATION_PCT:
                     callouts["story_points"] = {"message": "One epic is consuming most delivery capacity - other areas may be under-resourced", "severity": "warn"}
 
         # type_issue - bug ratio
@@ -415,187 +293,138 @@ class Backlog:
             bugs = df["Type"].str.lower().isin(bug_types).sum()
             if total > 0:
                 ratio = round(bugs / total * 100, 1)
-                if ratio > 25:
+                if ratio > ChartConfig.CALLOUT_BUG_RATIO_HIGH_PCT:
                     callouts["type_issue"] = {"message": f"High defect ratio ({ratio}%) - more than 1 in 4 items is a bug or defect", "severity": "alert"}
                 elif bugs == 0:
                     callouts["type_issue"] = {"message": "No bugs or defects in this period", "severity": "ok"}
 
-        # timeline - slowest item
-        if "Cycle Time" in df.columns and done_col in df.columns:
-            ct_df = df[df[done_col].notna() & df["Cycle Time"].notna() & (df["Cycle Time"] > 0)]
-            if not ct_df.empty:
-                avg_ct = ct_df["Cycle Time"].mean()
-                max_row = ct_df.loc[ct_df["Cycle Time"].idxmax()]
-                max_ct = int(max_row["Cycle Time"])
-                if max_ct > 60:
-                    name = str(max_row.get("Summary", "An item"))[:50]
-                    callouts["timeline_size"] = {"message": f"{name} has been in progress for {max_ct} days", "severity": "alert"}
-                elif avg_ct > 30:
-                    callouts["timeline_size"] = {"message": f"Average item age is {round(avg_ct)} days - consider breaking work into smaller pieces", "severity": "warn"}
-
-        # timeline_size - outliers (> 3x average)
-        if "Cycle Time" in df.columns:
-            ct_vals = df["Cycle Time"].dropna()
-            ct_vals = ct_vals[ct_vals > 0]
-            if len(ct_vals) > 0:
-                avg_ct = ct_vals.mean()
-                outliers = (ct_vals > 3 * avg_ct).sum()
+        # timeline - use pre-computed ct_df
+        if not ct_df.empty:
+            avg_ct = ct_df["Cycle Time"].mean()
+            max_row = ct_df.loc[ct_df["Cycle Time"].idxmax()]
+            max_ct = int(max_row["Cycle Time"])
+            if max_ct > ChartConfig.CALLOUT_CYCLE_TIME_ALERT_DAYS:
+                name = str(max_row.get("Summary", "An item"))[:50]
+                callouts["timeline_size"] = {"message": f"{name} has been in progress for {max_ct} days", "severity": "alert"}
+            elif avg_ct > ChartConfig.CALLOUT_CYCLE_TIME_WARN_DAYS:
+                callouts["timeline_size"] = {"message": f"Average item age is {round(avg_ct)} days - consider breaking work into smaller pieces", "severity": "warn"}
+            else:
+                outliers = (ct_df["Cycle Time"] > ChartConfig.CALLOUT_OUTLIER_CT_MULTIPLIER * avg_ct).sum()
                 if outliers > 0:
-                    callouts["timeline_size"] = {"message": f"{outliers} item{'s' if outliers > 1 else ''} took more than 3 times the average to complete", "severity": "warn"}
+                    label = "items" if outliers > 1 else "item"
+                    callouts["timeline_size"] = {"message": f"{outliers} {label} took more than {ChartConfig.CALLOUT_OUTLIER_CT_MULTIPLIER}x the average to complete", "severity": "warn"}
+
+        # aging_heatmap - use pre-computed active_df
+        if not active_df.empty and "Created" in active_df.columns:
+            today = pd.Timestamp(datetime.now().date())
+            created = pd.to_datetime(active_df["Created"], errors="coerce")
+            age_days = (today - created).dt.days.fillna(0)
+
+            old_counts = active_df[age_days >= ChartConfig.AGING_CRITICAL_DAYS].groupby("Epic Name").size()
+            if not old_counts.empty:
+                worst_epic = old_counts.idxmax()
+                worst_count = int(old_counts[worst_epic])
+                if worst_count > ChartConfig.AGING_CRITICAL_COUNT:
+                    callouts["aging_heatmap"] = {"message": f"{worst_epic} has {worst_count} items older than {ChartConfig.AGING_CRITICAL_DAYS} days - these may be blocked or forgotten", "severity": "alert"}
+                else:
+                    month_mask = (age_days >= ChartConfig.AGING_WARNING_DAYS) & (age_days < ChartConfig.AGING_CRITICAL_DAYS)
+                    month_total = int(month_mask.sum())
+                    if month_total > ChartConfig.AGING_WARNING_COUNT:
+                        callouts["aging_heatmap"] = {"message": f"{month_total} items are between {ChartConfig.AGING_WARNING_DAYS}-{ChartConfig.AGING_CRITICAL_DAYS} days old - review before they become critical", "severity": "warn"}
+                    else:
+                        callouts["aging_heatmap"] = {"message": "Backlog age is healthy - no major stale item clusters detected", "severity": "ok"}
+
+        # epic_investment
+        epic_groups = df.groupby("Epic Name").agg({
+            "Key": "count",
+            "Story Points": lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum(),
+        }).reset_index()
+        epic_groups.columns = ["Epic", "ItemCount", "StoryPoints"]
+        epic_groups = epic_groups[epic_groups["ItemCount"] > 0]
+
+        if not epic_groups.empty:
+            has_story_points = epic_groups["StoryPoints"].sum() > 0
+            if not has_story_points:
+                callouts["epic_investment"] = {"message": "Story points not configured - add your Story Points Field ID in Configuration to unlock this view", "severity": "warn"}
+            else:
+                epic_groups["complexity"] = epic_groups["StoryPoints"] / epic_groups["ItemCount"]
+                high_complexity = epic_groups.loc[epic_groups["complexity"].idxmax()]
+                low_complexity = epic_groups.loc[epic_groups["complexity"].idxmin()]
+                complexity_ratio = (
+                    high_complexity["complexity"] / low_complexity["complexity"]
+                    if low_complexity["complexity"] > 0 else 0
+                )
+                if complexity_ratio > ChartConfig.COMPLEXITY_RATIO_THRESHOLD:
+                    high_name = high_complexity["Epic"]
+                    low_name = low_complexity["Epic"]
+                    high_avg = round(high_complexity["complexity"], 1)
+                    low_avg = round(low_complexity["complexity"], 1)
+                    callouts["epic_investment"] = {"message": f"{high_name} items average {high_avg} points each vs {low_avg} for {low_name} - large complexity gap between epics", "severity": "warn"}
 
         return callouts
 
-    def draw_flow_efficiency(self) -> str:
-        df = self.treemap_data
-        done_col = self.done_step
-        in_prog_col = self.in_progress_step
-        done_data = df[df["Status"] == done_col]
-        if done_data.empty or "Cycle Time" not in df.columns:
-            return go.Figure(layout={"title": "flow_efficiency unavailable: No completed items"}).to_json()
-        done_count = len(done_data)
-        in_prog_count = int(df[in_prog_col].notna().sum()) if in_prog_col in df.columns else 0
-        total = done_count + in_prog_count
-        efficiency = round(done_count / total * 100, 1) if total > 0 else 0
-        color = "#52BE80" if efficiency > 40 else ("#F5A623" if efficiency >= 20 else "#D35400")
-        fig = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=efficiency,
-            number={"suffix": "%", "font": {"size": 28}},
-            gauge={
-                "axis": {"range": [0, 100]},
-                "bar": {"color": color},
-                "steps": [
-                    {"range": [0, 20], "color": "#fdeee5"},
-                    {"range": [20, 40], "color": "#fff3dc"},
-                    {"range": [40, 100], "color": "#e8f8f0"},
-                ],
-                "threshold": {"line": {"color": "#2C3E50", "width": 2}, "thickness": 0.75, "value": efficiency},
-            },
-        ))
-        return fig.to_json()
+    def get_flow_callouts(self) -> dict:
+        """Callouts for Flow tab charts (throughput histogram).
+        Returns the same structure as get_callouts() but for flow-specific charts.
+        Keeps this logic in the backend so FlowView doesn't re-derive it from chart data.
+        """
+        callouts = {}
 
-    def draw_wip_trend(self) -> str:
-        df = self.treemap_data
-        in_prog_col = self.in_progress_step
-        done_col = self.done_step
-        if in_prog_col not in df.columns:
-            return go.Figure(layout={"title": "wip_trend unavailable: No in-progress date column"}).to_json()
-        started = df[in_prog_col].dropna()
-        if started.empty:
-            return go.Figure(layout={"title": "wip_trend unavailable: No in-progress data"}).to_json()
-        date_min = started.min()
-        date_max = max(
-            started.max(),
-            df[done_col].dropna().max() if done_col in df.columns else started.max()
-        )
-        weeks = pd.date_range(start=date_min, end=date_max, freq="W")
-        wip_counts = []
-        for week_end in weeks:
-            in_prog = df[in_prog_col].notna() & (df[in_prog_col] <= week_end)
-            if done_col in df.columns:
-                not_done = df[done_col].isna() | (df[done_col] > week_end)
-            else:
-                not_done = pd.Series([True] * len(df))
-            count = (in_prog & not_done).sum()
-            wip_counts.append({"week": week_end, "wip": int(count)})
-        wip_df = pd.DataFrame(wip_counts)
-        if wip_df.empty:
-            return go.Figure(layout={"title": "wip_trend unavailable: No data"}).to_json()
-        color = ANANSI_COLORS[2] if (len(wip_df) >= 4 and wip_df["wip"].iloc[-4:].mean() > wip_df["wip"].iloc[-8:-4].mean() * 1.2) else ANANSI_COLORS[0]
-        fig = go.Figure(go.Scatter(x=wip_df["week"], y=wip_df["wip"], mode="lines+markers", line={"color": color, "width": 2}, name="WIP"))
-        fig.update_layout(xaxis={"title": "Week"}, yaxis={"title": "Items in Progress"})
-        return fig.to_json()
+        # Use pre-computed _done_df — avoids re-filtering treemap_data
+        if self._done_df.empty:
+            callouts["throughput_histogram"] = {
+                "message": "No completed items yet - data will appear once items reach Done status",
+                "severity": "warn",
+            }
+            return callouts
 
-    def draw_throughput(self) -> str:
-        df = self.treemap_data
         done_col = self.done_step
-        if done_col not in df.columns:
-            return go.Figure(layout={"title": "throughput unavailable: No done date column"}).to_json()
-        done_dates = df[done_col].dropna()
+        done_dates = pd.to_datetime(self._done_df[done_col], errors="coerce").dropna()
         if done_dates.empty:
-            return go.Figure(layout={"title": "throughput unavailable: No completed items"}).to_json()
+            callouts["throughput_histogram"] = {
+                "message": "No completed items yet - data will appear once items reach Done status",
+                "severity": "warn",
+            }
+            return callouts
+
         weekly = done_dates.dt.to_period("W").value_counts().sort_index()
-        weeks = [str(p.start_time.date()) for p in weekly.index]
-        counts = weekly.values.tolist()
-        rolling = pd.Series(counts).rolling(4, min_periods=1).mean().round(1).tolist()
-        fig = go.Figure()
-        fig.add_trace(go.Bar(x=weeks, y=counts, name="Completed", marker_color=ANANSI_COLORS[0]))
-        fig.add_trace(go.Scatter(x=weeks, y=rolling, mode="lines", name="4-week avg", line={"color": ANANSI_COLORS[1], "width": 2, "dash": "dot"}))
-        fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
-        return fig.to_json()
+        if weekly.empty:
+            return callouts
 
-    def draw_cumulative_flow(self) -> str:
-        df = self.treemap_data
-        done_col = self.done_step
-        created_col = "Created"
-        if created_col not in df.columns:
-            return go.Figure(layout={"title": "cumulative_flow unavailable: No Created date column"}).to_json()
-        created = df[created_col].dropna()
-        done_dates = df[done_col].dropna() if done_col in df.columns else pd.Series([], dtype="datetime64[ns]")
-        if created.empty:
-            return go.Figure(layout={"title": "cumulative_flow unavailable: No date data"}).to_json()
-        date_min = created.min()
-        date_max = max(created.max(), done_dates.max() if len(done_dates) > 0 else created.max())
-        dates = pd.date_range(start=date_min, end=date_max, freq="W")
-        cum_created = [(d, int((created <= d).sum())) for d in dates]
-        cum_done = [(d, int((done_dates <= d).sum())) for d in dates] if len(done_dates) > 0 else [(d, 0) for d in dates]
-        xs = [str(d.date()) for d in dates]
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=xs, y=[c[1] for c in cum_created], mode="lines", name="Created", line={"color": ANANSI_COLORS[1], "width": 2}, fill="tonexty", fillcolor="rgba(0,123,133,0.1)"))
-        fig.add_trace(go.Scatter(x=xs, y=[c[1] for c in cum_done], mode="lines", name="Completed", line={"color": ANANSI_COLORS[0], "width": 2}))
-        fig.update_layout(xaxis={"tickformat": "%b %Y", "tickangle": -30}, yaxis={"title": "Cumulative items"})
-        return fig.to_json()
+        min_week = weekly.index.min()
+        max_week = weekly.index.max()
+        all_weeks = pd.period_range(min_week, max_week, freq="W")
+        complete_weekly = pd.Series(0, index=all_weeks)
+        complete_weekly.update(weekly)
+        counts = complete_weekly.values.tolist()
 
-    def draw_monthly_throughput(self) -> str:
-        df = self.treemap_data
-        done_col = self.done_step
-        if done_col not in df.columns:
-            return go.Figure(layout={"title": "monthly_throughput unavailable: No done date"}).to_json()
-        done_dates = df[done_col].dropna()
-        if done_dates.empty:
-            return go.Figure(layout={"title": "monthly_throughput unavailable: No completed items"}).to_json()
-        monthly = done_dates.dt.to_period("M").value_counts().sort_index()
-        xs = [str(p) for p in monthly.index]
-        ys = monthly.values.tolist()
-        x_nums = np.arange(len(ys))
-        if len(ys) >= 2:
-            m, b = np.polyfit(x_nums, ys, 1)
-            trend = [round(m * i + b, 1) for i in x_nums]
-        else:
-            trend = ys[:]
-        fig = go.Figure()
-        fig.add_trace(go.Bar(x=xs, y=ys, name="Monthly completions", marker_color=ANANSI_COLORS[0]))
-        fig.add_trace(go.Scatter(x=xs, y=trend, mode="lines", name="Trend", line={"color": ANANSI_COLORS[2], "width": 2, "dash": "dot"}))
-        fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
-        return fig.to_json()
+        non_zero = [c for c in counts if c > 0]
+        if not non_zero:
+            return callouts
 
-    def draw_epic_progress(self) -> str:
-        df = self.treemap_data
-        done_col = self.done_step
-        if done_col not in df.columns:
-            return go.Figure(layout={"title": "epic_progress unavailable: No done date"}).to_json()
-        # Filter to issues with a done_step date (completed items)
-        done_data = df[df[done_col].notna()].copy()
-        epic_groups = done_data.groupby("Epic Name")[done_col]
-        epic_first = epic_groups.min().dropna()
-        epic_last = epic_groups.max().dropna()
-        epic_count = done_data.groupby("Epic Name").size()
-        epics = sorted(set(epic_first.index) & set(epic_last.index))
-        if not epics:
-            return go.Figure(layout={"title": "epic_progress unavailable: No completed items"}).to_json()
-        epic_data = []
-        for epic in epics:
-            epic_data.append({
-                "Epic": epic,
-                "Start": epic_first[epic],
-                "End": epic_last[epic],
-                "Count": int(epic_count.get(epic, 1)),
-            })
-        epic_df = pd.DataFrame(epic_data)
-        fig = px.timeline(epic_df, x_start="Start", x_end="End", y="Epic", color="Epic",
-                          color_discrete_sequence=ANANSI_COLORS)
-        fig.update_layout(showlegend=False, yaxis={"automargin": True})
-        return fig.to_json()
+        mean = float(np.mean(non_zero))
+        stddev = float(np.std(non_zero))
+        last_four = counts[-4:] if len(counts) >= 4 else counts
+        max_ever = max(counts)
+        last_week = counts[-1]
+
+        if len(last_four) == 4 and all(c < mean for c in last_four):
+            callouts["throughput_histogram"] = {
+                "message": "Delivery has slowed over the last 4 weeks - check for blockers or holiday periods",
+                "severity": "warn",
+            }
+        elif last_week == max_ever and last_week > 0:
+            callouts["throughput_histogram"] = {
+                "message": f"Best delivery week on record - {last_week} items completed",
+                "severity": "ok",
+            }
+        elif stddev > mean:
+            callouts["throughput_histogram"] = {
+                "message": "Throughput is highly variable - hard to forecast reliably",
+                "severity": "warn",
+            }
+
+        return callouts
 
     # ------------------------------------------------------------------ #
     #  Data preparation                                                    #

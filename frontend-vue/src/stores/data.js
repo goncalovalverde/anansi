@@ -38,6 +38,7 @@ export const useDataStore = defineStore('data', {
     setProgress(loaded, total) { this.progress = { loaded, total } },
     setInsights(data) { this.insights = data },
     setFlowCharts(data) { this.flowCharts = data },
+    clearFlowCharts() { this.flowCharts = null },
     setTrendsCharts(data) { this.trendsCharts = data },
     setCharts(charts, datasetId, saveTimestamp) {
       this.charts = charts

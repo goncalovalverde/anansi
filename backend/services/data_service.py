@@ -127,6 +127,9 @@ def load_data_task(dataset_id: str, db_path: str) -> None:
         logger.info(f"Story Points column non-null count: {df['Story Points'].notna().sum()}")
         save_dataframe(conn, dataset_id, df)
         update_dataset_status(conn, dataset_id, "ready")
+        # Invalidate stale cache so the next request rebuilds with fresh data
+        from services import backlog_cache
+        backlog_cache.invalidate(dataset_id)
         logger.info("Dataset %s loaded successfully (%d rows)", dataset_id, len(df))
     except Exception as exc:
         logger.exception("Failed to load dataset %s", dataset_id)
