@@ -20,7 +20,9 @@ export const Api = {
   putIssueTypes: (types) => apiFetch('/api/config/issue-types', { method: 'PUT', ...json({ types }) }),
 
   getChartThresholds: () => apiFetch('/api/config/chart-thresholds'),
+  getChartThresholdDefaults: () => apiFetch('/api/config/chart-thresholds/defaults'),
   putChartThresholds: (d) => apiFetch('/api/config/chart-thresholds', { method: 'PUT', ...json(d) }),
+  resetChartThresholds: () => apiFetch('/api/config/chart-thresholds', { method: 'DELETE' }),
 
   testConnection:  (d) => apiFetch('/api/config/test-connection',  { method: 'POST', ...json(d || {}) }),
   getJiraStatuses: (d) => apiFetch('/api/config/jira-statuses',    { method: 'POST', ...json(d || {}) }),

@@ -1021,6 +1021,18 @@ details.advanced-settings .advanced-content {
   width: 100%;
 }
 
+/* ── Section header with action ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+.section-header .section-title {
+  margin-bottom: 0;
+}
+
 /* ── Contrast fix: WCAG AA — text-muted defined in :root above ── */
 
 /* ── Mobile chart fix ── */

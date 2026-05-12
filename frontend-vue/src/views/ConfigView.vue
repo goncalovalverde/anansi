@@ -178,13 +178,6 @@
                 </div>
               </div>
 
-              <div class="form-group">
-                <div class="checkbox-group">
-                  <input type="checkbox" id="jira_cache_enabled" v-model="form.jira_cache_enabled" />
-                  <label for="jira_cache_enabled">Cache fetched data (recommended — speeds up repeat visits)</label>
-                </div>
-              </div>
-
               <!-- JQL advanced -->
               <details class="advanced-settings" ref="jqlDetails">
                 <summary>Advanced: Custom Issue Filter (JQL)</summary>
@@ -316,7 +309,10 @@
 
         <!-- Section 3: Chart Thresholds -->
         <section v-if="workflowVisible" class="config-section">
-          <h2 class="section-title">Chart Thresholds</h2>
+          <div class="section-header">
+            <h2 class="section-title">Chart Thresholds</h2>
+            <button class="btn btn-secondary btn-sm" @click="resetThresholds">↺ Reset All to Defaults</button>
+          </div>
           <p class="form-hint" style="margin-bottom:1rem;">Fine-tune the sensitivity of insights, callouts, and health indicators. Changes apply on the next data load.</p>
 
           <details class="advanced-settings">
@@ -485,7 +481,6 @@ const form = reactive({
   jira_oauth_key_cert_file: '',
   jira_oauth_token: '',
   jira_oauth_token_secret: '',
-  jira_cache_enabled: true,
   input_csv_file: '',
 })
 
@@ -562,6 +557,17 @@ const typeInput     = ref('')
 
 // ── Chart thresholds ─────────────────────────────────────────────────────
 const thresholds = reactive({})
+const thresholdDefaults = ref({})
+
+async function resetThresholds() {
+  try {
+    const defaults = await Api.resetChartThresholds()
+    Object.assign(thresholds, defaults)
+    showNotification?.('Thresholds reset to defaults', 'info')
+  } catch (err) {
+    showNotification?.('Reset failed: ' + err.message, 'error')
+  }
+}
 
 const availableIssueTypes = computed(() =>
   allIssueTypes.value.filter(t => !issueTypes.value.includes(t))
@@ -588,10 +594,6 @@ function collectFormData() {
   const data = { input_mode: inputMode.value, workflow_start_step: startStep.value }
   const SECRET_FIELDS = ['jira_password', 'jira_pat_token', 'jira_oauth_token', 'jira_oauth_token_secret']
   for (const [key, val] of Object.entries(form)) {
-    if (key === 'jira_cache_enabled') {
-      data[key] = val ? 'true' : 'false'
-      continue
-    }
     if (typeof val === 'string') {
       if (SECRET_FIELDS.includes(key) && (val === '' || val === '***')) continue
       if (val === '') continue
@@ -773,7 +775,6 @@ onMounted(async () => {
     // Populate form
     for (const [key, value] of Object.entries(configResp)) {
       if (key === 'input_mode') { inputMode.value = value; continue }
-      if (key === 'jira_cache_enabled') { form.jira_cache_enabled = value === 'true' || value === true; continue }
       if (key in form && value !== '***') form[key] = value
     }
 

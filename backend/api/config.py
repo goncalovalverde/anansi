@@ -65,6 +65,12 @@ def read_chart_thresholds(db: sqlite3.Connection = Depends(get_db)):
     return config_service.get_chart_thresholds(db)
 
 
+@router.get("/chart-thresholds/defaults")
+def read_chart_threshold_defaults():
+    """Get built-in default chart thresholds."""
+    return config_service.get_chart_threshold_defaults()
+
+
 @router.put("/chart-thresholds")
 def write_chart_thresholds(
     body: dict, db: sqlite3.Connection = Depends(get_db)
@@ -72,6 +78,12 @@ def write_chart_thresholds(
     """Update chart thresholds (partial update supported)."""
     config_service.set_chart_thresholds(db, body)
     return config_service.get_chart_thresholds(db)
+
+
+@router.delete("/chart-thresholds")
+def reset_chart_thresholds(db: sqlite3.Connection = Depends(get_db)):
+    """Reset all chart thresholds to defaults."""
+    return config_service.reset_chart_thresholds(db)
 
 
 def _merge_overrides(jira_config: dict, overrides: schemas.TestConnectionRequest) -> dict:

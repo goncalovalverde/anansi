@@ -229,3 +229,25 @@ def set_chart_thresholds(db: sqlite3.Connection, thresholds: dict) -> None:
             (db_key, str(value)),
         )
     db.commit()
+
+
+def reset_chart_thresholds(db: sqlite3.Connection, keys: list[str] | None = None) -> dict:
+    """Remove chart threshold overrides, reverting to defaults.
+
+    If keys is provided, only those keys are reset. Otherwise all are reset.
+    """
+    from ..viewer.chart_config import _THRESHOLD_DEFAULTS
+
+    targets = keys if keys else list(_THRESHOLD_DEFAULTS.keys())
+    for key in targets:
+        if key not in _THRESHOLD_DEFAULTS:
+            continue
+        db.execute("DELETE FROM config WHERE key = ?", (f"chart_{key}",))
+    db.commit()
+    return get_chart_thresholds(db)
+
+
+def get_chart_threshold_defaults() -> dict:
+    """Return the built-in default thresholds (no DB access)."""
+    from ..viewer.chart_config import _THRESHOLD_DEFAULTS
+    return dict(_THRESHOLD_DEFAULTS)
