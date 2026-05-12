@@ -1,0 +1,401 @@
+Key,Summary,Type,Status,Priority,Story Points,Epic,Created,To Do,In Progress,In Review,Done
+PROJ-1,ETL scheduler #1,Bug,Done,High,0,Data Pipeline,2025-09-23 04:00:00,2025-09-23 04:00:00,2025-10-04 04:00:00,2025-10-22 04:00:00,2025-10-23 04:00:00
+PROJ-2,Push notifications #2,Task,To Do,High,5,Mobile App,2026-02-14 19:00:00,2026-02-14 19:00:00,,,
+PROJ-3,Pull to refresh #3,Story,In Review,Low,8,Mobile App,2025-06-04 05:00:00,2025-06-04 08:00:00,2025-06-10 08:00:00,2025-06-19 08:00:00,
+PROJ-4,Tax calculation #4,Story,To Do,Low,2,Payment Processing,2025-12-01 11:00:00,2025-12-01 15:00:00,,,
+PROJ-5,User preferences #5,Story,Done,Low,2,Dashboard Revamp,2026-03-10 09:00:00,2026-03-10 13:00:00,2026-03-24 13:00:00,2026-04-05 13:00:00,2026-04-10 13:00:00
+PROJ-6,Stripe integration #6,Bug,Done,Medium,0,Payment Processing,2025-07-11 07:00:00,2025-07-11 07:00:00,2025-07-18 07:00:00,2025-07-27 07:00:00,2025-07-31 07:00:00
+PROJ-7,S3 ingestion #7,Bug,In Progress,High,0,Data Pipeline,2025-10-15 22:00:00,2025-10-15 22:00:00,2025-10-25 22:00:00,,
+PROJ-8,Real-time streaming #8,Task,Done,High,0,Data Pipeline,2025-12-12 08:00:00,2025-12-12 12:00:00,2025-12-16 12:00:00,2025-12-27 12:00:00,2025-12-28 12:00:00
+PROJ-9,Tax calculation #9,Story,In Review,Highest,5,Payment Processing,2026-03-18 22:00:00,2026-03-19 00:00:00,2026-03-23 00:00:00,2026-04-08 00:00:00,
+PROJ-10,API versioning #10,Story,In Progress,High,8,API Gateway,2026-03-27 13:00:00,2026-03-27 17:00:00,2026-04-03 17:00:00,,
+PROJ-11,Chart animations #11,Story,Done,Highest,1,Dashboard Revamp,2025-07-27 04:00:00,2025-07-27 05:00:00,2025-08-09 05:00:00,2025-08-23 05:00:00,2025-08-28 05:00:00
+PROJ-12,Role-based access #12,Task,Done,Low,8,User Authentication,2026-03-11 00:00:00,2026-03-11 00:00:00,2026-03-22 00:00:00,2026-04-09 00:00:00,2026-04-12 00:00:00
+PROJ-13,Data validation #13,Bug,In Progress,High,0,Data Pipeline,2026-01-19 00:00:00,2026-01-19 02:00:00,2026-01-28 02:00:00,,
+PROJ-14,Payment retry logic #14,Bug,Done,Lowest,0,Payment Processing,2025-09-10 04:00:00,2025-09-10 06:00:00,2025-09-23 06:00:00,2025-09-29 06:00:00,2025-10-04 06:00:00
+PROJ-15,Onboarding flow #15,Story,In Progress,Highest,2,Mobile App,2025-12-03 09:00:00,2025-12-03 10:00:00,2025-12-04 10:00:00,,
+PROJ-16,Refund workflow #16,Bug,Done,Highest,0,Payment Processing,2026-02-28 04:00:00,2026-02-28 05:00:00,2026-03-11 05:00:00,2026-03-27 05:00:00,2026-04-01 05:00:00
+PROJ-17,Currency conversion #17,Story,Done,Low,5,Payment Processing,2026-03-04 23:00:00,2026-03-05 00:00:00,2026-03-17 00:00:00,2026-03-27 00:00:00,2026-03-31 00:00:00
+PROJ-18,Batch processing #18,Bug,Done,Low,0,Data Pipeline,2025-08-01 07:00:00,2025-08-01 08:00:00,2025-08-03 08:00:00,2025-08-14 08:00:00,2025-08-15 08:00:00
+PROJ-19,Onboarding flow #19,Story,In Progress,Highest,1,Mobile App,2025-09-26 02:00:00,2025-09-26 02:00:00,2025-10-10 02:00:00,,
+PROJ-20,Loading skeletons #20,Bug,In Progress,Low,0,Dashboard Revamp,2025-09-18 17:00:00,2025-09-18 18:00:00,2025-09-30 18:00:00,,
+PROJ-21,Deep linking #21,Story,Done,Low,5,Mobile App,2025-07-19 03:00:00,2025-07-19 06:00:00,2025-07-25 06:00:00,2025-08-08 06:00:00,2025-08-12 06:00:00
+PROJ-22,Request caching #22,Story,To Do,Medium,2,API Gateway,2025-10-06 06:00:00,2025-10-06 07:00:00,,,
+PROJ-23,Biometric login #23,Story,In Review,Medium,0,Mobile App,2025-10-06 02:00:00,2025-10-06 05:00:00,2025-10-19 05:00:00,2025-11-06 05:00:00,
+PROJ-24,JWT refresh token #24,Story,Done,Highest,5,User Authentication,2025-08-25 13:00:00,2025-08-25 16:00:00,2025-09-02 16:00:00,2025-09-09 16:00:00,2025-09-13 16:00:00
+PROJ-25,Role-based access #25,Task,To Do,Low,8,User Authentication,2026-01-19 09:00:00,2026-01-19 12:00:00,,,
+PROJ-26,S3 ingestion #26,Story,In Progress,High,1,Data Pipeline,2026-03-24 23:00:00,2026-03-25 03:00:00,2026-03-26 03:00:00,,
+PROJ-27,ETL scheduler #27,Bug,To Do,Low,0,Data Pipeline,2026-02-13 16:00:00,2026-02-13 17:00:00,,,
+PROJ-28,Password reset flow #28,Bug,To Do,Highest,0,User Authentication,2025-09-29 12:00:00,2025-09-29 12:00:00,,,
+PROJ-29,Onboarding flow #29,Story,Done,Lowest,2,Mobile App,2026-01-01 21:00:00,2026-01-02 01:00:00,2026-01-12 01:00:00,2026-01-29 01:00:00,2026-02-01 01:00:00
+PROJ-30,Custom date ranges #30,Story,In Progress,Low,3,Dashboard Revamp,2025-11-01 14:00:00,2025-11-01 16:00:00,2025-11-14 16:00:00,,
+PROJ-31,Login rate limiting #31,Story,Done,Lowest,2,User Authentication,2025-07-08 17:00:00,2025-07-08 18:00:00,2025-07-17 18:00:00,2025-07-26 18:00:00,2025-07-28 18:00:00
+PROJ-32,Export to PDF #32,Bug,In Progress,High,0,Dashboard Revamp,2026-01-11 17:00:00,2026-01-11 19:00:00,2026-01-21 19:00:00,,
+PROJ-33,Real-time streaming #33,Story,In Progress,Highest,3,Data Pipeline,2025-10-14 03:00:00,2025-10-14 03:00:00,2025-10-26 03:00:00,,
+PROJ-34,App store listing #34,Task,In Progress,High,13,Mobile App,2025-09-13 21:00:00,2025-09-13 23:00:00,2025-09-22 23:00:00,,
+PROJ-35,Rate limiting #35,Story,To Do,Low,8,API Gateway,2025-06-23 00:00:00,2025-06-23 02:00:00,,,
+PROJ-36,Invoice generation #36,Story,Done,Lowest,0,Payment Processing,2026-03-15 00:00:00,2026-03-15 00:00:00,2026-03-17 00:00:00,2026-03-22 00:00:00,2026-03-27 00:00:00
+PROJ-37,Account lockout policy #37,Bug,Done,Low,0,User Authentication,2025-08-05 01:00:00,2025-08-05 03:00:00,2025-08-11 03:00:00,2025-08-13 03:00:00,2025-08-16 03:00:00
+PROJ-38,Refund workflow #38,Story,In Progress,Lowest,0,Payment Processing,2025-08-19 07:00:00,2025-08-19 08:00:00,2025-09-01 08:00:00,,
+PROJ-39,Stripe integration #39,Task,In Progress,Medium,0,Payment Processing,2025-10-06 08:00:00,2025-10-06 09:00:00,2025-10-19 09:00:00,,
+PROJ-40,Monitoring alerts #40,Bug,Done,Low,0,Data Pipeline,2025-09-22 06:00:00,2025-09-22 09:00:00,2025-09-28 09:00:00,2025-10-08 09:00:00,2025-10-10 09:00:00
+PROJ-41,Subscription billing #41,Story,In Progress,Medium,2,Payment Processing,2025-10-21 11:00:00,2025-10-21 15:00:00,2025-10-28 15:00:00,,
+PROJ-42,ETL scheduler #42,Bug,To Do,Medium,0,Data Pipeline,2025-08-31 18:00:00,2025-08-31 20:00:00,,,
+PROJ-43,Account lockout policy #43,Bug,In Review,Medium,0,User Authentication,2026-01-10 19:00:00,2026-01-10 23:00:00,2026-01-12 23:00:00,2026-01-25 23:00:00,
+PROJ-44,App store listing #44,Story,To Do,Low,1,Mobile App,2026-02-22 17:00:00,2026-02-22 18:00:00,,,
+PROJ-45,Dark mode support #45,Task,Done,Medium,13,Dashboard Revamp,2025-08-03 23:00:00,2025-08-04 01:00:00,2025-08-13 01:00:00,2025-08-23 01:00:00,2025-08-27 01:00:00
+PROJ-46,Responsive layout #46,Task,Done,High,0,Dashboard Revamp,2025-12-12 21:00:00,2025-12-12 22:00:00,2025-12-22 22:00:00,2026-01-10 22:00:00,2026-01-13 22:00:00
+PROJ-47,Circuit breaker #47,Story,In Progress,Low,13,API Gateway,2026-01-25 14:00:00,2026-01-25 17:00:00,2026-02-05 17:00:00,,
+PROJ-48,Invoice generation #48,Story,Done,Medium,13,Payment Processing,2025-07-18 07:00:00,2025-07-18 09:00:00,2025-07-22 09:00:00,2025-07-29 09:00:00,2025-07-31 09:00:00
+PROJ-49,Session timeout handling #49,Story,Done,Lowest,2,User Authentication,2026-01-20 13:00:00,2026-01-20 17:00:00,2026-01-24 17:00:00,2026-02-06 17:00:00,2026-02-10 17:00:00
+PROJ-50,API versioning #50,Story,Done,Highest,2,API Gateway,2026-01-04 07:00:00,2026-01-04 08:00:00,2026-01-17 08:00:00,2026-02-03 08:00:00,2026-02-07 08:00:00
+PROJ-51,Add MFA support #51,Story,In Review,Low,13,User Authentication,2026-01-13 19:00:00,2026-01-13 23:00:00,2026-01-20 23:00:00,2026-02-07 23:00:00,
+PROJ-52,CORS configuration #52,Task,In Review,High,8,API Gateway,2026-02-22 15:00:00,2026-02-22 16:00:00,2026-02-27 16:00:00,2026-03-14 16:00:00,
+PROJ-53,Session timeout handling #53,Story,In Progress,Medium,2,User Authentication,2025-08-10 04:00:00,2025-08-10 05:00:00,2025-08-17 05:00:00,,
+PROJ-54,Kafka consumer #54,Task,To Do,Low,13,Data Pipeline,2026-03-05 14:00:00,2026-03-05 17:00:00,,,
+PROJ-55,Role-based access #55,Story,In Progress,Lowest,1,User Authentication,2026-03-22 12:00:00,2026-03-22 15:00:00,2026-03-23 15:00:00,,
+PROJ-56,Drag-drop widgets #56,Story,Done,Low,5,Dashboard Revamp,2026-02-05 07:00:00,2026-02-05 09:00:00,2026-02-12 09:00:00,2026-02-28 09:00:00,2026-03-01 09:00:00
+PROJ-57,Auth middleware #57,Bug,Done,Low,0,API Gateway,2025-08-05 19:00:00,2025-08-05 23:00:00,2025-08-06 23:00:00,2025-08-19 23:00:00,2025-08-24 23:00:00
+PROJ-58,Offline mode #58,Story,Done,High,0,Mobile App,2025-09-02 01:00:00,2025-09-02 03:00:00,2025-09-09 03:00:00,2025-09-20 03:00:00,2025-09-22 03:00:00
+PROJ-59,Request logging #59,Bug,Done,Low,0,API Gateway,2025-10-21 13:00:00,2025-10-21 15:00:00,2025-11-04 15:00:00,2025-11-07 15:00:00,2025-11-11 15:00:00
+PROJ-60,User profile page #60,Story,In Progress,Highest,1,User Authentication,2025-06-16 07:00:00,2025-06-16 08:00:00,2025-06-30 08:00:00,,
+PROJ-61,Session timeout handling #61,Task,To Do,Highest,5,User Authentication,2026-01-25 22:00:00,2026-01-26 00:00:00,,,
+PROJ-62,Accessibility audit #62,Task,Done,Highest,3,Dashboard Revamp,2025-11-07 03:00:00,2025-11-07 07:00:00,2025-11-08 07:00:00,2025-11-18 07:00:00,2025-11-23 07:00:00
+PROJ-63,Monitoring alerts #63,Task,Done,High,2,Data Pipeline,2025-10-03 03:00:00,2025-10-03 05:00:00,2025-10-17 05:00:00,2025-11-06 05:00:00,2025-11-07 05:00:00
+PROJ-64,Crash reporting #64,Story,Done,Medium,2,Mobile App,2026-02-15 20:00:00,2026-02-15 22:00:00,2026-02-16 22:00:00,2026-03-02 22:00:00,2026-03-06 22:00:00
+PROJ-65,User profile page #65,Task,Done,Low,3,User Authentication,2026-01-09 05:00:00,2026-01-09 09:00:00,2026-01-20 09:00:00,2026-01-29 09:00:00,2026-02-03 09:00:00
+PROJ-66,Image caching #66,Story,In Review,Lowest,8,Mobile App,2025-11-13 07:00:00,2025-11-13 07:00:00,2025-11-18 07:00:00,2025-12-03 07:00:00,
+PROJ-67,PCI compliance audit #67,Story,Done,Low,13,Payment Processing,2025-06-15 15:00:00,2025-06-15 17:00:00,2025-06-18 17:00:00,2025-07-04 17:00:00,2025-07-06 17:00:00
+PROJ-68,Custom date ranges #68,Story,In Progress,Lowest,8,Dashboard Revamp,2026-03-12 00:00:00,2026-03-12 04:00:00,2026-03-16 04:00:00,,
+PROJ-69,Role-based access #69,Story,In Review,High,0,User Authentication,2026-02-07 14:00:00,2026-02-07 14:00:00,2026-02-09 14:00:00,2026-02-19 14:00:00,
+PROJ-70,Subscription billing #70,Task,In Progress,Lowest,13,Payment Processing,2026-01-29 17:00:00,2026-01-29 21:00:00,2026-02-04 21:00:00,,
+PROJ-71,Request logging #71,Bug,Done,Medium,0,API Gateway,2025-11-04 08:00:00,2025-11-04 09:00:00,2025-11-06 09:00:00,2025-11-13 09:00:00,2025-11-16 09:00:00
+PROJ-72,Session timeout handling #72,Task,In Progress,Low,8,User Authentication,2026-02-24 19:00:00,2026-02-24 21:00:00,2026-02-26 21:00:00,,
+PROJ-73,Subscription billing #73,Story,In Progress,Medium,1,Payment Processing,2026-03-01 04:00:00,2026-03-01 06:00:00,2026-03-02 06:00:00,,
+PROJ-74,Password reset flow #74,Story,Done,Low,2,User Authentication,2025-06-07 18:00:00,2025-06-07 20:00:00,2025-06-15 20:00:00,2025-07-01 20:00:00,2025-07-05 20:00:00
+PROJ-75,New KPI widgets #75,Task,In Progress,Low,2,Dashboard Revamp,2025-07-04 12:00:00,2025-07-04 15:00:00,2025-07-06 15:00:00,,
+PROJ-76,Biometric login #76,Story,To Do,Lowest,8,Mobile App,2025-07-14 07:00:00,2025-07-14 07:00:00,,,
+PROJ-77,Onboarding flow #77,Task,Done,Lowest,5,Mobile App,2026-02-23 12:00:00,2026-02-23 15:00:00,2026-03-03 15:00:00,2026-03-13 15:00:00,2026-03-18 15:00:00
+PROJ-78,GraphQL endpoint #78,Story,Done,Lowest,2,API Gateway,2025-09-15 20:00:00,2025-09-15 21:00:00,2025-09-20 21:00:00,2025-09-23 21:00:00,2025-09-25 21:00:00
+PROJ-79,Currency conversion #79,Task,To Do,Highest,0,Payment Processing,2026-01-17 22:00:00,2026-01-18 02:00:00,,,
+PROJ-80,Rate limiting #80,Story,In Progress,Medium,0,API Gateway,2025-07-07 21:00:00,2025-07-07 22:00:00,2025-07-12 22:00:00,,
+PROJ-81,Monitoring alerts #81,Story,To Do,High,3,Data Pipeline,2025-10-15 04:00:00,2025-10-15 04:00:00,,,
+PROJ-82,OAuth2 integration #82,Task,Done,Lowest,8,User Authentication,2026-01-11 03:00:00,2026-01-11 06:00:00,2026-01-23 06:00:00,2026-02-02 06:00:00,2026-02-06 06:00:00
+PROJ-83,User preferences #83,Story,To Do,Highest,0,Dashboard Revamp,2025-11-13 19:00:00,2025-11-13 21:00:00,,,
+PROJ-84,Session timeout handling #84,Bug,Done,Lowest,0,User Authentication,2026-03-28 00:00:00,2026-03-28 02:00:00,2026-04-07 02:00:00,2026-04-09 02:00:00,2026-04-11 02:00:00
+PROJ-85,Circuit breaker #85,Story,In Progress,Lowest,0,API Gateway,2026-02-07 02:00:00,2026-02-07 05:00:00,2026-02-13 05:00:00,,
+PROJ-86,Request logging #86,Bug,Done,High,0,API Gateway,2025-11-16 13:00:00,2025-11-16 16:00:00,2025-11-21 16:00:00,2025-12-04 16:00:00,2025-12-09 16:00:00
+PROJ-87,Add MFA support #87,Story,In Progress,Medium,2,User Authentication,2025-12-24 16:00:00,2025-12-24 16:00:00,2026-01-04 16:00:00,,
+PROJ-88,Performance monitoring #88,Story,To Do,Lowest,13,Mobile App,2026-02-11 20:00:00,2026-02-11 23:00:00,,,
+PROJ-89,OAuth2 integration #89,Story,Done,Medium,0,User Authentication,2026-02-04 03:00:00,2026-02-04 03:00:00,2026-02-15 03:00:00,2026-03-07 03:00:00,2026-03-09 03:00:00
+PROJ-90,Data deduplication #90,Task,Done,Lowest,0,Data Pipeline,2025-07-18 07:00:00,2025-07-18 07:00:00,2025-07-26 07:00:00,2025-07-30 07:00:00,2025-08-01 07:00:00
+PROJ-91,WebSocket support #91,Story,Done,Low,0,API Gateway,2026-01-28 07:00:00,2026-01-28 10:00:00,2026-02-06 10:00:00,2026-02-11 10:00:00,2026-02-15 10:00:00
+PROJ-92,Refund workflow #92,Task,In Progress,Low,13,Payment Processing,2026-02-15 08:00:00,2026-02-15 08:00:00,2026-02-20 08:00:00,,
+PROJ-93,Data retention policy #93,Story,Done,Low,3,Data Pipeline,2026-01-15 17:00:00,2026-01-15 20:00:00,2026-01-21 20:00:00,2026-02-01 20:00:00,2026-02-06 20:00:00
+PROJ-94,Image caching #94,Task,Done,High,5,Mobile App,2026-03-20 12:00:00,2026-03-20 13:00:00,2026-04-03 13:00:00,2026-04-17 13:00:00,2026-04-18 13:00:00
+PROJ-95,Drag-drop widgets #95,Story,In Progress,High,0,Dashboard Revamp,2025-06-19 04:00:00,2025-06-19 08:00:00,2025-06-29 08:00:00,,
+PROJ-96,User preferences #96,Bug,To Do,Low,0,Dashboard Revamp,2025-06-08 23:00:00,2025-06-09 00:00:00,,,
+PROJ-97,Request caching #97,Task,In Review,Medium,13,API Gateway,2025-12-21 20:00:00,2025-12-21 20:00:00,2026-01-04 20:00:00,2026-01-15 20:00:00,
+PROJ-98,Schema migration #98,Task,Done,Low,1,Data Pipeline,2025-07-06 07:00:00,2025-07-06 09:00:00,2025-07-10 09:00:00,2025-07-13 09:00:00,2025-07-17 09:00:00
+PROJ-99,Login rate limiting #99,Bug,In Progress,Medium,0,User Authentication,2025-06-15 01:00:00,2025-06-15 03:00:00,2025-06-28 03:00:00,,
+PROJ-100,User profile page #100,Story,In Progress,High,5,User Authentication,2026-02-27 13:00:00,2026-02-27 17:00:00,2026-03-10 17:00:00,,
+PROJ-101,Invoice generation #101,Task,To Do,Low,5,Payment Processing,2026-02-10 18:00:00,2026-02-10 19:00:00,,,
+PROJ-102,Payment retry logic #102,Story,In Review,Highest,0,Payment Processing,2025-10-26 21:00:00,2025-10-27 01:00:00,2025-10-30 01:00:00,2025-11-02 01:00:00,
+PROJ-103,GraphQL endpoint #103,Bug,In Progress,Low,0,API Gateway,2025-10-07 14:00:00,2025-10-07 16:00:00,2025-10-11 16:00:00,,
+PROJ-104,Request caching #104,Story,In Progress,Lowest,13,API Gateway,2026-03-22 09:00:00,2026-03-22 11:00:00,2026-03-23 11:00:00,,
+PROJ-105,Data deduplication #105,Task,To Do,Highest,0,Data Pipeline,2025-10-25 07:00:00,2025-10-25 11:00:00,,,
+PROJ-106,Export to PDF #106,Story,Done,High,2,Dashboard Revamp,2025-06-21 09:00:00,2025-06-21 12:00:00,2025-06-22 12:00:00,2025-07-11 12:00:00,2025-07-14 12:00:00
+PROJ-107,Data validation #107,Task,Done,Medium,0,Data Pipeline,2025-08-29 06:00:00,2025-08-29 07:00:00,2025-09-11 07:00:00,2025-09-29 07:00:00,2025-10-02 07:00:00
+PROJ-108,Biometric login #108,Story,In Progress,Low,8,Mobile App,2025-11-21 03:00:00,2025-11-21 06:00:00,2025-11-23 06:00:00,,
+PROJ-109,Receipt emails #109,Story,Done,Lowest,13,Payment Processing,2025-07-17 12:00:00,2025-07-17 12:00:00,2025-07-22 12:00:00,2025-08-09 12:00:00,2025-08-10 12:00:00
+PROJ-110,Circuit breaker #110,Bug,Done,Medium,0,API Gateway,2025-07-26 21:00:00,2025-07-26 22:00:00,2025-08-03 22:00:00,2025-08-04 22:00:00,2025-08-09 22:00:00
+PROJ-111,Onboarding flow #111,Bug,In Progress,Highest,0,Mobile App,2026-01-24 22:00:00,2026-01-25 00:00:00,2026-02-05 00:00:00,,
+PROJ-112,API versioning #112,Bug,To Do,Highest,0,API Gateway,2025-11-03 15:00:00,2025-11-03 15:00:00,,,
+PROJ-113,JWT refresh token #113,Story,To Do,Low,13,User Authentication,2026-03-04 13:00:00,2026-03-04 17:00:00,,,
+PROJ-114,Monitoring alerts #114,Task,Done,Low,0,Data Pipeline,2025-10-22 01:00:00,2025-10-22 03:00:00,2025-10-26 03:00:00,2025-11-10 03:00:00,2025-11-14 03:00:00
+PROJ-115,Refund workflow #115,Bug,Done,Medium,0,Payment Processing,2026-03-06 20:00:00,2026-03-06 22:00:00,2026-03-07 22:00:00,2026-03-20 22:00:00,2026-03-23 22:00:00
+PROJ-116,Payment dashboard #116,Bug,To Do,High,0,Payment Processing,2025-06-11 01:00:00,2025-06-11 03:00:00,,,
+PROJ-117,PCI compliance audit #117,Task,In Progress,Lowest,5,Payment Processing,2026-03-28 06:00:00,2026-03-28 07:00:00,2026-04-03 07:00:00,,
+PROJ-118,Payment retry logic #118,Story,Done,High,3,Payment Processing,2026-03-04 08:00:00,2026-03-04 09:00:00,2026-03-06 09:00:00,2026-03-07 09:00:00,2026-03-09 09:00:00
+PROJ-119,Session timeout handling #119,Bug,Done,Highest,0,User Authentication,2025-08-29 08:00:00,2025-08-29 08:00:00,2025-09-01 08:00:00,2025-09-15 08:00:00,2025-09-20 08:00:00
+PROJ-120,Login rate limiting #120,Bug,In Review,Medium,0,User Authentication,2026-02-18 18:00:00,2026-02-18 18:00:00,2026-02-26 18:00:00,2026-03-15 18:00:00,
+PROJ-121,Currency conversion #121,Story,In Progress,Highest,1,Payment Processing,2026-02-01 12:00:00,2026-02-01 15:00:00,2026-02-12 15:00:00,,
+PROJ-122,Login rate limiting #122,Story,To Do,Highest,13,User Authentication,2025-08-15 02:00:00,2025-08-15 03:00:00,,,
+PROJ-123,Drag-drop widgets #123,Bug,Done,Lowest,0,Dashboard Revamp,2025-10-29 14:00:00,2025-10-29 18:00:00,2025-11-08 18:00:00,2025-11-22 18:00:00,2025-11-23 18:00:00
+PROJ-124,Real-time streaming #124,Bug,Done,High,0,Data Pipeline,2026-01-07 14:00:00,2026-01-07 15:00:00,2026-01-14 15:00:00,2026-01-25 15:00:00,2026-01-29 15:00:00
+PROJ-125,Request caching #125,Task,In Progress,Medium,8,API Gateway,2025-12-09 04:00:00,2025-12-09 07:00:00,2025-12-11 07:00:00,,
+PROJ-126,Add MFA support #126,Bug,In Review,Medium,0,User Authentication,2025-08-06 17:00:00,2025-08-06 17:00:00,2025-08-16 17:00:00,2025-09-03 17:00:00,
+PROJ-127,Offline mode #127,Bug,In Review,Low,0,Mobile App,2025-06-27 09:00:00,2025-06-27 13:00:00,2025-07-02 13:00:00,2025-07-14 13:00:00,
+PROJ-128,Password reset flow #128,Story,Done,High,2,User Authentication,2025-11-27 17:00:00,2025-11-27 19:00:00,2025-11-29 19:00:00,2025-12-08 19:00:00,2025-12-13 19:00:00
+PROJ-129,Currency conversion #129,Task,Done,Lowest,1,Payment Processing,2025-10-15 00:00:00,2025-10-15 01:00:00,2025-10-20 01:00:00,2025-10-30 01:00:00,2025-11-02 01:00:00
+PROJ-130,Chart animations #130,Story,Done,Lowest,0,Dashboard Revamp,2025-07-06 04:00:00,2025-07-06 04:00:00,2025-07-08 04:00:00,2025-07-25 04:00:00,2025-07-27 04:00:00
+PROJ-131,CORS configuration #131,Task,In Progress,Medium,8,API Gateway,2025-11-14 18:00:00,2025-11-14 22:00:00,2025-11-16 22:00:00,,
+PROJ-132,Password reset flow #132,Task,Done,Highest,2,User Authentication,2025-10-18 14:00:00,2025-10-18 17:00:00,2025-10-26 17:00:00,2025-11-15 17:00:00,2025-11-19 17:00:00
+PROJ-133,Health checks #133,Story,Done,Highest,13,API Gateway,2026-01-07 03:00:00,2026-01-07 05:00:00,2026-01-18 05:00:00,2026-02-06 05:00:00,2026-02-10 05:00:00
+PROJ-134,Push notifications #134,Story,In Progress,Lowest,1,Mobile App,2025-06-04 06:00:00,2025-06-04 08:00:00,2025-06-08 08:00:00,,
+PROJ-135,Payment retry logic #135,Story,In Progress,Highest,0,Payment Processing,2026-01-07 05:00:00,2026-01-07 06:00:00,2026-01-14 06:00:00,,
+PROJ-136,Pull to refresh #136,Story,Done,Medium,2,Mobile App,2025-12-21 23:00:00,2025-12-21 23:00:00,2025-12-28 23:00:00,2025-12-29 23:00:00,2026-01-02 23:00:00
+PROJ-137,Account lockout policy #137,Bug,In Review,Low,0,User Authentication,2025-12-31 09:00:00,2025-12-31 09:00:00,2026-01-07 09:00:00,2026-01-08 09:00:00,
+PROJ-138,Accessibility audit #138,Task,In Review,Medium,2,Dashboard Revamp,2026-01-10 03:00:00,2026-01-10 04:00:00,2026-01-17 04:00:00,2026-02-05 04:00:00,
+PROJ-139,Auth middleware #139,Bug,Done,Medium,0,API Gateway,2025-09-22 10:00:00,2025-09-22 11:00:00,2025-09-24 11:00:00,2025-10-11 11:00:00,2025-10-12 11:00:00
+PROJ-140,Crash reporting #140,Story,In Progress,High,5,Mobile App,2025-07-23 04:00:00,2025-07-23 06:00:00,2025-07-27 06:00:00,,
+PROJ-141,Refund workflow #141,Task,In Progress,Low,0,Payment Processing,2026-03-16 18:00:00,2026-03-16 21:00:00,2026-03-27 21:00:00,,
+PROJ-142,Crash reporting #142,Bug,In Progress,Highest,0,Mobile App,2026-01-27 14:00:00,2026-01-27 16:00:00,2026-02-09 16:00:00,,
+PROJ-143,Custom date ranges #143,Story,Done,Medium,0,Dashboard Revamp,2026-01-18 01:00:00,2026-01-18 01:00:00,2026-01-24 01:00:00,2026-02-03 01:00:00,2026-02-04 01:00:00
+PROJ-144,Data retention policy #144,Bug,Done,Low,0,Data Pipeline,2026-01-23 18:00:00,2026-01-23 22:00:00,2026-02-05 22:00:00,2026-02-07 22:00:00,2026-02-11 22:00:00
+PROJ-145,Crash reporting #145,Story,Done,Lowest,3,Mobile App,2025-07-02 14:00:00,2025-07-02 14:00:00,2025-07-15 14:00:00,2025-07-26 14:00:00,2025-07-27 14:00:00
+PROJ-146,Push notifications #146,Task,In Progress,Low,0,Mobile App,2026-02-24 16:00:00,2026-02-24 20:00:00,2026-02-27 20:00:00,,
+PROJ-147,Responsive layout #147,Bug,In Progress,Medium,0,Dashboard Revamp,2025-06-27 20:00:00,2025-06-27 22:00:00,2025-06-29 22:00:00,,
+PROJ-148,Loading skeletons #148,Bug,Done,Medium,0,Dashboard Revamp,2025-10-08 23:00:00,2025-10-09 03:00:00,2025-10-23 03:00:00,2025-10-28 03:00:00,2025-10-31 03:00:00
+PROJ-149,User profile page #149,Task,In Progress,Low,3,User Authentication,2025-07-14 09:00:00,2025-07-14 13:00:00,2025-07-21 13:00:00,,
+PROJ-150,S3 ingestion #150,Bug,Done,Lowest,0,Data Pipeline,2025-07-18 20:00:00,2025-07-18 23:00:00,2025-07-27 23:00:00,2025-08-08 23:00:00,2025-08-09 23:00:00
+PROJ-151,Chart animations #151,Story,Done,Medium,0,Dashboard Revamp,2025-09-07 07:00:00,2025-09-07 08:00:00,2025-09-10 08:00:00,2025-09-13 08:00:00,2025-09-16 08:00:00
+PROJ-152,User profile page #152,Story,Done,Lowest,3,User Authentication,2025-12-10 04:00:00,2025-12-10 05:00:00,2025-12-13 05:00:00,2026-01-02 05:00:00,2026-01-04 05:00:00
+PROJ-153,ETL scheduler #153,Story,In Review,High,0,Data Pipeline,2025-10-24 23:00:00,2025-10-25 02:00:00,2025-10-29 02:00:00,2025-11-16 02:00:00,
+PROJ-154,Payment dashboard #154,Story,Done,High,13,Payment Processing,2026-03-20 14:00:00,2026-03-20 17:00:00,2026-04-02 17:00:00,2026-04-12 17:00:00,2026-04-16 17:00:00
+PROJ-155,Biometric login #155,Task,Done,Lowest,3,Mobile App,2025-10-07 01:00:00,2025-10-07 04:00:00,2025-10-21 04:00:00,2025-11-02 04:00:00,2025-11-07 04:00:00
+PROJ-156,OAuth2 integration #156,Bug,To Do,High,0,User Authentication,2025-10-18 14:00:00,2025-10-18 18:00:00,,,
+PROJ-157,Refund workflow #157,Task,Done,High,0,Payment Processing,2025-11-26 00:00:00,2025-11-26 03:00:00,2025-11-27 03:00:00,2025-12-10 03:00:00,2025-12-15 03:00:00
+PROJ-158,Drag-drop widgets #158,Story,Done,Medium,5,Dashboard Revamp,2025-06-15 10:00:00,2025-06-15 10:00:00,2025-06-29 10:00:00,2025-07-10 10:00:00,2025-07-12 10:00:00
+PROJ-159,Payment retry logic #159,Story,Done,Low,3,Payment Processing,2026-01-27 14:00:00,2026-01-27 18:00:00,2026-01-28 18:00:00,2026-01-31 18:00:00,2026-02-01 18:00:00
+PROJ-160,Chart animations #160,Story,Done,Lowest,0,Dashboard Revamp,2025-07-27 09:00:00,2025-07-27 10:00:00,2025-08-01 10:00:00,2025-08-05 10:00:00,2025-08-06 10:00:00
+PROJ-161,PCI compliance audit #161,Task,In Review,Highest,0,Payment Processing,2026-03-02 00:00:00,2026-03-02 04:00:00,2026-03-12 04:00:00,2026-03-20 04:00:00,
+PROJ-162,Data deduplication #162,Task,In Review,Lowest,13,Data Pipeline,2025-10-02 18:00:00,2025-10-02 21:00:00,2025-10-05 21:00:00,2025-10-08 21:00:00,
+PROJ-163,Offline mode #163,Bug,Done,Lowest,0,Mobile App,2026-02-15 16:00:00,2026-02-15 20:00:00,2026-02-16 20:00:00,2026-03-01 20:00:00,2026-03-05 20:00:00
+PROJ-164,User profile page #164,Task,In Progress,Highest,13,User Authentication,2025-07-05 11:00:00,2025-07-05 12:00:00,2025-07-17 12:00:00,,
+PROJ-165,Data retention policy #165,Bug,Done,Medium,0,Data Pipeline,2025-08-08 01:00:00,2025-08-08 03:00:00,2025-08-17 03:00:00,2025-08-28 03:00:00,2025-08-30 03:00:00
+PROJ-166,Batch processing #166,Story,Done,High,2,Data Pipeline,2026-01-21 01:00:00,2026-01-21 03:00:00,2026-01-25 03:00:00,2026-01-27 03:00:00,2026-01-29 03:00:00
+PROJ-167,OAuth2 integration #167,Bug,Done,Lowest,0,User Authentication,2026-01-29 08:00:00,2026-01-29 08:00:00,2026-02-11 08:00:00,2026-02-18 08:00:00,2026-02-21 08:00:00
+PROJ-168,Custom date ranges #168,Story,In Progress,Medium,0,Dashboard Revamp,2025-12-22 23:00:00,2025-12-23 02:00:00,2025-12-30 02:00:00,,
+PROJ-169,User preferences #169,Task,Done,Medium,8,Dashboard Revamp,2025-07-13 23:00:00,2025-07-14 02:00:00,2025-07-16 02:00:00,2025-07-30 02:00:00,2025-08-04 02:00:00
+PROJ-170,Tax calculation #170,Story,To Do,Medium,8,Payment Processing,2025-11-04 14:00:00,2025-11-04 18:00:00,,,
+PROJ-171,S3 ingestion #171,Task,Done,Medium,0,Data Pipeline,2025-06-22 23:00:00,2025-06-23 01:00:00,2025-07-03 01:00:00,2025-07-17 01:00:00,2025-07-20 01:00:00
+PROJ-172,Data validation #172,Story,Done,Low,13,Data Pipeline,2026-02-18 23:00:00,2026-02-19 00:00:00,2026-02-20 00:00:00,2026-02-25 00:00:00,2026-03-02 00:00:00
+PROJ-173,ETL scheduler #173,Story,To Do,High,13,Data Pipeline,2025-12-03 12:00:00,2025-12-03 16:00:00,,,
+PROJ-174,Login rate limiting #174,Task,Done,Medium,0,User Authentication,2025-07-10 18:00:00,2025-07-10 19:00:00,2025-07-19 19:00:00,2025-07-31 19:00:00,2025-08-04 19:00:00
+PROJ-175,Export to PDF #175,Story,Done,Highest,3,Dashboard Revamp,2026-02-11 16:00:00,2026-02-11 19:00:00,2026-02-20 19:00:00,2026-02-24 19:00:00,2026-02-27 19:00:00
+PROJ-176,Export to PDF #176,Story,Done,Medium,0,Dashboard Revamp,2025-09-11 03:00:00,2025-09-11 04:00:00,2025-09-25 04:00:00,2025-09-28 04:00:00,2025-10-02 04:00:00
+PROJ-177,Refund workflow #177,Story,Done,Medium,13,Payment Processing,2025-07-04 17:00:00,2025-07-04 21:00:00,2025-07-09 21:00:00,2025-07-19 21:00:00,2025-07-21 21:00:00
+PROJ-178,Schema migration #178,Task,Done,Highest,5,Data Pipeline,2025-08-11 07:00:00,2025-08-11 10:00:00,2025-08-12 10:00:00,2025-08-24 10:00:00,2025-08-29 10:00:00
+PROJ-179,Image caching #179,Bug,Done,Lowest,0,Mobile App,2025-08-06 19:00:00,2025-08-06 19:00:00,2025-08-08 19:00:00,2025-08-18 19:00:00,2025-08-22 19:00:00
+PROJ-180,Real-time streaming #180,Story,In Review,Low,2,Data Pipeline,2025-08-04 10:00:00,2025-08-04 10:00:00,2025-08-12 10:00:00,2025-08-27 10:00:00,
+PROJ-181,S3 ingestion #181,Bug,Done,Lowest,0,Data Pipeline,2026-03-28 05:00:00,2026-03-28 06:00:00,2026-04-04 06:00:00,2026-04-21 06:00:00,2026-04-22 06:00:00
+PROJ-182,OAuth2 integration #182,Task,In Progress,Medium,5,User Authentication,2025-11-25 16:00:00,2025-11-25 18:00:00,2025-12-09 18:00:00,,
+PROJ-183,Session timeout handling #183,Story,Done,Lowest,8,User Authentication,2025-08-04 20:00:00,2025-08-04 22:00:00,2025-08-14 22:00:00,2025-09-01 22:00:00,2025-09-02 22:00:00
+PROJ-184,Onboarding flow #184,Task,Done,High,3,Mobile App,2025-11-20 18:00:00,2025-11-20 18:00:00,2025-12-04 18:00:00,2025-12-05 18:00:00,2025-12-06 18:00:00
+PROJ-185,Session timeout handling #185,Story,Done,Low,1,User Authentication,2026-02-10 20:00:00,2026-02-11 00:00:00,2026-02-16 00:00:00,2026-02-26 00:00:00,2026-03-02 00:00:00
+PROJ-186,Payment retry logic #186,Task,In Review,Highest,3,Payment Processing,2026-01-12 13:00:00,2026-01-12 16:00:00,2026-01-20 16:00:00,2026-01-27 16:00:00,
+PROJ-187,Custom date ranges #187,Task,Done,Medium,13,Dashboard Revamp,2025-12-22 04:00:00,2025-12-22 06:00:00,2025-12-31 06:00:00,2026-01-18 06:00:00,2026-01-19 06:00:00
+PROJ-188,User preferences #188,Story,To Do,Low,5,Dashboard Revamp,2025-08-12 03:00:00,2025-08-12 03:00:00,,,
+PROJ-189,Accessibility audit #189,Task,In Review,High,13,Dashboard Revamp,2026-03-23 23:00:00,2026-03-24 01:00:00,2026-03-28 01:00:00,2026-04-03 01:00:00,
+PROJ-190,CORS configuration #190,Story,Done,Low,1,API Gateway,2025-07-17 12:00:00,2025-07-17 16:00:00,2025-07-25 16:00:00,2025-08-02 16:00:00,2025-08-04 16:00:00
+PROJ-191,Push notifications #191,Bug,To Do,Low,0,Mobile App,2026-01-27 09:00:00,2026-01-27 13:00:00,,,
+PROJ-192,Role-based access #192,Bug,To Do,Medium,0,User Authentication,2025-12-05 12:00:00,2025-12-05 14:00:00,,,
+PROJ-193,Implement SSO login #193,Task,Done,High,13,User Authentication,2026-03-11 09:00:00,2026-03-11 09:00:00,2026-03-18 09:00:00,2026-04-04 09:00:00,2026-04-08 09:00:00
+PROJ-194,Onboarding flow #194,Story,Done,Highest,3,Mobile App,2025-07-20 12:00:00,2025-07-20 14:00:00,2025-08-02 14:00:00,2025-08-13 14:00:00,2025-08-18 14:00:00
+PROJ-195,Export to PDF #195,Task,Done,Low,1,Dashboard Revamp,2025-06-24 01:00:00,2025-06-24 02:00:00,2025-07-06 02:00:00,2025-07-17 02:00:00,2025-07-21 02:00:00
+PROJ-196,Biometric login #196,Story,Done,Lowest,3,Mobile App,2025-11-15 19:00:00,2025-11-15 21:00:00,2025-11-18 21:00:00,2025-12-01 21:00:00,2025-12-06 21:00:00
+PROJ-197,Data retention policy #197,Story,In Progress,Lowest,0,Data Pipeline,2026-03-16 09:00:00,2026-03-16 12:00:00,2026-03-30 12:00:00,,
+PROJ-198,User profile page #198,Bug,Done,Low,0,User Authentication,2026-03-26 09:00:00,2026-03-26 09:00:00,2026-04-05 09:00:00,2026-04-21 09:00:00,2026-04-24 09:00:00
+PROJ-199,ETL scheduler #199,Story,Done,High,0,Data Pipeline,2025-08-15 21:00:00,2025-08-15 22:00:00,2025-08-16 22:00:00,2025-09-04 22:00:00,2025-09-05 22:00:00
+PROJ-200,Payment dashboard #200,Story,In Progress,High,0,Payment Processing,2025-09-13 13:00:00,2025-09-13 17:00:00,2025-09-26 17:00:00,,
+PROJ-201,Push notifications #201,Story,Done,Lowest,5,Mobile App,2026-03-15 10:00:00,2026-03-15 13:00:00,2026-03-24 13:00:00,2026-04-06 13:00:00,2026-04-09 13:00:00
+PROJ-202,Currency conversion #202,Story,In Progress,Medium,8,Payment Processing,2026-02-03 06:00:00,2026-02-03 07:00:00,2026-02-08 07:00:00,,
+PROJ-203,Deep linking #203,Story,Done,Medium,8,Mobile App,2025-09-15 22:00:00,2025-09-16 01:00:00,2025-09-22 01:00:00,2025-10-08 01:00:00,2025-10-11 01:00:00
+PROJ-204,App store listing #204,Story,To Do,Lowest,0,Mobile App,2025-12-20 11:00:00,2025-12-20 12:00:00,,,
+PROJ-205,Responsive layout #205,Story,Done,Highest,13,Dashboard Revamp,2026-01-13 20:00:00,2026-01-13 22:00:00,2026-01-25 22:00:00,2026-02-10 22:00:00,2026-02-12 22:00:00
+PROJ-206,Currency conversion #206,Story,Done,High,2,Payment Processing,2026-03-28 07:00:00,2026-03-28 08:00:00,2026-03-29 08:00:00,2026-04-15 08:00:00,2026-04-17 08:00:00
+PROJ-207,ETL scheduler #207,Story,To Do,Medium,0,Data Pipeline,2025-07-22 21:00:00,2025-07-22 22:00:00,,,
+PROJ-208,Role-based access #208,Task,Done,Low,0,User Authentication,2025-09-11 09:00:00,2025-09-11 11:00:00,2025-09-16 11:00:00,2025-09-18 11:00:00,2025-09-19 11:00:00
+PROJ-209,Real-time streaming #209,Story,Done,Highest,3,Data Pipeline,2025-12-31 05:00:00,2025-12-31 05:00:00,2026-01-14 05:00:00,2026-01-27 05:00:00,2026-01-31 05:00:00
+PROJ-210,Stripe integration #210,Story,To Do,Lowest,2,Payment Processing,2025-11-19 09:00:00,2025-11-19 12:00:00,,,
+PROJ-211,S3 ingestion #211,Story,Done,Low,8,Data Pipeline,2025-09-07 03:00:00,2025-09-07 05:00:00,2025-09-10 05:00:00,2025-09-25 05:00:00,2025-09-28 05:00:00
+PROJ-212,ETL scheduler #212,Task,Done,Medium,5,Data Pipeline,2025-08-29 19:00:00,2025-08-29 22:00:00,2025-09-12 22:00:00,2025-09-26 22:00:00,2025-10-01 22:00:00
+PROJ-213,Drag-drop widgets #213,Bug,Done,High,0,Dashboard Revamp,2025-08-11 15:00:00,2025-08-11 17:00:00,2025-08-15 17:00:00,2025-08-16 17:00:00,2025-08-19 17:00:00
+PROJ-214,CORS configuration #214,Story,Done,Medium,8,API Gateway,2026-03-26 23:00:00,2026-03-27 03:00:00,2026-03-28 03:00:00,2026-04-06 03:00:00,2026-04-09 03:00:00
+PROJ-215,ETL scheduler #215,Story,Done,Low,8,Data Pipeline,2025-08-21 12:00:00,2025-08-21 16:00:00,2025-09-02 16:00:00,2025-09-12 16:00:00,2025-09-13 16:00:00
+PROJ-216,Schema migration #216,Story,Done,High,3,Data Pipeline,2026-01-31 04:00:00,2026-01-31 07:00:00,2026-02-12 07:00:00,2026-03-04 07:00:00,2026-03-07 07:00:00
+PROJ-217,WebSocket support #217,Story,Done,High,5,API Gateway,2025-07-12 16:00:00,2025-07-12 19:00:00,2025-07-21 19:00:00,2025-08-02 19:00:00,2025-08-03 19:00:00
+PROJ-218,Push notifications #218,Bug,Done,Lowest,0,Mobile App,2025-09-12 18:00:00,2025-09-12 22:00:00,2025-09-15 22:00:00,2025-09-21 22:00:00,2025-09-24 22:00:00
+PROJ-219,Offline mode #219,Story,Done,Lowest,0,Mobile App,2025-07-17 16:00:00,2025-07-17 19:00:00,2025-07-30 19:00:00,2025-08-01 19:00:00,2025-08-05 19:00:00
+PROJ-220,Payment dashboard #220,Task,Done,Lowest,0,Payment Processing,2025-11-05 23:00:00,2025-11-05 23:00:00,2025-11-12 23:00:00,2025-11-21 23:00:00,2025-11-22 23:00:00
+PROJ-221,Data retention policy #221,Story,To Do,Low,13,Data Pipeline,2025-07-03 17:00:00,2025-07-03 17:00:00,,,
+PROJ-222,Implement SSO login #222,Story,In Progress,High,3,User Authentication,2026-01-02 11:00:00,2026-01-02 14:00:00,2026-01-10 14:00:00,,
+PROJ-223,Request caching #223,Task,Done,Lowest,3,API Gateway,2025-11-26 03:00:00,2025-11-26 04:00:00,2025-12-05 04:00:00,2025-12-18 04:00:00,2025-12-23 04:00:00
+PROJ-224,Stripe integration #224,Story,Done,Medium,0,Payment Processing,2026-03-06 13:00:00,2026-03-06 17:00:00,2026-03-13 17:00:00,2026-03-21 17:00:00,2026-03-23 17:00:00
+PROJ-225,API versioning #225,Bug,In Progress,Highest,0,API Gateway,2025-06-17 21:00:00,2025-06-18 00:00:00,2025-06-28 00:00:00,,
+PROJ-226,Session timeout handling #226,Story,To Do,Lowest,1,User Authentication,2026-01-15 19:00:00,2026-01-15 19:00:00,,,
+PROJ-227,Receipt emails #227,Story,In Review,Lowest,5,Payment Processing,2025-06-29 04:00:00,2025-06-29 08:00:00,2025-07-04 08:00:00,2025-07-12 08:00:00,
+PROJ-228,Data retention policy #228,Bug,Done,Medium,0,Data Pipeline,2025-09-30 09:00:00,2025-09-30 10:00:00,2025-10-11 10:00:00,2025-10-28 10:00:00,2025-10-30 10:00:00
+PROJ-229,Circuit breaker #229,Story,To Do,Lowest,3,API Gateway,2026-01-05 17:00:00,2026-01-05 20:00:00,,,
+PROJ-230,Role-based access #230,Bug,Done,Medium,0,User Authentication,2025-12-31 13:00:00,2025-12-31 14:00:00,2026-01-05 14:00:00,2026-01-18 14:00:00,2026-01-20 14:00:00
+PROJ-231,Deep linking #231,Story,Done,Medium,3,Mobile App,2026-01-24 01:00:00,2026-01-24 05:00:00,2026-01-31 05:00:00,2026-02-14 05:00:00,2026-02-19 05:00:00
+PROJ-232,Performance monitoring #232,Task,In Progress,High,13,Mobile App,2025-07-11 14:00:00,2025-07-11 16:00:00,2025-07-13 16:00:00,,
+PROJ-233,Push notifications #233,Story,In Progress,Lowest,1,Mobile App,2025-07-08 06:00:00,2025-07-08 10:00:00,2025-07-20 10:00:00,,
+PROJ-234,Batch processing #234,Story,In Progress,Medium,8,Data Pipeline,2025-06-08 06:00:00,2025-06-08 07:00:00,2025-06-20 07:00:00,,
+PROJ-235,Session timeout handling #235,Story,Done,High,0,User Authentication,2025-10-01 17:00:00,2025-10-01 19:00:00,2025-10-14 19:00:00,2025-10-24 19:00:00,2025-10-28 19:00:00
+PROJ-236,Circuit breaker #236,Bug,In Progress,Lowest,0,API Gateway,2026-02-10 14:00:00,2026-02-10 14:00:00,2026-02-23 14:00:00,,
+PROJ-237,Schema migration #237,Story,Done,Medium,13,Data Pipeline,2025-12-29 01:00:00,2025-12-29 05:00:00,2026-01-12 05:00:00,2026-01-20 05:00:00,2026-01-22 05:00:00
+PROJ-238,JWT refresh token #238,Story,Done,Lowest,0,User Authentication,2025-10-30 04:00:00,2025-10-30 05:00:00,2025-11-05 05:00:00,2025-11-13 05:00:00,2025-11-17 05:00:00
+PROJ-239,Image caching #239,Story,Done,Medium,8,Mobile App,2026-02-06 23:00:00,2026-02-07 02:00:00,2026-02-15 02:00:00,2026-02-21 02:00:00,2026-02-24 02:00:00
+PROJ-240,Currency conversion #240,Task,In Review,Lowest,1,Payment Processing,2026-02-24 01:00:00,2026-02-24 01:00:00,2026-03-10 01:00:00,2026-03-12 01:00:00,
+PROJ-241,Password reset flow #241,Task,Done,High,2,User Authentication,2025-08-17 00:00:00,2025-08-17 01:00:00,2025-08-26 01:00:00,2025-09-10 01:00:00,2025-09-13 01:00:00
+PROJ-242,Login rate limiting #242,Story,To Do,Lowest,0,User Authentication,2025-06-07 00:00:00,2025-06-07 04:00:00,,,
+PROJ-243,Real-time streaming #243,Story,Done,Highest,0,Data Pipeline,2025-08-31 03:00:00,2025-08-31 03:00:00,2025-09-09 03:00:00,2025-09-14 03:00:00,2025-09-16 03:00:00
+PROJ-244,Tax calculation #244,Story,In Progress,Low,2,Payment Processing,2025-12-09 12:00:00,2025-12-09 15:00:00,2025-12-19 15:00:00,,
+PROJ-245,Payment retry logic #245,Story,Done,Highest,1,Payment Processing,2025-07-18 12:00:00,2025-07-18 15:00:00,2025-07-25 15:00:00,2025-08-12 15:00:00,2025-08-16 15:00:00
+PROJ-246,Password reset flow #246,Story,To Do,Low,13,User Authentication,2026-03-17 03:00:00,2026-03-17 07:00:00,,,
+PROJ-247,Session timeout handling #247,Story,Done,Lowest,0,User Authentication,2025-10-17 01:00:00,2025-10-17 01:00:00,2025-10-28 01:00:00,2025-11-06 01:00:00,2025-11-11 01:00:00
+PROJ-248,Biometric login #248,Story,Done,Medium,1,Mobile App,2025-09-15 18:00:00,2025-09-15 19:00:00,2025-09-28 19:00:00,2025-10-11 19:00:00,2025-10-12 19:00:00
+PROJ-249,Accessibility audit #249,Task,In Progress,Low,13,Dashboard Revamp,2025-12-14 23:00:00,2025-12-15 00:00:00,2025-12-28 00:00:00,,
+PROJ-250,Real-time streaming #250,Bug,Done,Medium,0,Data Pipeline,2025-06-28 03:00:00,2025-06-28 06:00:00,2025-07-02 06:00:00,2025-07-05 06:00:00,2025-07-08 06:00:00
+PROJ-251,Crash reporting #251,Task,To Do,Medium,0,Mobile App,2026-02-07 07:00:00,2026-02-07 09:00:00,,,
+PROJ-252,Performance monitoring #252,Task,In Progress,Lowest,0,Mobile App,2025-07-14 19:00:00,2025-07-14 21:00:00,2025-07-27 21:00:00,,
+PROJ-253,Refund workflow #253,Bug,In Progress,Low,0,Payment Processing,2025-08-18 23:00:00,2025-08-19 02:00:00,2025-08-25 02:00:00,,
+PROJ-254,Dark mode support #254,Bug,To Do,Medium,0,Dashboard Revamp,2026-01-14 11:00:00,2026-01-14 13:00:00,,,
+PROJ-255,Add MFA support #255,Task,In Progress,Low,0,User Authentication,2025-07-23 00:00:00,2025-07-23 00:00:00,2025-07-29 00:00:00,,
+PROJ-256,Onboarding flow #256,Bug,Done,Medium,0,Mobile App,2025-12-15 00:00:00,2025-12-15 02:00:00,2025-12-22 02:00:00,2026-01-04 02:00:00,2026-01-05 02:00:00
+PROJ-257,Data retention policy #257,Story,Done,Low,3,Data Pipeline,2025-08-11 08:00:00,2025-08-11 10:00:00,2025-08-16 10:00:00,2025-09-01 10:00:00,2025-09-03 10:00:00
+PROJ-258,Role-based access #258,Task,In Progress,Medium,0,User Authentication,2025-07-10 11:00:00,2025-07-10 13:00:00,2025-07-14 13:00:00,,
+PROJ-259,Data retention policy #259,Story,Done,Low,2,Data Pipeline,2025-08-09 09:00:00,2025-08-09 09:00:00,2025-08-16 09:00:00,2025-08-27 09:00:00,2025-09-01 09:00:00
+PROJ-260,CORS configuration #260,Bug,In Progress,Lowest,0,API Gateway,2025-08-09 09:00:00,2025-08-09 11:00:00,2025-08-19 11:00:00,,
+PROJ-261,Batch processing #261,Story,In Progress,Low,13,Data Pipeline,2025-10-28 23:00:00,2025-10-29 02:00:00,2025-11-08 02:00:00,,
+PROJ-262,Receipt emails #262,Bug,In Progress,Low,0,Payment Processing,2025-12-04 03:00:00,2025-12-04 07:00:00,2025-12-08 07:00:00,,
+PROJ-263,Pull to refresh #263,Task,To Do,Low,5,Mobile App,2026-01-11 09:00:00,2026-01-11 09:00:00,,,
+PROJ-264,API versioning #264,Story,Done,High,8,API Gateway,2025-08-18 22:00:00,2025-08-19 01:00:00,2025-09-01 01:00:00,2025-09-14 01:00:00,2025-09-15 01:00:00
+PROJ-265,GraphQL endpoint #265,Story,In Review,Lowest,0,API Gateway,2026-03-06 01:00:00,2026-03-06 03:00:00,2026-03-18 03:00:00,2026-04-05 03:00:00,
+PROJ-266,Offline mode #266,Bug,Done,Medium,0,Mobile App,2025-08-25 20:00:00,2025-08-26 00:00:00,2025-08-27 00:00:00,2025-09-15 00:00:00,2025-09-19 00:00:00
+PROJ-267,Dark mode support #267,Task,To Do,Medium,5,Dashboard Revamp,2026-02-17 23:00:00,2026-02-18 03:00:00,,,
+PROJ-268,Image caching #268,Story,In Progress,Low,3,Mobile App,2025-11-24 00:00:00,2025-11-24 03:00:00,2025-11-26 03:00:00,,
+PROJ-269,Dark mode support #269,Task,To Do,High,13,Dashboard Revamp,2025-11-07 10:00:00,2025-11-07 13:00:00,,,
+PROJ-270,Tax calculation #270,Story,In Review,Low,0,Payment Processing,2025-11-11 02:00:00,2025-11-11 04:00:00,2025-11-12 04:00:00,2025-11-16 04:00:00,
+PROJ-271,Add MFA support #271,Bug,Done,High,0,User Authentication,2025-10-03 16:00:00,2025-10-03 17:00:00,2025-10-12 17:00:00,2025-10-18 17:00:00,2025-10-21 17:00:00
+PROJ-272,Image caching #272,Task,In Progress,Low,3,Mobile App,2025-09-04 20:00:00,2025-09-04 23:00:00,2025-09-11 23:00:00,,
+PROJ-273,Login rate limiting #273,Story,Done,Low,1,User Authentication,2025-09-18 06:00:00,2025-09-18 08:00:00,2025-10-01 08:00:00,2025-10-04 08:00:00,2025-10-09 08:00:00
+PROJ-274,User profile page #274,Task,In Progress,Low,2,User Authentication,2025-10-13 21:00:00,2025-10-14 00:00:00,2025-10-23 00:00:00,,
+PROJ-275,Data retention policy #275,Bug,In Progress,Low,0,Data Pipeline,2026-03-28 03:00:00,2026-03-28 05:00:00,2026-04-03 05:00:00,,
+PROJ-276,Circuit breaker #276,Task,Done,Lowest,2,API Gateway,2025-08-08 10:00:00,2025-08-08 10:00:00,2025-08-12 10:00:00,2025-08-22 10:00:00,2025-08-23 10:00:00
+PROJ-277,Invoice generation #277,Bug,Done,Low,0,Payment Processing,2025-08-10 18:00:00,2025-08-10 21:00:00,2025-08-17 21:00:00,2025-08-23 21:00:00,2025-08-27 21:00:00
+PROJ-278,Real-time streaming #278,Task,In Progress,Medium,3,Data Pipeline,2025-09-04 10:00:00,2025-09-04 13:00:00,2025-09-14 13:00:00,,
+PROJ-279,Implement SSO login #279,Bug,In Review,High,0,User Authentication,2025-12-14 17:00:00,2025-12-14 21:00:00,2025-12-25 21:00:00,2026-01-10 21:00:00,
+PROJ-280,Auth middleware #280,Story,Done,Low,0,API Gateway,2025-08-25 02:00:00,2025-08-25 06:00:00,2025-08-26 06:00:00,2025-09-03 06:00:00,2025-09-06 06:00:00
+PROJ-281,Session timeout handling #281,Story,Done,High,0,User Authentication,2026-03-17 23:00:00,2026-03-18 02:00:00,2026-03-27 02:00:00,2026-04-13 02:00:00,2026-04-14 02:00:00
+PROJ-282,App store listing #282,Bug,Done,Medium,0,Mobile App,2026-03-05 01:00:00,2026-03-05 04:00:00,2026-03-14 04:00:00,2026-03-21 04:00:00,2026-03-25 04:00:00
+PROJ-283,OAuth2 integration #283,Story,Done,Highest,0,User Authentication,2025-10-13 11:00:00,2025-10-13 11:00:00,2025-10-21 11:00:00,2025-10-25 11:00:00,2025-10-27 11:00:00
+PROJ-284,PCI compliance audit #284,Bug,Done,High,0,Payment Processing,2025-08-11 06:00:00,2025-08-11 07:00:00,2025-08-24 07:00:00,2025-08-26 07:00:00,2025-08-31 07:00:00
+PROJ-285,Accessibility audit #285,Story,Done,Medium,8,Dashboard Revamp,2025-10-27 18:00:00,2025-10-27 20:00:00,2025-11-10 20:00:00,2025-11-27 20:00:00,2025-11-28 20:00:00
+PROJ-286,Stripe integration #286,Task,Done,High,3,Payment Processing,2025-10-06 04:00:00,2025-10-06 06:00:00,2025-10-20 06:00:00,2025-10-28 06:00:00,2025-11-01 06:00:00
+PROJ-287,GraphQL endpoint #287,Task,Done,Low,0,API Gateway,2026-01-18 02:00:00,2026-01-18 02:00:00,2026-01-25 02:00:00,2026-02-11 02:00:00,2026-02-14 02:00:00
+PROJ-288,Batch processing #288,Bug,Done,Medium,0,Data Pipeline,2026-03-25 00:00:00,2026-03-25 00:00:00,2026-04-06 00:00:00,2026-04-21 00:00:00,2026-04-24 00:00:00
+PROJ-289,Session timeout handling #289,Task,Done,High,0,User Authentication,2025-10-16 10:00:00,2025-10-16 12:00:00,2025-10-22 12:00:00,2025-11-09 12:00:00,2025-11-14 12:00:00
+PROJ-290,Tax calculation #290,Story,Done,Highest,1,Payment Processing,2025-07-21 20:00:00,2025-07-21 23:00:00,2025-07-22 23:00:00,2025-07-26 23:00:00,2025-07-28 23:00:00
+PROJ-291,Rate limiting #291,Story,Done,Low,5,API Gateway,2025-08-07 20:00:00,2025-08-07 22:00:00,2025-08-10 22:00:00,2025-08-19 22:00:00,2025-08-20 22:00:00
+PROJ-292,Data deduplication #292,Bug,To Do,High,0,Data Pipeline,2025-06-27 12:00:00,2025-06-27 14:00:00,,,
+PROJ-293,Monitoring alerts #293,Story,Done,Highest,1,Data Pipeline,2025-09-18 15:00:00,2025-09-18 15:00:00,2025-09-21 15:00:00,2025-10-10 15:00:00,2025-10-12 15:00:00
+PROJ-294,Push notifications #294,Story,To Do,Medium,2,Mobile App,2026-01-03 22:00:00,2026-01-03 23:00:00,,,
+PROJ-295,Health checks #295,Bug,In Progress,Highest,0,API Gateway,2025-07-23 10:00:00,2025-07-23 12:00:00,2025-07-28 12:00:00,,
+PROJ-296,Invoice generation #296,Task,Done,High,2,Payment Processing,2026-02-27 18:00:00,2026-02-27 18:00:00,2026-03-09 18:00:00,2026-03-15 18:00:00,2026-03-19 18:00:00
+PROJ-297,Chart animations #297,Story,Done,Lowest,0,Dashboard Revamp,2025-09-20 02:00:00,2025-09-20 02:00:00,2025-09-23 02:00:00,2025-09-27 02:00:00,2025-10-02 02:00:00
+PROJ-298,Schema migration #298,Task,Done,Medium,3,Data Pipeline,2025-10-05 08:00:00,2025-10-05 08:00:00,2025-10-09 08:00:00,2025-10-27 08:00:00,2025-11-01 08:00:00
+PROJ-299,Push notifications #299,Story,Done,Medium,5,Mobile App,2026-02-21 19:00:00,2026-02-21 23:00:00,2026-02-25 23:00:00,2026-03-10 23:00:00,2026-03-13 23:00:00
+PROJ-300,Kafka consumer #300,Story,In Review,Highest,5,Data Pipeline,2026-02-11 20:00:00,2026-02-12 00:00:00,2026-02-14 00:00:00,2026-03-03 00:00:00,
+PROJ-301,User profile page #301,Bug,To Do,Lowest,0,User Authentication,2026-01-02 11:00:00,2026-01-02 15:00:00,,,
+PROJ-302,Batch processing #302,Task,Done,Highest,1,Data Pipeline,2026-03-28 02:00:00,2026-03-28 02:00:00,2026-04-02 02:00:00,2026-04-09 02:00:00,2026-04-10 02:00:00
+PROJ-303,JWT refresh token #303,Task,In Progress,Lowest,0,User Authentication,2026-01-03 22:00:00,2026-01-04 01:00:00,2026-01-06 01:00:00,,
+PROJ-304,Data deduplication #304,Task,To Do,Highest,5,Data Pipeline,2025-08-19 17:00:00,2025-08-19 19:00:00,,,
+PROJ-305,Circuit breaker #305,Bug,Done,High,0,API Gateway,2025-06-30 07:00:00,2025-06-30 07:00:00,2025-07-07 07:00:00,2025-07-11 07:00:00,2025-07-15 07:00:00
+PROJ-306,App store listing #306,Story,Done,High,2,Mobile App,2025-06-07 22:00:00,2025-06-07 23:00:00,2025-06-19 23:00:00,2025-06-20 23:00:00,2025-06-22 23:00:00
+PROJ-307,WebSocket support #307,Bug,Done,Medium,0,API Gateway,2025-08-25 11:00:00,2025-08-25 12:00:00,2025-09-06 12:00:00,2025-09-15 12:00:00,2025-09-16 12:00:00
+PROJ-308,Role-based access #308,Bug,In Progress,Highest,0,User Authentication,2025-10-13 22:00:00,2025-10-14 02:00:00,2025-10-25 02:00:00,,
+PROJ-309,Login rate limiting #309,Story,Done,Highest,0,User Authentication,2026-03-18 05:00:00,2026-03-18 07:00:00,2026-03-21 07:00:00,2026-03-30 07:00:00,2026-03-31 07:00:00
+PROJ-310,Deep linking #310,Bug,Done,Highest,0,Mobile App,2025-06-23 00:00:00,2025-06-23 01:00:00,2025-06-24 01:00:00,2025-07-10 01:00:00,2025-07-13 01:00:00
+PROJ-311,API versioning #311,Task,Done,Highest,0,API Gateway,2025-09-23 10:00:00,2025-09-23 11:00:00,2025-09-30 11:00:00,2025-10-11 11:00:00,2025-10-14 11:00:00
+PROJ-312,Add MFA support #312,Bug,Done,Highest,0,User Authentication,2025-08-31 07:00:00,2025-08-31 11:00:00,2025-09-01 11:00:00,2025-09-14 11:00:00,2025-09-15 11:00:00
+PROJ-313,Circuit breaker #313,Story,In Progress,Lowest,0,API Gateway,2025-06-05 11:00:00,2025-06-05 12:00:00,2025-06-10 12:00:00,,
+PROJ-314,Onboarding flow #314,Story,In Progress,Medium,0,Mobile App,2025-09-09 23:00:00,2025-09-10 03:00:00,2025-09-23 03:00:00,,
+PROJ-315,Stripe integration #315,Task,Done,Highest,5,Payment Processing,2026-03-05 11:00:00,2026-03-05 11:00:00,2026-03-11 11:00:00,2026-03-12 11:00:00,2026-03-16 11:00:00
+PROJ-316,Data validation #316,Story,In Progress,High,0,Data Pipeline,2026-02-07 01:00:00,2026-02-07 02:00:00,2026-02-19 02:00:00,,
+PROJ-317,New KPI widgets #317,Bug,Done,Lowest,0,Dashboard Revamp,2025-12-29 22:00:00,2025-12-30 00:00:00,2026-01-07 00:00:00,2026-01-10 00:00:00,2026-01-15 00:00:00
+PROJ-318,Role-based access #318,Task,To Do,Lowest,1,User Authentication,2026-01-09 21:00:00,2026-01-09 22:00:00,,,
+PROJ-319,Payment retry logic #319,Story,Done,Low,13,Payment Processing,2025-11-10 14:00:00,2025-11-10 16:00:00,2025-11-14 16:00:00,2025-11-17 16:00:00,2025-11-19 16:00:00
+PROJ-320,Invoice generation #320,Bug,To Do,Low,0,Payment Processing,2026-01-25 10:00:00,2026-01-25 13:00:00,,,
+PROJ-321,Session timeout handling #321,Bug,In Review,Low,0,User Authentication,2025-10-14 03:00:00,2025-10-14 03:00:00,2025-10-17 03:00:00,2025-10-27 03:00:00,
+PROJ-322,Kafka consumer #322,Story,Done,Medium,3,Data Pipeline,2025-07-17 22:00:00,2025-07-17 23:00:00,2025-07-23 23:00:00,2025-08-05 23:00:00,2025-08-10 23:00:00
+PROJ-323,OAuth2 integration #323,Story,Done,High,1,User Authentication,2025-12-25 14:00:00,2025-12-25 18:00:00,2026-01-06 18:00:00,2026-01-24 18:00:00,2026-01-26 18:00:00
+PROJ-324,Add MFA support #324,Story,Done,High,2,User Authentication,2025-06-07 01:00:00,2025-06-07 02:00:00,2025-06-10 02:00:00,2025-06-17 02:00:00,2025-06-21 02:00:00
+PROJ-325,Accessibility audit #325,Bug,Done,Highest,0,Dashboard Revamp,2025-06-12 02:00:00,2025-06-12 03:00:00,2025-06-23 03:00:00,2025-07-08 03:00:00,2025-07-10 03:00:00
+PROJ-326,Add MFA support #326,Bug,To Do,Low,0,User Authentication,2025-06-26 05:00:00,2025-06-26 09:00:00,,,
+PROJ-327,CORS configuration #327,Task,To Do,Low,3,API Gateway,2025-11-29 06:00:00,2025-11-29 07:00:00,,,
+PROJ-328,User preferences #328,Story,Done,Highest,5,Dashboard Revamp,2025-10-30 15:00:00,2025-10-30 18:00:00,2025-11-08 18:00:00,2025-11-24 18:00:00,2025-11-25 18:00:00
+PROJ-329,Role-based access #329,Story,To Do,High,5,User Authentication,2026-03-06 00:00:00,2026-03-06 03:00:00,,,
+PROJ-330,Batch processing #330,Bug,Done,Low,0,Data Pipeline,2025-11-24 18:00:00,2025-11-24 22:00:00,2025-11-30 22:00:00,2025-12-13 22:00:00,2025-12-16 22:00:00
+PROJ-331,Tax calculation #331,Story,Done,Highest,8,Payment Processing,2025-06-30 15:00:00,2025-06-30 19:00:00,2025-07-06 19:00:00,2025-07-25 19:00:00,2025-07-27 19:00:00
+PROJ-332,Subscription billing #332,Bug,Done,Medium,0,Payment Processing,2026-03-01 23:00:00,2026-03-01 23:00:00,2026-03-14 23:00:00,2026-03-22 23:00:00,2026-03-27 23:00:00
+PROJ-333,API versioning #333,Bug,In Progress,Lowest,0,API Gateway,2025-11-10 23:00:00,2025-11-11 01:00:00,2025-11-21 01:00:00,,
+PROJ-334,Account lockout policy #334,Bug,Done,Lowest,0,User Authentication,2025-09-05 15:00:00,2025-09-05 19:00:00,2025-09-10 19:00:00,2025-09-16 19:00:00,2025-09-20 19:00:00
+PROJ-335,Implement SSO login #335,Bug,In Progress,High,0,User Authentication,2025-06-11 16:00:00,2025-06-11 19:00:00,2025-06-12 19:00:00,,
+PROJ-336,Chart animations #336,Story,In Progress,High,13,Dashboard Revamp,2025-07-01 00:00:00,2025-07-01 01:00:00,2025-07-11 01:00:00,,
+PROJ-337,Data validation #337,Task,Done,Medium,2,Data Pipeline,2025-12-09 22:00:00,2025-12-10 01:00:00,2025-12-20 01:00:00,2025-12-24 01:00:00,2025-12-27 01:00:00
+PROJ-338,Chart animations #338,Bug,Done,Low,0,Dashboard Revamp,2026-02-05 20:00:00,2026-02-05 22:00:00,2026-02-08 22:00:00,2026-02-26 22:00:00,2026-03-03 22:00:00
+PROJ-339,Accessibility audit #339,Story,Done,Low,8,Dashboard Revamp,2025-10-29 04:00:00,2025-10-29 05:00:00,2025-11-10 05:00:00,2025-11-11 05:00:00,2025-11-16 05:00:00
+PROJ-340,API versioning #340,Story,Done,Lowest,5,API Gateway,2026-03-17 03:00:00,2026-03-17 06:00:00,2026-03-20 06:00:00,2026-03-31 06:00:00,2026-04-01 06:00:00
+PROJ-341,Tax calculation #341,Bug,In Progress,Highest,0,Payment Processing,2025-11-19 14:00:00,2025-11-19 14:00:00,2025-11-24 14:00:00,,
+PROJ-342,Refund workflow #342,Story,In Progress,Highest,1,Payment Processing,2025-06-25 12:00:00,2025-06-25 15:00:00,2025-07-07 15:00:00,,
+PROJ-343,Auth middleware #343,Task,In Review,Low,13,API Gateway,2026-03-07 12:00:00,2026-03-07 12:00:00,2026-03-21 12:00:00,2026-04-06 12:00:00,
+PROJ-344,Biometric login #344,Story,In Review,Highest,8,Mobile App,2025-06-11 10:00:00,2025-06-11 12:00:00,2025-06-13 12:00:00,2025-06-16 12:00:00,
+PROJ-345,Drag-drop widgets #345,Task,In Progress,Highest,2,Dashboard Revamp,2025-11-21 19:00:00,2025-11-21 23:00:00,2025-11-29 23:00:00,,
+PROJ-346,Monitoring alerts #346,Story,Done,High,0,Data Pipeline,2025-08-20 01:00:00,2025-08-20 01:00:00,2025-08-26 01:00:00,2025-09-02 01:00:00,2025-09-04 01:00:00
+PROJ-347,Circuit breaker #347,Story,In Progress,Highest,1,API Gateway,2025-12-19 18:00:00,2025-12-19 22:00:00,2026-01-02 22:00:00,,
+PROJ-348,Rate limiting #348,Task,In Progress,Low,2,API Gateway,2025-10-29 21:00:00,2025-10-30 01:00:00,2025-11-07 01:00:00,,
+PROJ-349,Stripe integration #349,Bug,In Progress,Medium,0,Payment Processing,2025-07-12 15:00:00,2025-07-12 15:00:00,2025-07-17 15:00:00,,
+PROJ-350,CORS configuration #350,Story,Done,Medium,2,API Gateway,2026-03-06 12:00:00,2026-03-06 13:00:00,2026-03-12 13:00:00,2026-03-25 13:00:00,2026-03-28 13:00:00
+PROJ-351,Stripe integration #351,Story,In Progress,Low,8,Payment Processing,2025-09-24 08:00:00,2025-09-24 12:00:00,2025-09-25 12:00:00,,
+PROJ-352,Refund workflow #352,Bug,Done,Lowest,0,Payment Processing,2025-12-29 18:00:00,2025-12-29 19:00:00,2026-01-07 19:00:00,2026-01-09 19:00:00,2026-01-13 19:00:00
+PROJ-353,Pull to refresh #353,Task,Done,Low,5,Mobile App,2026-01-30 09:00:00,2026-01-30 09:00:00,2026-02-06 09:00:00,2026-02-08 09:00:00,2026-02-13 09:00:00
+PROJ-354,Offline mode #354,Task,Done,Low,3,Mobile App,2025-08-25 06:00:00,2025-08-25 07:00:00,2025-08-28 07:00:00,2025-08-30 07:00:00,2025-09-03 07:00:00
+PROJ-355,Session timeout handling #355,Task,Done,High,8,User Authentication,2025-11-11 23:00:00,2025-11-11 23:00:00,2025-11-13 23:00:00,2025-11-26 23:00:00,2025-12-01 23:00:00
+PROJ-356,Circuit breaker #356,Bug,Done,Highest,0,API Gateway,2026-03-28 16:00:00,2026-03-28 19:00:00,2026-03-30 19:00:00,2026-04-13 19:00:00,2026-04-15 19:00:00
+PROJ-357,Refund workflow #357,Bug,Done,Highest,0,Payment Processing,2025-10-25 17:00:00,2025-10-25 19:00:00,2025-11-01 19:00:00,2025-11-10 19:00:00,2025-11-14 19:00:00
+PROJ-358,Data retention policy #358,Story,Done,Highest,3,Data Pipeline,2025-10-20 12:00:00,2025-10-20 13:00:00,2025-10-30 13:00:00,2025-11-19 13:00:00,2025-11-23 13:00:00
+PROJ-359,User profile page #359,Task,Done,Highest,0,User Authentication,2025-10-16 11:00:00,2025-10-16 11:00:00,2025-10-22 11:00:00,2025-11-01 11:00:00,2025-11-04 11:00:00
+PROJ-360,Dark mode support #360,Story,Done,High,3,Dashboard Revamp,2025-11-01 23:00:00,2025-11-02 02:00:00,2025-11-15 02:00:00,2025-11-26 02:00:00,2025-11-29 02:00:00
+PROJ-361,Data retention policy #361,Task,Done,High,0,Data Pipeline,2025-09-17 13:00:00,2025-09-17 16:00:00,2025-09-30 16:00:00,2025-10-17 16:00:00,2025-10-20 16:00:00
+PROJ-362,Add MFA support #362,Task,In Progress,Lowest,0,User Authentication,2025-08-09 16:00:00,2025-08-09 20:00:00,2025-08-10 20:00:00,,
+PROJ-363,Subscription billing #363,Story,Done,High,1,Payment Processing,2026-01-20 01:00:00,2026-01-20 03:00:00,2026-02-01 03:00:00,2026-02-08 03:00:00,2026-02-11 03:00:00
+PROJ-364,Loading skeletons #364,Story,In Progress,Highest,1,Dashboard Revamp,2025-10-02 11:00:00,2025-10-02 14:00:00,2025-10-12 14:00:00,,
+PROJ-365,CORS configuration #365,Task,Done,Medium,13,API Gateway,2025-08-23 08:00:00,2025-08-23 08:00:00,2025-08-28 08:00:00,2025-08-29 08:00:00,2025-09-02 08:00:00
+PROJ-366,Account lockout policy #366,Task,Done,High,5,User Authentication,2025-09-24 21:00:00,2025-09-24 22:00:00,2025-09-29 22:00:00,2025-10-13 22:00:00,2025-10-18 22:00:00
+PROJ-367,Login rate limiting #367,Story,Done,High,1,User Authentication,2025-09-23 08:00:00,2025-09-23 12:00:00,2025-10-06 12:00:00,2025-10-16 12:00:00,2025-10-19 12:00:00
+PROJ-368,Request logging #368,Task,In Review,High,0,API Gateway,2025-11-02 21:00:00,2025-11-03 01:00:00,2025-11-17 01:00:00,2025-12-07 01:00:00,
+PROJ-369,Rate limiting #369,Bug,Done,Medium,0,API Gateway,2026-03-15 20:00:00,2026-03-16 00:00:00,2026-03-26 00:00:00,2026-04-05 00:00:00,2026-04-08 00:00:00
+PROJ-370,Batch processing #370,Bug,To Do,Medium,0,Data Pipeline,2025-11-14 08:00:00,2025-11-14 10:00:00,,,
+PROJ-371,Kafka consumer #371,Story,To Do,High,1,Data Pipeline,2025-12-24 21:00:00,2025-12-24 23:00:00,,,
+PROJ-372,ETL scheduler #372,Task,Done,Medium,8,Data Pipeline,2026-01-01 12:00:00,2026-01-01 15:00:00,2026-01-13 15:00:00,2026-01-15 15:00:00,2026-01-20 15:00:00
+PROJ-373,Schema migration #373,Story,Done,High,0,Data Pipeline,2025-12-01 16:00:00,2025-12-01 18:00:00,2025-12-15 18:00:00,2025-12-21 18:00:00,2025-12-26 18:00:00
+PROJ-374,Refund workflow #374,Story,In Review,Medium,3,Payment Processing,2025-11-19 20:00:00,2025-11-19 20:00:00,2025-11-23 20:00:00,2025-12-05 20:00:00,
+PROJ-375,Receipt emails #375,Story,Done,Medium,13,Payment Processing,2025-10-12 18:00:00,2025-10-12 20:00:00,2025-10-20 20:00:00,2025-10-24 20:00:00,2025-10-28 20:00:00
+PROJ-376,Login rate limiting #376,Bug,Done,Lowest,0,User Authentication,2025-08-01 21:00:00,2025-08-02 00:00:00,2025-08-11 00:00:00,2025-08-21 00:00:00,2025-08-25 00:00:00
+PROJ-377,Password reset flow #377,Task,Done,Medium,0,User Authentication,2026-03-19 14:00:00,2026-03-19 15:00:00,2026-03-25 15:00:00,2026-03-31 15:00:00,2026-04-01 15:00:00
+PROJ-378,API versioning #378,Bug,In Progress,Highest,0,API Gateway,2025-06-03 14:00:00,2025-06-03 16:00:00,2025-06-07 16:00:00,,
+PROJ-379,Payment dashboard #379,Task,Done,Highest,3,Payment Processing,2026-01-09 20:00:00,2026-01-09 23:00:00,2026-01-16 23:00:00,2026-01-30 23:00:00,2026-02-03 23:00:00
+PROJ-380,Rate limiting #380,Story,Done,Medium,1,API Gateway,2025-11-12 16:00:00,2025-11-12 17:00:00,2025-11-13 17:00:00,2025-11-14 17:00:00,2025-11-16 17:00:00
+PROJ-381,Payment retry logic #381,Bug,To Do,Low,0,Payment Processing,2026-02-13 18:00:00,2026-02-13 20:00:00,,,
+PROJ-382,Stripe integration #382,Bug,In Progress,Medium,0,Payment Processing,2026-01-20 23:00:00,2026-01-21 03:00:00,2026-01-31 03:00:00,,
+PROJ-383,Performance monitoring #383,Bug,Done,High,0,Mobile App,2025-11-23 15:00:00,2025-11-23 17:00:00,2025-12-06 17:00:00,2025-12-13 17:00:00,2025-12-15 17:00:00
+PROJ-384,Health checks #384,Story,In Progress,High,5,API Gateway,2025-06-12 18:00:00,2025-06-12 22:00:00,2025-06-15 22:00:00,,
+PROJ-385,Implement SSO login #385,Bug,In Progress,Medium,0,User Authentication,2026-03-01 19:00:00,2026-03-01 19:00:00,2026-03-11 19:00:00,,
+PROJ-386,Implement SSO login #386,Bug,To Do,Highest,0,User Authentication,2025-12-31 14:00:00,2025-12-31 17:00:00,,,
+PROJ-387,Login rate limiting #387,Story,Done,High,1,User Authentication,2025-11-02 13:00:00,2025-11-02 13:00:00,2025-11-13 13:00:00,2025-11-30 13:00:00,2025-12-03 13:00:00
+PROJ-388,Performance monitoring #388,Task,Done,Highest,2,Mobile App,2025-10-23 03:00:00,2025-10-23 03:00:00,2025-10-31 03:00:00,2025-11-07 03:00:00,2025-11-12 03:00:00
+PROJ-389,Currency conversion #389,Story,Done,Medium,0,Payment Processing,2025-10-30 05:00:00,2025-10-30 05:00:00,2025-11-08 05:00:00,2025-11-24 05:00:00,2025-11-26 05:00:00
+PROJ-390,Schema migration #390,Story,In Progress,Highest,2,Data Pipeline,2025-07-27 18:00:00,2025-07-27 21:00:00,2025-07-30 21:00:00,,
+PROJ-391,Add MFA support #391,Bug,Done,High,0,User Authentication,2026-01-20 09:00:00,2026-01-20 11:00:00,2026-01-28 11:00:00,2026-01-30 11:00:00,2026-01-31 11:00:00
+PROJ-392,Payment retry logic #392,Story,In Progress,Medium,0,Payment Processing,2025-07-30 03:00:00,2025-07-30 03:00:00,2025-07-31 03:00:00,,
+PROJ-393,Tax calculation #393,Task,In Progress,Low,8,Payment Processing,2025-07-18 11:00:00,2025-07-18 13:00:00,2025-07-21 13:00:00,,
+PROJ-394,Role-based access #394,Task,Done,Medium,0,User Authentication,2026-01-31 13:00:00,2026-01-31 14:00:00,2026-02-02 14:00:00,2026-02-07 14:00:00,2026-02-08 14:00:00
+PROJ-395,Receipt emails #395,Bug,Done,Low,0,Payment Processing,2026-03-19 21:00:00,2026-03-20 00:00:00,2026-03-23 00:00:00,2026-04-12 00:00:00,2026-04-16 00:00:00
+PROJ-396,Chart animations #396,Story,In Review,Low,2,Dashboard Revamp,2025-12-28 14:00:00,2025-12-28 14:00:00,2025-12-30 14:00:00,2026-01-08 14:00:00,
+PROJ-397,ETL scheduler #397,Bug,Done,Lowest,0,Data Pipeline,2026-03-23 23:00:00,2026-03-24 03:00:00,2026-03-28 03:00:00,2026-04-08 03:00:00,2026-04-13 03:00:00
+PROJ-398,Performance monitoring #398,Bug,Done,High,0,Mobile App,2026-02-02 11:00:00,2026-02-02 14:00:00,2026-02-05 14:00:00,2026-02-23 14:00:00,2026-02-28 14:00:00
+PROJ-399,Password reset flow #399,Story,Done,Low,0,User Authentication,2025-08-24 02:00:00,2025-08-24 05:00:00,2025-08-30 05:00:00,2025-09-07 05:00:00,2025-09-10 05:00:00
+PROJ-400,Loading skeletons #400,Story,In Progress,Low,0,Dashboard Revamp,2025-09-29 02:00:00,2025-09-29 05:00:00,2025-10-07 05:00:00,,

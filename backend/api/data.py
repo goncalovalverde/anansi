@@ -40,9 +40,20 @@ def load_data(
     
     elif source == "csv":
         if not reader_config["input"]["csv_file"].strip():
+            # CSV uploads create datasets directly — check for existing one
+            config_hash = data_service.compute_config_hash(db)
+            existing_id = data_service.find_valid_dataset(db, config_hash)
+            if existing_id:
+                return {"dataset_id": existing_id, "cached": True}
+            # Also check for any ready CSV dataset (uploaded via drag-and-drop)
+            row = db.execute(
+                "SELECT id FROM datasets WHERE source='csv' AND status='ready' ORDER BY created_at DESC LIMIT 1"
+            ).fetchone()
+            if row:
+                return {"dataset_id": row["id"], "cached": True}
             raise HTTPException(
                 status_code=400,
-                detail="CSV file path is required. Please enter a file path in Settings."
+                detail="No CSV data available. Please upload a CSV file in Settings."
             )
 
     config_hash = data_service.compute_config_hash(db)
