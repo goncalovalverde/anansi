@@ -11,7 +11,7 @@ graph TD
         FlowAPI["/api/flow\nefficiency · wip_trend · throughput"]
         TrendsAPI["/api/trends\ncumulative_flow · monthly · epic_progress"]
         InsightsAPI["/api/insights\nalert / warn / ok pills"]
-        ConfigAPI["/api/config"]
+        ConfigAPI["/api/config\n+ /chart-thresholds"]
         DataAPI["/api/data"]
     end
 
@@ -22,21 +22,23 @@ graph TD
     FastAPI --> ConfigAPI
     FastAPI --> DataAPI
 
-    ChartsAPI  --> BacklogViewer["viewer.Backlog\nget_all_charts · get_kpis\nget_callouts · get_insights\n↳ BacklogChartsMixin · FlowChartsMixin\n↳ TrendChartsMixin · BacklogData"]
-    FlowAPI    --> BacklogViewer
-    TrendsAPI  --> BacklogViewer
-    InsightsAPI --> BacklogViewer
+    ChartsAPI   --> BacklogCache["services.BacklogCache\nget_backlog · get_insights_response\nget_trends_response\n(double-checked locking)"]
+    FlowAPI     --> BacklogCache
+    TrendsAPI   --> BacklogCache
+    InsightsAPI --> BacklogCache
 
-    ConfigAPI --> ConfigSvc[ConfigService]
+    BacklogCache --> BacklogViewer["viewer.Backlog\n↳ BacklogInsightsMixin\n↳ BacklogChartsMixin\n↳ FlowChartsMixin\n↳ TrendChartsMixin"]
+
+    ConfigAPI --> ConfigSvc["ConfigService\ndetect_story_point_fields\ndetect_epic_link_fields\nget/set_chart_thresholds"]
     DataAPI   --> DataSvc[DataService]
 
     ConfigSvc --> SQLite[("SQLite anansi.db")]
     DataSvc   --> SQLite
-    DataSvc   --> JiraReader["reader.Jira"]
+    DataSvc   --> JiraReader["reader.Jira\n(pure data fetcher)"]
     DataSvc   --> CSVReader["reader.CSV (in-memory)"]
     JiraReader --> JiraAPI["Jira Cloud API"]
-    JiraReader --> SQLiteCache["SQLite cache\ndataset_rows table"]
 
+    BacklogViewer --> ChartConfigInst["ChartConfig(overrides)\ntunable thresholds"]
     BacklogViewer -->|"Plotly JSON\n+ callouts + insights"| FastAPI
 ```
 
@@ -108,9 +110,11 @@ sequenceDiagram
         API-->>B: {status: ready}
     end
     B->>API: GET /api/charts/{dataset_id}
+    API->>API: BacklogCache.get_backlog(dataset_id)
     API->>DB: SELECT dataset_rows
     API-->>B: {treemap, distribution, pbis_done, ...kpis, callouts}
     B->>API: GET /api/insights/{dataset_id}
+    API->>API: BacklogCache.get_insights_response(dataset_id)
     API-->>B: [{type, message}, ...]
     B->>B: Plotly.newPlot() x8
     B->>B: InsightBar renders alert/warn/ok pills
@@ -156,6 +160,13 @@ classDiagram
         +build_cumulative_series(dates, week_range) Series
     }
 
+    class BacklogInsightsMixin {
+        <<viewer/backlog_insights.py>>
+        +get_insights() list
+        +get_callouts() list
+        +get_flow_callouts() list
+    }
+
     class BacklogChartsMixin {
         <<viewer/backlog_charts.py>>
         +draw_treemap() str
@@ -190,25 +201,25 @@ classDiagram
         +in_progress_step: str
         +treemap_data: DataFrame
         +data: BacklogData
+        +chart_config: ChartConfig
         -_done_df: DataFrame
         -_active_df: DataFrame
         -_ct_df: DataFrame
         +get_all_charts() dict
         +get_flow_charts() dict
         +get_kpis() dict
-        +get_callouts() list
-        +get_insights() list
         -_normalize_status(status) str
         -_resolve_step(df, preferred, workflow, reversed_order) str
     }
 
     class ChartConfig {
-        <<viewer/chart_config.py>>
-        +HEATMAP_MIN_HEIGHT
-        +NORMAL_WEEK_COLOR
-        +ROLLING_AVG_WINDOW
-        +AGING_CRITICAL_COUNT
-        +FLOW_EFFICIENCY_GOOD_PCT
+        <<viewer/chart_config.py — instantiable>>
+        +HEATMAP_MIN_HEIGHT$
+        +NORMAL_WEEK_COLOR$
+        +WIP_HIGH_THRESHOLD: int
+        +CYCLE_TIME_HIGH_DAYS: int
+        +FLOW_EFFICIENCY_GOOD_PCT: int
+        +__init__(overrides: dict|None)
     }
 
     class EpicColorMap {
@@ -219,22 +230,34 @@ classDiagram
         +clear()
     }
 
+    class BacklogCache {
+        <<services/backlog_cache.py>>
+        +get_backlog(dataset_id, db) Backlog
+        +get_insights_response(dataset_id, db) list
+        +get_trends_response(dataset_id, db) dict
+        -_config_signature(db) str
+    }
+
     class create_empty_state_figure {
         <<viewer/chart_helpers.py>>
         +create_empty_state_figure(message, height) str
     }
 
+    Backlog --|> BacklogInsightsMixin : inherits
     Backlog --|> BacklogChartsMixin : inherits
     Backlog --|> FlowChartsMixin : inherits
     Backlog --|> TrendChartsMixin : inherits
     Backlog --> BacklogData : creates via from_cycle_data()
+    Backlog --> ChartConfig : creates instance in __init__
     BacklogData --* Backlog : stored as .data
-    BacklogChartsMixin --> ChartConfig : uses constants
+    BacklogInsightsMixin --> ChartConfig : reads self.chart_config
+    BacklogChartsMixin --> ChartConfig : reads self.chart_config
     BacklogChartsMixin --> EpicColorMap : uses for colors
     BacklogChartsMixin --> create_empty_state_figure : uses for empty states
     FlowChartsMixin --> BacklogData : calls build_event_wip / build_weekly_counts
-    FlowChartsMixin --> ChartConfig : uses constants
+    FlowChartsMixin --> ChartConfig : reads self.chart_config
     TrendChartsMixin --> BacklogData : calls build_cumulative_series
+    BacklogCache --> Backlog : instantiates and caches
 ```
 
 

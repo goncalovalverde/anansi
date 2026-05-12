@@ -59,6 +59,21 @@ def write_issue_types(
     return {"types": config_service.get_issue_types(db)}
 
 
+@router.get("/chart-thresholds")
+def read_chart_thresholds(db: sqlite3.Connection = Depends(get_db)):
+    """Get current chart thresholds (defaults merged with overrides)."""
+    return config_service.get_chart_thresholds(db)
+
+
+@router.put("/chart-thresholds")
+def write_chart_thresholds(
+    body: dict, db: sqlite3.Connection = Depends(get_db)
+):
+    """Update chart thresholds (partial update supported)."""
+    config_service.set_chart_thresholds(db, body)
+    return config_service.get_chart_thresholds(db)
+
+
 def _merge_overrides(jira_config: dict, overrides: schemas.TestConnectionRequest) -> dict:
     """Merge form-submitted overrides into a jira_config dict.
 

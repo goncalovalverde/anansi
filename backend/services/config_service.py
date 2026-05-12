@@ -22,6 +22,22 @@ _ALLOWED_CONFIG_KEYS = {
     "workflow_start_step",
 }
 
+# Chart threshold keys are also allowed (prefixed with "chart_")
+_ALLOWED_CHART_KEYS = {f"chart_{k}" for k in (
+    "wip_high_threshold", "wip_elevated_threshold",
+    "cycle_time_high_days", "cycle_time_healthy_days",
+    "bug_ratio_high_pct", "bug_ratio_elevated_pct",
+    "backlog_growth_ratio",
+    "aging_critical_days", "aging_critical_count",
+    "aging_warning_days", "aging_warning_count",
+    "callout_bug_ratio_high_pct",
+    "callout_cycle_time_alert_days", "callout_cycle_time_warn_days",
+    "callout_outlier_ct_multiplier", "callout_epic_concentration_pct",
+    "complexity_ratio_threshold", "unestimated_items_threshold",
+    "flow_efficiency_good_pct", "flow_efficiency_ok_pct",
+    "stddev_threshold", "rolling_avg_window",
+)}
+
 
 def get_config(db: sqlite3.Connection) -> dict:
     rows = db.execute("SELECT key, value FROM config").fetchall()
@@ -41,8 +57,9 @@ def get_raw_config(db: sqlite3.Connection) -> dict:
 
 
 def set_config(db: sqlite3.Connection, updates: dict) -> None:
+    allowed = _ALLOWED_CONFIG_KEYS | _ALLOWED_CHART_KEYS
     for key, value in updates.items():
-        if key not in _ALLOWED_CONFIG_KEYS:
+        if key not in allowed:
             continue
         if key in SECRET_KEYS and value in ("", "***"):
             continue
@@ -180,3 +197,35 @@ def build_reader_config(db: sqlite3.Connection) -> dict:
         "issue_type": ["Total"] + issue_types,
         "chart_thresholds": chart_thresholds or None,
     }
+
+
+def get_chart_thresholds(db: sqlite3.Connection) -> dict:
+    """Return current chart thresholds (defaults merged with DB overrides)."""
+    from ..viewer.chart_config import _THRESHOLD_DEFAULTS
+
+    raw = get_raw_config(db)
+    result = {}
+    for key, default_val in _THRESHOLD_DEFAULTS.items():
+        db_key = f"chart_{key}"
+        stored = raw.get(db_key)
+        if stored:
+            result[key] = type(default_val)(stored)
+        else:
+            result[key] = default_val
+    return result
+
+
+def set_chart_thresholds(db: sqlite3.Connection, thresholds: dict) -> None:
+    """Persist chart threshold overrides (only non-default values)."""
+    from ..viewer.chart_config import _THRESHOLD_DEFAULTS
+
+    for key, value in thresholds.items():
+        if key not in _THRESHOLD_DEFAULTS:
+            continue
+        db_key = f"chart_{key}"
+        db.execute(
+            "INSERT INTO config (key, value) VALUES (?, ?) "
+            "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            (db_key, str(value)),
+        )
+    db.commit()

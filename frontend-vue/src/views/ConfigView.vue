@@ -314,6 +314,135 @@
           </div>
         </section>
 
+        <!-- Section 3: Chart Thresholds -->
+        <section v-if="workflowVisible" class="config-section">
+          <h2 class="section-title">Chart Thresholds</h2>
+          <p class="form-hint" style="margin-bottom:1rem;">Fine-tune the sensitivity of insights, callouts, and health indicators. Changes apply on the next data load.</p>
+
+          <details class="advanced-settings">
+            <summary>WIP &amp; Flow</summary>
+            <div class="advanced-content threshold-grid">
+              <div class="form-group form-group--narrow">
+                <label for="ct_wip_high">WIP High Threshold</label>
+                <input type="number" id="ct_wip_high" v-model.number="thresholds.wip_high_threshold" />
+                <p class="form-hint">Items count above which WIP is flagged as critical.</p>
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_wip_elevated">WIP Elevated Threshold</label>
+                <input type="number" id="ct_wip_elevated" v-model.number="thresholds.wip_elevated_threshold" />
+                <p class="form-hint">Items count for elevated WIP warning.</p>
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_flow_good">Flow Efficiency Good (%)</label>
+                <input type="number" id="ct_flow_good" v-model.number="thresholds.flow_efficiency_good_pct" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_flow_ok">Flow Efficiency OK (%)</label>
+                <input type="number" id="ct_flow_ok" v-model.number="thresholds.flow_efficiency_ok_pct" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_rolling_avg">Rolling Avg Window (weeks)</label>
+                <input type="number" id="ct_rolling_avg" v-model.number="thresholds.rolling_avg_window" />
+              </div>
+            </div>
+          </details>
+
+          <details class="advanced-settings">
+            <summary>Cycle Time</summary>
+            <div class="advanced-content threshold-grid">
+              <div class="form-group form-group--narrow">
+                <label for="ct_ct_high">High Cycle Time (days)</label>
+                <input type="number" id="ct_ct_high" v-model.number="thresholds.cycle_time_high_days" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_ct_healthy">Healthy Cycle Time (days)</label>
+                <input type="number" id="ct_ct_healthy" v-model.number="thresholds.cycle_time_healthy_days" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_stddev">Std Dev Threshold</label>
+                <input type="number" step="0.1" id="ct_stddev" v-model.number="thresholds.stddev_threshold" />
+              </div>
+            </div>
+          </details>
+
+          <details class="advanced-settings">
+            <summary>Bug Ratio &amp; Health</summary>
+            <div class="advanced-content threshold-grid">
+              <div class="form-group form-group--narrow">
+                <label for="ct_bug_high">Bug Ratio High (%)</label>
+                <input type="number" id="ct_bug_high" v-model.number="thresholds.bug_ratio_high_pct" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_bug_elevated">Bug Ratio Elevated (%)</label>
+                <input type="number" id="ct_bug_elevated" v-model.number="thresholds.bug_ratio_elevated_pct" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_backlog_growth">Backlog Growth Ratio</label>
+                <input type="number" step="0.1" id="ct_backlog_growth" v-model.number="thresholds.backlog_growth_ratio" />
+                <p class="form-hint">Created/Done ratio above which backlog is considered growing.</p>
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_complexity">Complexity Ratio</label>
+                <input type="number" step="0.1" id="ct_complexity" v-model.number="thresholds.complexity_ratio_threshold" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_unestimated">Unestimated Items (%)</label>
+                <input type="number" step="0.01" id="ct_unestimated" v-model.number="thresholds.unestimated_items_threshold" />
+                <p class="form-hint">Fraction (0–1) of unestimated items to flag.</p>
+              </div>
+            </div>
+          </details>
+
+          <details class="advanced-settings">
+            <summary>Aging</summary>
+            <div class="advanced-content threshold-grid">
+              <div class="form-group form-group--narrow">
+                <label for="ct_aging_crit_days">Aging Critical (days)</label>
+                <input type="number" id="ct_aging_crit_days" v-model.number="thresholds.aging_critical_days" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_aging_crit_count">Aging Critical Count</label>
+                <input type="number" id="ct_aging_crit_count" v-model.number="thresholds.aging_critical_count" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_aging_warn_days">Aging Warning (days)</label>
+                <input type="number" id="ct_aging_warn_days" v-model.number="thresholds.aging_warning_days" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_aging_warn_count">Aging Warning Count</label>
+                <input type="number" id="ct_aging_warn_count" v-model.number="thresholds.aging_warning_count" />
+              </div>
+            </div>
+          </details>
+
+          <details class="advanced-settings">
+            <summary>Callout Sensitivity</summary>
+            <div class="advanced-content threshold-grid">
+              <div class="form-group form-group--narrow">
+                <label for="ct_co_bug">Bug Ratio High (%)</label>
+                <input type="number" id="ct_co_bug" v-model.number="thresholds.callout_bug_ratio_high_pct" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_co_ct_alert">Cycle Time Alert (days)</label>
+                <input type="number" id="ct_co_ct_alert" v-model.number="thresholds.callout_cycle_time_alert_days" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_co_ct_warn">Cycle Time Warning (days)</label>
+                <input type="number" id="ct_co_ct_warn" v-model.number="thresholds.callout_cycle_time_warn_days" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_co_outlier">Outlier CT Multiplier</label>
+                <input type="number" step="0.1" id="ct_co_outlier" v-model.number="thresholds.callout_outlier_ct_multiplier" />
+              </div>
+              <div class="form-group form-group--narrow">
+                <label for="ct_co_epic">Epic Concentration (%)</label>
+                <input type="number" step="0.01" id="ct_co_epic" v-model.number="thresholds.callout_epic_concentration_pct" />
+                <p class="form-hint">Fraction (0–1) of work in one epic to flag concentration risk.</p>
+              </div>
+            </div>
+          </details>
+        </section>
+
         <!-- Post-save CTA -->
         <div v-if="stepSave" class="cta-banner">
           <p>✓ Configuration saved! Your dashboard is ready.</p>
@@ -430,6 +559,9 @@ function addWorkflowManual() {
 const issueTypes    = ref([])
 const allIssueTypes = ref([])
 const typeInput     = ref('')
+
+// ── Chart thresholds ─────────────────────────────────────────────────────
+const thresholds = reactive({})
 
 const availableIssueTypes = computed(() =>
   allIssueTypes.value.filter(t => !issueTypes.value.includes(t))
@@ -605,6 +737,7 @@ async function save() {
       Api.putConfig(collectFormData()),
       Api.putWorkflow(workflowSteps.value),
       Api.putIssueTypes(issueTypes.value),
+      Api.putChartThresholds(thresholds),
     ])
     showNotification?.('Configuration saved successfully', 'success')
     stepSave.value = true
@@ -630,10 +763,11 @@ async function clearConfigCache() {
 // ── Load config on mount ──────────────────────────────────────────────────
 onMounted(async () => {
   try {
-    const [configResp, workflowResp, typesResp] = await Promise.all([
+    const [configResp, workflowResp, typesResp, thresholdsResp] = await Promise.all([
       Api.getConfig(),
       Api.getWorkflow(),
       Api.getIssueTypes(),
+      Api.getChartThresholds(),
     ])
 
     // Populate form
@@ -645,6 +779,9 @@ onMounted(async () => {
 
     workflowSteps.value = workflowResp.steps || []
     issueTypes.value = typesResp.types || []
+
+    // Populate chart thresholds
+    Object.assign(thresholds, thresholdsResp)
 
     const savedStart = configResp.workflow_start_step
     if (savedStart && workflowSteps.value.includes(savedStart)) {

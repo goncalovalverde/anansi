@@ -1011,6 +1011,16 @@ details.advanced-settings .advanced-content {
   margin-top: 0.75rem;
 }
 
+/* ── Threshold grid ── */
+.threshold-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.threshold-grid .form-group--narrow input[type="number"] {
+  width: 100%;
+}
+
 /* ── Contrast fix: WCAG AA — text-muted defined in :root above ── */
 
 /* ── Mobile chart fix ── */

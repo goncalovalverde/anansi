@@ -19,6 +19,9 @@ export const Api = {
   getIssueTypes: ()  => apiFetch('/api/config/issue-types'),
   putIssueTypes: (types) => apiFetch('/api/config/issue-types', { method: 'PUT', ...json({ types }) }),
 
+  getChartThresholds: () => apiFetch('/api/config/chart-thresholds'),
+  putChartThresholds: (d) => apiFetch('/api/config/chart-thresholds', { method: 'PUT', ...json(d) }),
+
   testConnection:  (d) => apiFetch('/api/config/test-connection',  { method: 'POST', ...json(d || {}) }),
   getJiraStatuses: (d) => apiFetch('/api/config/jira-statuses',    { method: 'POST', ...json(d || {}) }),
   getJiraProjects: (d) => apiFetch('/api/config/jira-projects',    { method: 'POST', ...json(d || {}) }),

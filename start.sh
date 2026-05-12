@@ -15,6 +15,6 @@ if [ ! -d "$FRONTEND_DIST" ]; then
   cd "$ROOT_DIR"
 fi
 
-echo "==> Starting Anansi backend on http://localhost:8000"
+echo "==> Starting Anansi backend on http://localhost:9000"
 cd "$ROOT_DIR/backend"
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --port 9000
