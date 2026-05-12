@@ -205,6 +205,15 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
     # ------------------------------------------------------------------ #
 
     def get_treemap_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Normalize epic column: CSV exports use "Epic" (name), Jira uses "Epic Link" (key)
+        if "Epic Link" not in df.columns:
+            if "Epic" in df.columns:
+                df = df.copy()
+                df["Epic Link"] = df["Epic"]
+            else:
+                df = df.copy()
+                df["Epic Link"] = "No Epic"
+
         # Filter to configured issue types to track
         configured_types = self.config.get("issue_type", [])
         if configured_types and "Total" in configured_types:
