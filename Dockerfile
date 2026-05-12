@@ -19,10 +19,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY anansi.py .
 COPY backend backend/
-COPY reader reader/
-COPY viewer viewer/
 COPY log_config.yaml .
 
 # Copy frontend build from builder stage
