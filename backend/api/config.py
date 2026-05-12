@@ -143,7 +143,6 @@ def test_connection(
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Test connection to Jira with current or provided config."""
-    import reader.jira as jira_reader
 
     jira_config = config_service.build_jira_config(db)
     if body:
@@ -167,7 +166,6 @@ def get_jira_statuses(
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Get list of available statuses from Jira instance."""
-    import reader.jira as jira_reader
 
     jira_config = config_service.build_jira_config(db)
     if body:
@@ -191,7 +189,6 @@ def get_jira_projects(
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Return list of Jira projects accessible with current credentials."""
-    import reader.jira as jira_reader
 
     jira_config = config_service.build_jira_config(db)
     if body:
@@ -219,7 +216,6 @@ def get_jira_issue_types(
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Return all issue types available in the connected Jira instance."""
-    import reader.jira as jira_reader
 
     jira_config = config_service.build_jira_config(db)
     if body:
@@ -242,7 +238,6 @@ def get_jira_fields(
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Return custom fields that likely map to story points or epic link."""
-    import reader.jira as jira_reader
 
     jira_config = config_service.build_jira_config(db)
     if body:
