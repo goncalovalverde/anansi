@@ -124,7 +124,7 @@ def load_data_task(dataset_id: str, db_path: str) -> None:
         save_dataframe(conn, dataset_id, df)
         update_dataset_status(conn, dataset_id, "ready")
         # Invalidate stale cache so the next request rebuilds with fresh data
-        from services import backlog_cache
+        from . import backlog_cache
         backlog_cache.invalidate(dataset_id)
         logger.info("Dataset %s loaded successfully (%d rows)", dataset_id, len(df))
     except Exception as exc:
