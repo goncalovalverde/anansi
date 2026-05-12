@@ -13,10 +13,42 @@ from typing import Dict, List
 
 ANANSI_COLORS = ['#007B85', '#F5A623', '#D35400', '#2C3E50', '#5DADE2', '#A569BD', '#52BE80']
 
+# Tunable threshold defaults — can be overridden per-instance via DB config
+_THRESHOLD_DEFAULTS = {
+    "wip_high_threshold": 100,
+    "wip_elevated_threshold": 50,
+    "cycle_time_high_days": 30,
+    "cycle_time_healthy_days": 10,
+    "bug_ratio_high_pct": 30,
+    "bug_ratio_elevated_pct": 15,
+    "backlog_growth_ratio": 1.2,
+    "aging_critical_days": 60,
+    "aging_critical_count": 5,
+    "aging_warning_days": 31,
+    "aging_warning_count": 3,
+    "callout_bug_ratio_high_pct": 25,
+    "callout_cycle_time_alert_days": 60,
+    "callout_cycle_time_warn_days": 30,
+    "callout_outlier_ct_multiplier": 3,
+    "callout_epic_concentration_pct": 0.6,
+    "complexity_ratio_threshold": 3.0,
+    "unestimated_items_threshold": 0.2,
+    "flow_efficiency_good_pct": 40,
+    "flow_efficiency_ok_pct": 20,
+    "stddev_threshold": 1.0,
+    "rolling_avg_window": 4,
+}
+
 
 class ChartConfig:
-    """Centralized configuration for chart generation."""
-    # Aging Heatmap
+    """Centralized configuration for chart generation.
+
+    Style/layout constants remain class-level (never overridden).
+    Tunable thresholds are instance attributes, initialized from defaults
+    and optionally overridden via a dict (loaded from the config DB).
+    """
+
+    # ---- Style / layout constants (class-level, not overridable) ---- #
     HEATMAP_MIN_HEIGHT = 240
     HEATMAP_EPIC_ROW_HEIGHT = 36
     HEATMAP_PADDING = 80
@@ -25,47 +57,45 @@ class ChartConfig:
         [0.75, '#D35400'], [1.0, '#7B1A00']
     ]
 
-    # Throughput Histogram
-    NORMAL_WEEK_COLOR = '#007B85'  # Teal
-    ABOVE_MEAN_COLOR = '#F5A623'   # Gold
-    BELOW_MEAN_COLOR = '#2C3E50'   # Dark
-    ZERO_WEEK_COLOR = '#2C3E50'    # Dark
-    STDDEV_THRESHOLD = 1.0
-    ROLLING_AVG_WINDOW = 4
+    NORMAL_WEEK_COLOR = '#007B85'
+    ABOVE_MEAN_COLOR = '#F5A623'
+    BELOW_MEAN_COLOR = '#2C3E50'
+    ZERO_WEEK_COLOR = '#2C3E50'
 
-    # Callout thresholds
-    AGING_CRITICAL_DAYS = 60
-    AGING_CRITICAL_COUNT = 5
-    AGING_WARNING_DAYS = 31
-    AGING_WARNING_COUNT = 3
-
-    COMPLEXITY_RATIO_THRESHOLD = 3.0
-    UNESTIMATED_ITEMS_THRESHOLD = 0.2  # 20%
-
-    # Insights thresholds
-    WIP_HIGH_THRESHOLD = 100
-    WIP_ELEVATED_THRESHOLD = 50
-    CYCLE_TIME_HIGH_DAYS = 30
-    CYCLE_TIME_HEALTHY_DAYS = 10
-    BUG_RATIO_HIGH_PCT = 30
-    BUG_RATIO_ELEVATED_PCT = 15
-    BACKLOG_GROWTH_RATIO = 1.2
-
-    # Callout thresholds
-    CALLOUT_BUG_RATIO_HIGH_PCT = 25
-    CALLOUT_CYCLE_TIME_ALERT_DAYS = 60
-    CALLOUT_CYCLE_TIME_WARN_DAYS = 30
-    CALLOUT_OUTLIER_CT_MULTIPLIER = 3
-    CALLOUT_EPIC_CONCENTRATION_PCT = 0.6  # one epic consuming >60% of capacity
-
-    # Flow efficiency gauge colour thresholds
-    FLOW_EFFICIENCY_GOOD_PCT = 40
-    FLOW_EFFICIENCY_OK_PCT = 20
-
-    # Empty state
     EMPTY_STATE_HEIGHT = 240
     EMPTY_STATE_FONT_SIZE = 13
     EMPTY_STATE_FONT_COLOR = '#888888'
+
+    def __init__(self, overrides: dict | None = None):
+        merged = dict(_THRESHOLD_DEFAULTS)
+        if overrides:
+            for key, value in overrides.items():
+                if key in _THRESHOLD_DEFAULTS:
+                    merged[key] = type(_THRESHOLD_DEFAULTS[key])(value)
+
+        # Expose thresholds as UPPER_CASE attributes for backward compatibility
+        self.WIP_HIGH_THRESHOLD = merged["wip_high_threshold"]
+        self.WIP_ELEVATED_THRESHOLD = merged["wip_elevated_threshold"]
+        self.CYCLE_TIME_HIGH_DAYS = merged["cycle_time_high_days"]
+        self.CYCLE_TIME_HEALTHY_DAYS = merged["cycle_time_healthy_days"]
+        self.BUG_RATIO_HIGH_PCT = merged["bug_ratio_high_pct"]
+        self.BUG_RATIO_ELEVATED_PCT = merged["bug_ratio_elevated_pct"]
+        self.BACKLOG_GROWTH_RATIO = merged["backlog_growth_ratio"]
+        self.AGING_CRITICAL_DAYS = merged["aging_critical_days"]
+        self.AGING_CRITICAL_COUNT = merged["aging_critical_count"]
+        self.AGING_WARNING_DAYS = merged["aging_warning_days"]
+        self.AGING_WARNING_COUNT = merged["aging_warning_count"]
+        self.CALLOUT_BUG_RATIO_HIGH_PCT = merged["callout_bug_ratio_high_pct"]
+        self.CALLOUT_CYCLE_TIME_ALERT_DAYS = merged["callout_cycle_time_alert_days"]
+        self.CALLOUT_CYCLE_TIME_WARN_DAYS = merged["callout_cycle_time_warn_days"]
+        self.CALLOUT_OUTLIER_CT_MULTIPLIER = merged["callout_outlier_ct_multiplier"]
+        self.CALLOUT_EPIC_CONCENTRATION_PCT = merged["callout_epic_concentration_pct"]
+        self.COMPLEXITY_RATIO_THRESHOLD = merged["complexity_ratio_threshold"]
+        self.UNESTIMATED_ITEMS_THRESHOLD = merged["unestimated_items_threshold"]
+        self.FLOW_EFFICIENCY_GOOD_PCT = merged["flow_efficiency_good_pct"]
+        self.FLOW_EFFICIENCY_OK_PCT = merged["flow_efficiency_ok_pct"]
+        self.STDDEV_THRESHOLD = merged["stddev_threshold"]
+        self.ROLLING_AVG_WINDOW = merged["rolling_avg_window"]
 
 
 class EpicColorMap:

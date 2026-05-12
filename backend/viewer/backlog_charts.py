@@ -10,9 +10,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
-from viewer.backlog_data import BacklogData
-from viewer.chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap
-from viewer.chart_helpers import _create_empty_state_figure
+from .backlog_data import BacklogData
+from .chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap
+from .chart_helpers import _create_empty_state_figure
 
 
 class BacklogChartsMixin:

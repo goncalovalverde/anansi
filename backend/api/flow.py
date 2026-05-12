@@ -1,17 +1,11 @@
 import sqlite3, logging
 from fastapi import APIRouter, Depends, HTTPException
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import database
-import services.backlog_cache as backlog_cache
+from .. import database
+from ..services import backlog_cache
+from ..dependencies import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/flow", tags=["flow"])
-
-def get_db():
-    conn = database.get_db()
-    try: yield conn
-    finally: conn.close()
 
 @router.get("/{dataset_id}")
 def get_flow(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):

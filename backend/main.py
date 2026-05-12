@@ -1,21 +1,12 @@
-import sys
 import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-import database
-import api.config
-import api.data
-import api.charts
-import api.insights
-import api.flow
-import api.trends
-import api.health
+from . import database
+from . import api
+from .api import config, data, charts, insights, flow, trends, health
 
 app = FastAPI(title="Anansi", description="Jira/CSV backlog analytics dashboard")
 
@@ -29,13 +20,13 @@ app.add_middleware(
 
 database.init_db(database.DB_PATH)
 
-app.include_router(api.config.router)
-app.include_router(api.data.router)
-app.include_router(api.charts.router)
-app.include_router(api.insights.router)
-app.include_router(api.flow.router)
-app.include_router(api.trends.router)
-app.include_router(api.health.router)
+app.include_router(config.router)
+app.include_router(data.router)
+app.include_router(charts.router)
+app.include_router(insights.router)
+app.include_router(flow.router)
+app.include_router(trends.router)
+app.include_router(health.router)
 
 _frontend_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend-vue", "dist")
 if os.path.isdir(_frontend_dir):

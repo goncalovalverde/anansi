@@ -51,9 +51,10 @@ def test_chart_config_constants():
     """Test that constants are defined."""
     print("Testing ChartConfig constants...")
     assert hasattr(ChartConfig, 'HEATMAP_MIN_HEIGHT')
-    assert hasattr(ChartConfig, 'ROLLING_AVG_WINDOW')
-    assert hasattr(ChartConfig, 'AGING_CRITICAL_DAYS')
-    assert ChartConfig.ROLLING_AVG_WINDOW == 4
+    cfg = ChartConfig()
+    assert hasattr(cfg, 'ROLLING_AVG_WINDOW')
+    assert hasattr(cfg, 'AGING_CRITICAL_DAYS')
+    assert cfg.ROLLING_AVG_WINDOW == 4
     print("  ✓ All constants defined")
 
 

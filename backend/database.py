@@ -14,7 +14,6 @@ _DEFAULT_CONFIG = [
     ("jira_password", ""),
     ("jira_story_points_field", "customfield_10016"),
     ("jira_epic_link_field", "customfield_10014"),
-    ("jira_cache_enabled", "true"),
     ("workflow_start_step", ""),
     ("jira_oauth_token", ""),
     ("jira_oauth_token_secret", ""),

@@ -9,8 +9,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from viewer.backlog_data import BacklogData
-from viewer.chart_config import ANANSI_COLORS
+from .backlog_data import BacklogData
+from .chart_config import ANANSI_COLORS
 
 
 class TrendChartsMixin:

@@ -31,17 +31,19 @@ class TestChartConfig:
     
     def test_throughput_constants_defined(self):
         """Ensure throughput histogram constants are defined."""
-        assert ChartConfig.ROLLING_AVG_WINDOW == 4
+        cfg = ChartConfig()
+        assert cfg.ROLLING_AVG_WINDOW == 4
         assert ChartConfig.NORMAL_WEEK_COLOR == '#007B85'
         assert ChartConfig.ABOVE_MEAN_COLOR == '#F5A623'
         assert ChartConfig.BELOW_MEAN_COLOR == '#2C3E50'
     
     def test_callout_thresholds_reasonable(self):
         """Ensure callout thresholds make business sense."""
-        assert ChartConfig.AGING_CRITICAL_DAYS > ChartConfig.AGING_WARNING_DAYS
-        assert ChartConfig.AGING_CRITICAL_COUNT > ChartConfig.AGING_WARNING_COUNT
-        assert 0 <= ChartConfig.UNESTIMATED_ITEMS_THRESHOLD <= 1
-        assert ChartConfig.COMPLEXITY_RATIO_THRESHOLD > 1
+        cfg = ChartConfig()
+        assert cfg.AGING_CRITICAL_DAYS > cfg.AGING_WARNING_DAYS
+        assert cfg.AGING_CRITICAL_COUNT > cfg.AGING_WARNING_COUNT
+        assert 0 <= cfg.UNESTIMATED_ITEMS_THRESHOLD <= 1
+        assert cfg.COMPLEXITY_RATIO_THRESHOLD > 1
 
 
 class TestEpicColorMapSingleton:
@@ -268,6 +270,7 @@ class TestBacklogThroughputHistogram:
         backlog = MagicMock(spec=Backlog)
         backlog.done_step = "Done"
         backlog._done_df = pd.DataFrame()  # default: no completed items
+        backlog.chart_config = ChartConfig()
         return backlog
     
     def test_no_done_items_returns_empty_state(self, mock_backlog):

@@ -2,66 +2,64 @@ import sqlite3
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import database
-import services.config_service as config_service
+from .. import database
+from ..services import config_service
+from ..dependencies import get_db
+from ..reader import jira as jira_reader
+from .. import schemas
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 logger = logging.getLogger(__name__)
 
 
-def get_db():
-    conn = database.get_db()
-    try:
-        yield conn
-    finally:
-        conn.close()
-
-
-@router.get("/")
-@router.get("")
+@router.get("/", response_model=schemas.ConfigResponse)
+@router.get("", response_model=schemas.ConfigResponse)
 def read_config(db: sqlite3.Connection = Depends(get_db)):
+    """Get current configuration."""
     return config_service.get_config(db)
 
 
-@router.put("/")
-@router.put("")
-def write_config(updates: dict, db: sqlite3.Connection = Depends(get_db)):
-    config_service.set_config(db, updates)
+@router.put("/", response_model=schemas.ConfigResponse)
+@router.put("", response_model=schemas.ConfigResponse)
+def write_config(
+    updates: schemas.ConfigUpdate, db: sqlite3.Connection = Depends(get_db)
+):
+    """Update configuration with partial or full config updates."""
+    config_service.set_config(db, updates.model_dump(exclude_none=True))
     return config_service.get_config(db)
 
 
-@router.get("/workflow")
+@router.get("/workflow", response_model=schemas.WorkflowResponse)
 def read_workflow(db: sqlite3.Connection = Depends(get_db)):
+    """Get workflow steps."""
     return {"steps": config_service.get_workflow(db)}
 
 
-@router.put("/workflow")
-def write_workflow(body: dict, db: sqlite3.Connection = Depends(get_db)):
-    steps = body.get("steps")
-    if not isinstance(steps, list):
-        raise HTTPException(status_code=400, detail="'steps' must be a list")
-    config_service.set_workflow(db, steps)
+@router.put("/workflow", response_model=schemas.WorkflowResponse)
+def write_workflow(
+    body: schemas.WorkflowUpdate, db: sqlite3.Connection = Depends(get_db)
+):
+    """Update workflow steps (minimum 2 steps required)."""
+    config_service.set_workflow(db, body.steps)
     return {"steps": config_service.get_workflow(db)}
 
 
-@router.get("/issue-types")
+@router.get("/issue-types", response_model=schemas.IssueTypesResponse)
 def read_issue_types(db: sqlite3.Connection = Depends(get_db)):
+    """Get configured issue types."""
     return {"types": config_service.get_issue_types(db)}
 
 
-@router.put("/issue-types")
-def write_issue_types(body: dict, db: sqlite3.Connection = Depends(get_db)):
-    types = body.get("types")
-    if not isinstance(types, list):
-        raise HTTPException(status_code=400, detail="'types' must be a list")
-    config_service.set_issue_types(db, types)
+@router.put("/issue-types", response_model=schemas.IssueTypesResponse)
+def write_issue_types(
+    body: schemas.IssueTypesUpdate, db: sqlite3.Connection = Depends(get_db)
+):
+    """Update issue types (minimum 1 type required)."""
+    config_service.set_issue_types(db, body.types)
     return {"types": config_service.get_issue_types(db)}
 
 
-def _merge_overrides(jira_config: dict, overrides: dict) -> dict:
+def _merge_overrides(jira_config: dict, overrides: schemas.TestConnectionRequest) -> dict:
     """Merge form-submitted overrides into a jira_config dict.
 
     Secret fields sent as '' or '***' are ignored so stored secrets are kept.
@@ -83,11 +81,14 @@ def _merge_overrides(jira_config: dict, overrides: dict) -> dict:
         "jira_oauth_consumer_key": "oauth.consumer_key",
         "jira_oauth_key_cert_file": "oauth.key_cert_file",
     }
+    
+    # Convert Pydantic model to dict, excluding None values
+    overrides_dict = overrides.model_dump(exclude_none=True)
     result = dict(jira_config)
     result["oauth"] = dict(jira_config.get("oauth", {}))
 
     for form_key, cfg_key in plain_map.items():
-        val = overrides.get(form_key)
+        val = overrides_dict.get(form_key)
         if val is None:
             continue
         if "." in cfg_key:
@@ -97,7 +98,7 @@ def _merge_overrides(jira_config: dict, overrides: dict) -> dict:
             result[cfg_key] = val
 
     for form_key, cfg_key in secret_map.items():
-        val = overrides.get(form_key)
+        val = overrides_dict.get(form_key)
         if val is None or val in ("", "***"):
             continue
         if "." in cfg_key:
@@ -109,11 +110,15 @@ def _merge_overrides(jira_config: dict, overrides: dict) -> dict:
     return result
 
 
-@router.post("/test-connection")
-def test_connection(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
+@router.post("/test-connection", response_model=schemas.TestConnectionResponse)
+def test_connection(
+    body: schemas.TestConnectionRequest = None,
+    db: sqlite3.Connection = Depends(get_db),
+):
+    """Test connection to Jira with current or provided config."""
     import reader.jira as jira_reader
 
-    jira_config = config_service.build_jira_config(db, cache=False)
+    jira_config = config_service.build_jira_config(db)
     if body:
         jira_config = _merge_overrides(jira_config, body)
     workflow = config_service.get_workflow(db)
@@ -129,11 +134,15 @@ def test_connection(body: dict = None, db: sqlite3.Connection = Depends(get_db))
         return {"success": False, "error": str(exc)}
 
 
-@router.post("/jira-statuses")
-def get_jira_statuses(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
+@router.post("/jira-statuses", response_model=schemas.JiraStatusesResponse)
+def get_jira_statuses(
+    body: schemas.TestConnectionRequest = None,
+    db: sqlite3.Connection = Depends(get_db),
+):
+    """Get list of available statuses from Jira instance."""
     import reader.jira as jira_reader
 
-    jira_config = config_service.build_jira_config(db, cache=False)
+    jira_config = config_service.build_jira_config(db)
     if body:
         jira_config = _merge_overrides(jira_config, body)
     workflow = config_service.get_workflow(db)
@@ -149,12 +158,15 @@ def get_jira_statuses(body: dict = None, db: sqlite3.Connection = Depends(get_db
         raise HTTPException(status_code=502, detail=f"Failed to fetch statuses: {exc}")
 
 
-@router.post("/jira-projects")
-def get_jira_projects(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
+@router.post("/jira-projects", response_model=schemas.JiraProjectsResponse)
+def get_jira_projects(
+    body: schemas.TestConnectionRequest = None,
+    db: sqlite3.Connection = Depends(get_db),
+):
     """Return list of Jira projects accessible with current credentials."""
     import reader.jira as jira_reader
 
-    jira_config = config_service.build_jira_config(db, cache=False)
+    jira_config = config_service.build_jira_config(db)
     if body:
         jira_config = _merge_overrides(jira_config, body)
 
@@ -174,12 +186,15 @@ def get_jira_projects(body: dict = None, db: sqlite3.Connection = Depends(get_db
         raise HTTPException(status_code=502, detail=f"Failed to fetch projects: {exc}")
 
 
-@router.post("/jira-issue-types")
-def get_jira_issue_types(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
+@router.post("/jira-issue-types", response_model=schemas.JiraIssueTypesResponse)
+def get_jira_issue_types(
+    body: schemas.TestConnectionRequest = None,
+    db: sqlite3.Connection = Depends(get_db),
+):
     """Return all issue types available in the connected Jira instance."""
     import reader.jira as jira_reader
 
-    jira_config = config_service.build_jira_config(db, cache=False)
+    jira_config = config_service.build_jira_config(db)
     if body:
         jira_config = _merge_overrides(jira_config, body)
 
@@ -194,12 +209,15 @@ def get_jira_issue_types(body: dict = None, db: sqlite3.Connection = Depends(get
         raise HTTPException(status_code=502, detail=f"Failed to fetch issue types: {exc}")
 
 
-@router.post("/jira-fields")
-def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db)):
+@router.post("/jira-fields", response_model=schemas.JiraFieldsResponse)
+def get_jira_fields(
+    body: schemas.TestConnectionRequest = None,
+    db: sqlite3.Connection = Depends(get_db),
+):
     """Return custom fields that likely map to story points or epic link."""
     import reader.jira as jira_reader
 
-    jira_config = config_service.build_jira_config(db, cache=False)
+    jira_config = config_service.build_jira_config(db)
     if body:
         jira_config = _merge_overrides(jira_config, body)
 
@@ -208,40 +226,12 @@ def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db))
         jira_instance = jr.get_jira_instance()
         fields = jira_instance.fields()
 
-        # Log all custom fields to aid debugging
         custom_fields = [f for f in fields if f["id"].startswith("customfield_")]
         logger.debug("Available custom fields: %s", [(f["id"], f["name"]) for f in custom_fields])
 
-        # Story points: match on the field name containing the phrase "story point".
-        # Short tokens like "sp" or "points" are intentionally excluded — they match
-        # unrelated fields as substrings (e.g. "sp" in "Responsible", "points" in
-        # "Touchpoints"). Schema type alone is also too broad (any numeric field matches).
-        def _is_sp_name(name: str) -> bool:
-            n = name.lower()
-            return "story point" in n or "storypoint" in n
-        story_candidates = [
-            {"id": f["id"], "name": f["name"]}
-            for f in fields
-            if f["id"].startswith("customfield_") and _is_sp_name(f.get("name", ""))
-        ]
-        # For epic link, match on the well-known Jira schema custom types first
-        # (locale-independent), then fall back to keyword matching on the name.
-        EPIC_SCHEMA_TYPES = ("gh-epic-link", "gh-epic-label", "greenhopper-epic")
-        epic_candidates = [
-            {"id": f["id"], "name": f["name"]}
-            for f in fields
-            if f["id"].startswith("customfield_")
-            and (
-                any(t in f.get("schema", {}).get("custom", "").lower() for t in EPIC_SCHEMA_TYPES)
-                or any(kw in f.get("name", "").lower() for kw in (
-                    "epic link", "epic_link", "epic name", "parent epic", "epic"
-                ))
-            )
-        ]
-        # Sort: schema-matched epics first (most reliable), name-matched second
-        epic_candidates.sort(
-            key=lambda f: 0 if any(t in f.get("schema", {}).get("custom", "").lower() for t in EPIC_SCHEMA_TYPES) else 1
-        )
+        story_candidates = config_service.detect_story_point_fields(fields)
+        epic_candidates = config_service.detect_epic_link_fields(fields)
+
         logger.info(
             "Field detection: story_points=%s epic_link=%s",
             [f["id"] for f in story_candidates],
@@ -256,5 +246,4 @@ def get_jira_fields(body: dict = None, db: sqlite3.Connection = Depends(get_db))
         raise HTTPException(status_code=400, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Failed to fetch fields: {exc}")
-
 

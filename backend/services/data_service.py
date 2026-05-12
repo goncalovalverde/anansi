@@ -5,13 +5,9 @@ import uuid
 import logging
 from pandas import DataFrame
 
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import database
-import services.config_service as config_service
-import reader
+from .. import database
+from . import config_service
+from .. import reader
 
 logger = logging.getLogger(__name__)
 

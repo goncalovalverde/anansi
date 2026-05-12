@@ -2,31 +2,26 @@ import io
 import sqlite3
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
 
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import database
-import services.config_service as config_service
-import services.data_service as data_service
-import reader.jira as jira_reader
-import reader.csv as csv_reader
+from .. import database
+from ..services import config_service, data_service
+from ..reader import jira as jira_reader
+from ..reader import csv as csv_reader
+from ..dependencies import get_db
+from .. import schemas
 
 router = APIRouter(prefix="/api/data", tags=["data"])
 
 
-def get_db():
-    conn = database.get_db()
-    try:
-        yield conn
-    finally:
-        conn.close()
-
-
-@router.post("/load")
+@router.post("/load", response_model=schemas.DatasetResponse)
 def load_data(
     background_tasks: BackgroundTasks,
     db: sqlite3.Connection = Depends(get_db),
 ):
+    """Load data from configured source (Jira or CSV).
+    
+    Validates configuration and returns cached dataset if available.
+    Otherwise creates new dataset and queues background loading task.
+    """
     reader_config = config_service.build_reader_config(db)
     source = reader_config["input"]["mode"]
 
@@ -64,8 +59,13 @@ def load_data(
     return {"dataset_id": dataset_id, "cached": False}
 
 
-@router.get("/{dataset_id}/status")
+@router.get("/{dataset_id}/status", response_model=schemas.DatasetStatusResponse)
 def get_dataset_status(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
+    """Get status and progress of dataset loading.
+    
+    Returns status ('loading', 'ready', or 'error'), error message if applicable,
+    and progress counts for loaded/total items.
+    """
     row = db.execute(
         "SELECT status, error, progress_loaded, progress_total FROM datasets WHERE id=?",
         (dataset_id,),
@@ -80,11 +80,15 @@ def get_dataset_status(dataset_id: str, db: sqlite3.Connection = Depends(get_db)
     }
 
 
-@router.post("/upload-csv")
+@router.post("/upload-csv", response_model=schemas.DatasetResponse)
 async def upload_csv(
     file: UploadFile = File(...),
     db: sqlite3.Connection = Depends(get_db),
 ):
+    """Upload and parse CSV file for data analysis.
+    
+    Validates file format, parses CSV, and returns cached dataset if available.
+    """
     if not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only .csv files are accepted")
 
@@ -115,8 +119,9 @@ async def upload_csv(
     return {"dataset_id": dataset_id, "cached": False}
 
 
-@router.delete("/cache")
+@router.delete("/cache", response_model=schemas.CacheClearResponse)
 def clear_cache(db: sqlite3.Connection = Depends(get_db)):
+    """Clear all cached datasets."""
     cursor = db.execute("SELECT COUNT(*) FROM datasets")
     count = cursor.fetchone()[0]
     db.execute("DELETE FROM datasets")

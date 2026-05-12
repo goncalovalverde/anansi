@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from viewer.backlog_data import BacklogData
-from viewer.chart_config import ANANSI_COLORS, ChartConfig
-from viewer.chart_helpers import _create_empty_state_figure
+from .backlog_data import BacklogData
+from .chart_config import ANANSI_COLORS, ChartConfig
+from .chart_helpers import _create_empty_state_figure
 
 
 class FlowChartsMixin:
@@ -36,8 +36,8 @@ class FlowChartsMixin:
         total = done_count + current_wip
         efficiency = round(done_count / total * 100, 1) if total > 0 else 0
         color = (
-            "#52BE80" if efficiency > ChartConfig.FLOW_EFFICIENCY_GOOD_PCT
-            else ("#F5A623" if efficiency >= ChartConfig.FLOW_EFFICIENCY_OK_PCT else "#D35400")
+            "#52BE80" if efficiency > self.chart_config.FLOW_EFFICIENCY_GOOD_PCT
+            else ("#F5A623" if efficiency >= self.chart_config.FLOW_EFFICIENCY_OK_PCT else "#D35400")
         )
         fig = go.Figure(go.Indicator(
             mode="gauge+number",
@@ -151,7 +151,7 @@ class FlowChartsMixin:
             else:
                 colors.append(ChartConfig.NORMAL_WEEK_COLOR)
 
-        rolling = pd.Series(counts).rolling(ChartConfig.ROLLING_AVG_WINDOW, min_periods=1).mean().round(1).tolist()
+        rolling = pd.Series(counts).rolling(self.chart_config.ROLLING_AVG_WINDOW, min_periods=1).mean().round(1).tolist()
 
         fig = go.Figure()
         fig.add_trace(go.Bar(

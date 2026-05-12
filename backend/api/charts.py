@@ -2,22 +2,12 @@ import logging
 import sqlite3
 from fastapi import APIRouter, Depends, HTTPException
 
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import database
-import services.backlog_cache as backlog_cache
+from .. import database
+from ..services import backlog_cache
+from ..dependencies import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/charts", tags=["charts"])
-
-
-def get_db():
-    conn = database.get_db()
-    try:
-        yield conn
-    finally:
-        conn.close()
 
 
 @router.get("/{dataset_id}")

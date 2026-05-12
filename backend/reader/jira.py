@@ -1,10 +1,7 @@
 from jira import JIRA
 import dateutil.parser
-import hashlib
 import logging
 from pandas import NaT, DataFrame
-
-import reader.cache
 
 logger = logging.getLogger(__name__)
 
@@ -44,15 +41,6 @@ class Jira:
         self.jira_config = jira_config
         self.workflow = workflow
         self.db_path = db_path
-
-        config_hash = self._compute_cache_hash()
-        self.cache = reader.cache.Cache(db_path, config_hash)
-
-    def _compute_cache_hash(self) -> str:
-        url = self.jira_config.get("url", "")
-        jql_query = self.jira_config.get("jql_query", "")
-        workflow = str(self.workflow)
-        return hashlib.md5((url + jql_query + workflow).encode("utf-8")).hexdigest()
 
     def get_issue_data(self, issue, issue_data: dict) -> None:
         issue_data["Key"].append(issue.key)
@@ -150,10 +138,6 @@ class Jira:
         return issues
 
     def get_jira_data(self, progress_callback=None) -> DataFrame:
-        if self.jira_config.get("cache") and self.cache.is_valid():
-            logger.info("=== RETURNING Jira data from cache ===")
-            return self.cache.read()
-
         logger.info("=== FETCHING Jira data from API ===")
         issue_data: dict = {
             "Key": [],

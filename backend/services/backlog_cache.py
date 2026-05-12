@@ -47,7 +47,8 @@ def _is_fresh(key: str) -> bool:
 
 
 def _config_signature(config: dict) -> str:
-    return str(sorted(config.items()))
+    import json
+    return json.dumps(config, sort_keys=True, default=str)
 
 
 def _evict_stale() -> None:
@@ -63,8 +64,8 @@ def _evict_stale() -> None:
 # ------------------------------------------------------------------ #
 
 def _build_backlog(db: sqlite3.Connection, dataset_id: str, config: dict):
-    import services.data_service as data_service
-    from viewer.backlog import Backlog
+    from . import data_service
+    from ..viewer.backlog import Backlog
 
     df = data_service.load_dataframe(db, dataset_id)
     return Backlog(df, config)
@@ -95,7 +96,7 @@ def _get_or_build(key: str, builder) -> Any:
 
 def get_backlog(db: sqlite3.Connection, dataset_id: str):
     """Return a cached Backlog for this dataset, rebuilding if stale."""
-    import services.config_service as config_service
+    from . import config_service
 
     config = config_service.build_reader_config(db)
     sig = _config_signature(config)
@@ -105,7 +106,7 @@ def get_backlog(db: sqlite3.Connection, dataset_id: str):
 
 def get_dashboard_response(db: sqlite3.Connection, dataset_id: str) -> dict:
     """Return cached {charts, kpis, callouts} for the dashboard endpoint."""
-    import services.config_service as config_service
+    from . import config_service
 
     config = config_service.build_reader_config(db)
     sig = _config_signature(config)
@@ -124,7 +125,7 @@ def get_dashboard_response(db: sqlite3.Connection, dataset_id: str) -> dict:
 
 def get_flow_response(db: sqlite3.Connection, dataset_id: str) -> dict:
     """Return cached flow charts + callouts for the flow endpoint."""
-    import services.config_service as config_service
+    from . import config_service
 
     config = config_service.build_reader_config(db)
     sig = _config_signature(config)
@@ -138,6 +139,52 @@ def get_flow_response(db: sqlite3.Connection, dataset_id: str) -> dict:
         return response
 
     return _get_or_build(flow_key, build)
+
+
+def get_insights_response(db: sqlite3.Connection, dataset_id: str) -> list:
+    """Return cached insights for the insights endpoint."""
+    from . import config_service
+
+    config = config_service.build_reader_config(db)
+    sig = _config_signature(config)
+    backlog_key = f"backlog:{dataset_id}:{sig}"
+    insights_key = f"insights:{dataset_id}:{sig}"
+
+    def build():
+        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config))
+        return backlog.get_insights()
+
+    return _get_or_build(insights_key, build)
+
+
+def get_trends_response(db: sqlite3.Connection, dataset_id: str) -> dict:
+    """Return cached trend charts for the trends endpoint."""
+    import json as json_mod
+    import plotly.graph_objects as go
+    from . import config_service
+
+    config = config_service.build_reader_config(db)
+    sig = _config_signature(config)
+    backlog_key = f"backlog:{dataset_id}:{sig}"
+    trends_key = f"trends:{dataset_id}:{sig}"
+
+    def build():
+        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config))
+        methods = {
+            "cumulative_flow": backlog.draw_cumulative_flow,
+            "monthly_throughput": backlog.draw_monthly_throughput,
+            "epic_progress": backlog.draw_epic_progress,
+        }
+        raw = {}
+        for name, method in methods.items():
+            try:
+                raw[name] = method()
+            except Exception as exc:
+                logger.exception("Trend chart '%s' failed", name)
+                raw[name] = go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json()
+        return {k: json_mod.loads(v) for k, v in raw.items()}
+
+    return _get_or_build(trends_key, build)
 
 
 def invalidate(dataset_id: str) -> None:
