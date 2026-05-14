@@ -30,6 +30,7 @@ _DEFAULT_ISSUE_TYPES = ["Story", "Bug", "Task", "Epic"]
 
 
 def get_db(db_path: str = DB_PATH) -> sqlite3.Connection:
+    """Get initialized SQLite connection with WAL mode and foreign keys enabled."""
     conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
@@ -38,6 +39,7 @@ def get_db(db_path: str = DB_PATH) -> sqlite3.Connection:
 
 
 def init_db(db_path: str = DB_PATH) -> None:
+    """Initialize database schema and default configuration values."""
     conn = get_db(db_path)
     with conn:
         conn.executescript(

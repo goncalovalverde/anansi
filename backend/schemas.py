@@ -13,7 +13,20 @@ from pydantic import BaseModel, Field, ConfigDict
 # ============================================================================
 
 class ConfigUpdate(BaseModel):
-    """Configuration update request - all fields are optional for partial updates."""
+    """Configuration update request for JIRA and input settings.
+    
+    All fields are optional to support partial updates. When updating JIRA credentials:
+    - For basic auth: provide jira_username and jira_password
+    - For OAuth: provide jira_oauth_token, jira_oauth_token_secret, jira_oauth_consumer_key, jira_oauth_key_cert_file
+    - For PAT: provide jira_pat_token
+    
+    Secret fields sent as empty string ('') or '***' are preserved (not overwritten).
+    
+    Examples:
+        Update JIRA URL and JQL: {"jira_url": "https://...", "jira_jql_query": "project = TEST"}
+        Switch to CSV mode: {"input_mode": "csv"}
+        Update story points field: {"jira_story_points_field": "customfield_10016"}
+    """
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -53,7 +66,11 @@ class ConfigUpdate(BaseModel):
 
 
 class ConfigResponse(BaseModel):
-    """Full configuration response - includes all stored config values."""
+    """Full configuration response - includes all stored config values.
+    
+    Secret fields (passwords, tokens) are masked as '***' in responses for security.
+    Unset secret fields are returned as empty strings ('').
+    """
 
     model_config = ConfigDict(json_schema_extra={
         "example": {
@@ -89,7 +106,17 @@ class ConfigResponse(BaseModel):
 
 
 class WorkflowUpdate(BaseModel):
-    """Workflow update request - requires at least 2 steps."""
+    """Workflow step configuration for issue status tracking.
+    
+    Steps define the pipeline from creation to completion (e.g., Backlog → In Progress → Done).
+    Minimum 2 steps required. The last step is treated as 'Done' for cycle time calculations.
+    Steps must be ordered from initial state to final completion state.
+    
+    Examples:
+        Two-step: ["Backlog", "Done"]
+        Multi-step: ["Backlog", "In Progress", "Review", "Done"]
+        Extended: ["Backlog", "To Do", "In Progress", "Code Review", "Testing", "Ready", "Done"]
+    """
 
     model_config = ConfigDict(json_schema_extra={"example": {"steps": ["To Do", "In Progress", "Done"]}})
 
@@ -110,7 +137,16 @@ class WorkflowResponse(BaseModel):
 
 
 class IssueTypesUpdate(BaseModel):
-    """Issue types update request - requires at least 1 type."""
+    """Issue types configuration for filtering and tracking.
+    
+    Specifies which issue type names from JIRA should be tracked and displayed.
+    At least 1 type required. Common types include Story, Bug, Task, Epic, Sub-task.
+    
+    Examples:
+        Track stories and bugs: ["Story", "Bug"]
+        Track all types: ["Story", "Bug", "Task", "Epic"]
+        Track epics only: ["Epic"]
+    """
 
     model_config = ConfigDict(json_schema_extra={"example": {"types": ["Story", "Bug", "Task"]}})
 
@@ -131,7 +167,17 @@ class IssueTypesResponse(BaseModel):
 
 
 class TestConnectionRequest(BaseModel):
-    """Test connection request - optional overrides of current config."""
+    """Test connection request with optional JIRA configuration overrides.
+    
+    Used to validate JIRA connectivity before saving configuration. All fields are optional
+    and will override corresponding values from the current config for the test.
+    If not provided, current saved configuration will be used.
+    
+    Examples:
+        Test basic auth: {"jira_url": "https://jira.example.com", "jira_username": "user", "jira_password": "pass"}
+        Test with override URL: {"jira_url": "https://new-jira.example.com"}
+        Test current config: {} (empty request body)
+    """
 
     model_config = ConfigDict(json_schema_extra={
         "example": {

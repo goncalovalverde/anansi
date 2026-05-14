@@ -10,10 +10,7 @@ import json
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
-import sys
-sys.path.insert(0, "/Users/ctw02858/dev/anansi/backend")
-
-from viewer.backlog import (
+from backend.viewer.backlog import (
     Backlog, ChartConfig, EpicColorMap, 
     _create_empty_state_figure, ANANSI_COLORS
 )

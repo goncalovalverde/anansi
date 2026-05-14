@@ -285,3 +285,93 @@ class TestIssueTypes:
         )
         assert response.status_code == 200
         assert response.json()["types"] == types
+
+
+class TestJiraFieldsEdgeCases:
+    """Edge case tests for Jira field detection endpoints."""
+
+    def test_workflow_requires_minimum_two_steps(self, client):
+        """PUT /api/config/workflow requires at least 2 steps."""
+        response = client.put(
+            "/api/config/workflow",
+            json={"steps": ["OnlyStep"]}
+        )
+        # Should reject with validation error
+        assert response.status_code == 422
+
+    def test_workflow_accepts_many_steps(self, client):
+        """PUT /api/config/workflow accepts many workflow steps."""
+        steps = ["Backlog", "To Do", "In Progress", "Review", "Testing", "Done", "Archived"]
+        response = client.put(
+            "/api/config/workflow",
+            json={"steps": steps}
+        )
+        assert response.status_code == 200
+        assert response.json()["steps"] == steps
+
+    def test_put_config_with_partial_jira_oauth_fields(self, client):
+        """PUT /api/config handles partial OAuth field updates."""
+        response = client.put(
+            "/api/config",
+            json={
+                "jira_auth_method": "oauth",
+                "jira_oauth_token": "token123",
+                "jira_oauth_consumer_key": "key123"
+            }
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["jira_auth_method"] == "oauth"
+
+    def test_issue_types_with_distinct_names(self, client):
+        """PUT /api/config/issue-types accepts multiple distinct types."""
+        types = ["Story", "Bug", "Task", "Enhancement"]
+        response = client.put(
+            "/api/config/issue-types",
+            json={"types": types}
+        )
+        # API should accept distinct types
+        assert response.status_code == 200
+        returned_types = response.json()["types"]
+        # All types should be present
+        assert set(returned_types) == set(types)
+
+    def test_config_multiple_secret_fields_preserved(self, client):
+        """Multiple secret fields can be set and are masked on retrieval."""
+        response = client.put(
+            "/api/config",
+            json={
+                "jira_password": "pass123",
+                "jira_pat_token": "pat123",
+                "jira_oauth_token": "oauth123"
+            }
+        )
+        assert response.status_code == 200
+        
+        # Retrieve and verify they're masked
+        response = client.get("/api/config")
+        data = response.json()
+        assert data["jira_password"] == "***"
+        assert data["jira_pat_token"] == "***"
+        assert data["jira_oauth_token"] == "***"
+
+    def test_issue_types_with_special_characters(self, client):
+        """PUT /api/config/issue-types accepts types with special characters."""
+        types = ["User Story", "Technical Debt", "Bug Fix", "Feature Request"]
+        response = client.put(
+            "/api/config/issue-types",
+            json={"types": types}
+        )
+        assert response.status_code == 200
+        assert response.json()["types"] == types
+
+    def test_workflow_preserves_order(self, client):
+        """PUT /api/config/workflow preserves step order."""
+        steps = ["Blocked", "Backlog", "Groomed", "Sprint Ready", "In Progress", "Code Review", "QA", "Done"]
+        response = client.put(
+            "/api/config/workflow",
+            json={"steps": steps}
+        )
+        assert response.status_code == 200
+        retrieved_steps = response.json()["steps"]
+        assert retrieved_steps == steps

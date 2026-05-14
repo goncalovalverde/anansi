@@ -156,8 +156,12 @@ def test_connection(
         return {"success": True}
     except ValueError as exc:
         return {"success": False, "error": str(exc)}
+    except (KeyError, TypeError) as exc:
+        logger.warning("Invalid Jira config format: %s", exc)
+        return {"success": False, "error": "Invalid Jira configuration"}
     except Exception as exc:
-        return {"success": False, "error": str(exc)}
+        logger.exception("Unexpected error in test_connection")
+        return {"success": False, "error": "Failed to connect to Jira"}
 
 
 @router.post("/jira-statuses", response_model=schemas.JiraStatusesResponse)
@@ -179,8 +183,12 @@ def get_jira_statuses(
         return {"statuses": sorted(set(s.name for s in statuses))}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    except (KeyError, TypeError) as exc:
+        logger.warning("Invalid Jira config format: %s", exc)
+        raise HTTPException(status_code=400, detail="Invalid Jira configuration")
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to fetch statuses: {exc}")
+        logger.exception("Unexpected error in get_jira_statuses")
+        raise HTTPException(status_code=502, detail="Failed to fetch statuses")
 
 
 @router.post("/jira-projects", response_model=schemas.JiraProjectsResponse)
@@ -206,8 +214,12 @@ def get_jira_projects(
         }
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    except (KeyError, TypeError) as exc:
+        logger.warning("Invalid Jira config format: %s", exc)
+        raise HTTPException(status_code=400, detail="Invalid Jira configuration")
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to fetch projects: {exc}")
+        logger.exception("Unexpected error in get_jira_projects")
+        raise HTTPException(status_code=502, detail="Failed to fetch projects")
 
 
 @router.post("/jira-issue-types", response_model=schemas.JiraIssueTypesResponse)
@@ -228,8 +240,12 @@ def get_jira_issue_types(
         return {"issue_types": sorted(set(t.name for t in types))}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    except (KeyError, TypeError) as exc:
+        logger.warning("Invalid Jira config format: %s", exc)
+        raise HTTPException(status_code=400, detail="Invalid Jira configuration")
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to fetch issue types: {exc}")
+        logger.exception("Unexpected error in get_jira_issue_types")
+        raise HTTPException(status_code=502, detail="Failed to fetch issue types")
 
 
 @router.post("/jira-fields", response_model=schemas.JiraFieldsResponse)
@@ -266,6 +282,10 @@ def get_jira_fields(
         }
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+    except (KeyError, TypeError) as exc:
+        logger.warning("Invalid Jira config format: %s", exc)
+        raise HTTPException(status_code=400, detail="Invalid Jira configuration")
     except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Failed to fetch fields: {exc}")
+        logger.exception("Unexpected error in get_jira_fields")
+        raise HTTPException(status_code=502, detail="Failed to fetch fields")
 
