@@ -101,8 +101,8 @@ def load_dataframe(db: sqlite3.Connection, dataset_id: str) -> DataFrame:
                     converted = pd.to_datetime(df[col], errors="coerce", format="mixed")
                 if converted.notna().sum() > len(df) * 0.5:
                     df[col] = converted
-            except Exception:
-                pass
+            except (ValueError, TypeError) as e:
+                logger.debug("Could not convert column '%s' to datetime: %s", col, e)
 
     return df
 
@@ -117,7 +117,8 @@ def load_data_task(dataset_id: str, db_path: str) -> None:
             update_dataset_progress(conn, dataset_id, loaded, total)
 
         reader_config = config_service.build_reader_config(conn)
-        logger.info(f"Reader config: {reader_config}")
+        # Log input mode but not full config (which contains secrets)
+        logger.info("Using input mode: %s", reader_config.get("input", {}).get("mode", "unknown"))
         df = reader.read_data(reader_config, db_path, progress_callback=progress_callback)
         logger.info(f"DataFrame columns: {df.columns.tolist()}")
         logger.info(f"Story Points column non-null count: {df['Story Points'].notna().sum()}")

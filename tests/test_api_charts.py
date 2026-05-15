@@ -86,7 +86,7 @@ class TestChartsEndpoint:
         conn.close()
         
         with patch("backend.services.backlog_cache.get_dashboard_response") as mock_charts:
-            mock_charts.side_effect = Exception("Rendering failed")
+            mock_charts.side_effect = ValueError("Rendering failed")
             response = client.get(f"/api/charts/{dataset_id}")
         
         assert response.status_code == 500

@@ -11,3 +11,5 @@ wheel
 fastapi
 uvicorn[standard]
 python-multipart
+python-json-logger
+prometheus-client

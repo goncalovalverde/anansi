@@ -2,13 +2,20 @@
 Shared Backlog instance and response cache.
 
 Both /api/charts and /api/flow build a Backlog from the same dataset and config.
-This module caches:
-  - The Backlog object (expensive DataFrame merge + cycle-time computation)
-  - The full dashboard response (charts + kpis + callouts)
-  - The full flow response (flow charts + callouts)
+This module caches at two levels:
 
-Per-key locking prevents the thundering-herd problem where concurrent requests
-on a cold cache each trigger a full rebuild.
+1. **Request-scoped cache** (contextvars): Ultrafast (~0ns) in-request lookups.
+   Automatically isolated per HTTP request. Useful if a single request accesses
+   multiple expensive operations (e.g., multiple chart/kpi endpoints in sequence).
+
+2. **Global cache** (thread-safe dict with TTL): Shared across requests.
+   Per-key locking prevents thundering herd. Survives request boundaries.
+
+This dual-layer design provides:
+  - Request locality: First call in a request is slow (global cache lookup)
+  - Subsequent calls in same request are instant (request-scope cache)
+  - Cross-request reuse: Second request reuses the global cache (no rebuild)
+  - Safety: Per-key locking + config-aware versioning
 
 Cache lifetime (TTL_SECONDS) is long enough to make dataset navigation snappy
 but short enough that a manual data reload is always reflected quickly.
@@ -18,7 +25,7 @@ Explicit invalidation is also called after every data load.
 import time
 import threading
 import logging
-from typing import Any
+from typing import Any, Optional
 import sqlite3
 
 logger = logging.getLogger(__name__)
@@ -71,22 +78,48 @@ def _build_backlog(db: sqlite3.Connection, dataset_id: str, config: dict):
     return Backlog(df, config)
 
 
-def _get_or_build(key: str, builder) -> Any:
-    """Double-checked locking: return cached value or call builder once."""
-    # Fast path — no lock needed
+def _get_or_build(key: str, builder, request_cache=None) -> Any:
+    """Double-checked locking with optional request-scoped cache fallback.
+    
+    1. If request_cache provided, check it first (ultrafast, ~0ns)
+    2. Then check global cache (fast, ~1-10μs)
+    3. If miss, acquire per-key lock and build
+    4. Cache result in both request-scope and global cache
+    """
+    # Request-scoped cache is fastest (should be checked first)
+    if request_cache is not None:
+        result = request_cache.get(key)
+        if result is not None:
+            logger.debug("Request-scope cache hit for '%s'", key)
+            return result
+    
+    # Global cache fast path — no lock needed
     if _is_fresh(key):
-        return _cache[key]["data"]
+        cached_value = _cache[key]["data"]
+        # Also cache in request scope for subsequent calls in this request
+        if request_cache is not None:
+            request_cache.set(key, cached_value)
+        return cached_value
 
     lock = _get_lock(key)
     with lock:
         # Re-check inside lock (another thread may have built it while we waited)
         if _is_fresh(key):
-            return _cache[key]["data"]
+            cached_value = _cache[key]["data"]
+            # Also cache in request scope
+            if request_cache is not None:
+                request_cache.set(key, cached_value)
+            return cached_value
 
         logger.debug("Cache miss for key '%s' — rebuilding", key)
         data = builder()
         _cache[key] = {"data": data, "ts": time.monotonic()}
         _evict_stale()
+        
+        # Also cache in request scope for subsequent calls in this request
+        if request_cache is not None:
+            request_cache.set(key, data)
+        
         return data
 
 
@@ -94,18 +127,39 @@ def _get_or_build(key: str, builder) -> Any:
 #  Public API                                                          #
 # ------------------------------------------------------------------ #
 
-def get_backlog(db: sqlite3.Connection, dataset_id: str):
-    """Return a cached Backlog for this dataset, rebuilding if stale."""
+def get_backlog(db: sqlite3.Connection, dataset_id: str, request_cache=None):
+    """Return a cached Backlog for this dataset, rebuilding if stale.
+    
+    Args:
+        db: Database connection
+        dataset_id: Dataset identifier
+        request_cache: Optional RequestCache for request-scoped caching.
+                      If provided, check it first before global cache.
+    
+    Returns:
+        Backlog instance (from request-scope, global, or freshly built)
+    """
     from . import config_service
 
     config = config_service.build_reader_config(db)
     sig = _config_signature(config)
     key = f"backlog:{dataset_id}:{sig}"
-    return _get_or_build(key, lambda: _build_backlog(db, dataset_id, config))
+    return _get_or_build(key, lambda: _build_backlog(db, dataset_id, config), request_cache)
 
 
-def get_dashboard_response(db: sqlite3.Connection, dataset_id: str) -> dict:
-    """Return cached {charts, kpis, callouts} for the dashboard endpoint."""
+def get_dashboard_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
+    """Return cached {charts, kpis, callouts} for the dashboard endpoint.
+    
+    Args:
+        db: Database connection
+        dataset_id: Dataset identifier
+        request_cache: Optional RequestCache for request-scoped caching
+    
+    Returns:
+        Dict with keys: treemap, treemap_all, distribution, pbis_done, pbis_created,
+                       story_points, type_issue, timeline_size, aging_heatmap,
+                       epic_investment, kpis, callouts
+    """
     from . import config_service
 
     config = config_service.build_reader_config(db)
@@ -114,17 +168,30 @@ def get_dashboard_response(db: sqlite3.Connection, dataset_id: str) -> dict:
     dash_key = f"dashboard:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config))
+        backlog = _get_or_build(
+            backlog_key,
+            lambda: _build_backlog(db, dataset_id, config),
+            request_cache
+        )
         response = backlog.get_all_charts()   # already parsed dicts
         response["kpis"] = backlog.get_kpis()
         response["callouts"] = backlog.get_callouts()
         return response
 
-    return _get_or_build(dash_key, build)
+    return _get_or_build(dash_key, build, request_cache)
 
 
-def get_flow_response(db: sqlite3.Connection, dataset_id: str) -> dict:
-    """Return cached flow charts + callouts for the flow endpoint."""
+def get_flow_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
+    """Return cached flow charts + callouts for the flow endpoint.
+    
+    Args:
+        db: Database connection
+        dataset_id: Dataset identifier
+        request_cache: Optional RequestCache for request-scoped caching
+    
+    Returns:
+        Dict with flow charts and callouts
+    """
     from . import config_service
 
     config = config_service.build_reader_config(db)
@@ -133,16 +200,29 @@ def get_flow_response(db: sqlite3.Connection, dataset_id: str) -> dict:
     flow_key = f"flow:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config))
+        backlog = _get_or_build(
+            backlog_key,
+            lambda: _build_backlog(db, dataset_id, config),
+            request_cache
+        )
         response = backlog.get_flow_charts()   # already parsed dicts
         response["callouts"] = backlog.get_flow_callouts()
         return response
 
-    return _get_or_build(flow_key, build)
+    return _get_or_build(flow_key, build, request_cache)
 
 
-def get_insights_response(db: sqlite3.Connection, dataset_id: str) -> list:
-    """Return cached insights for the insights endpoint."""
+def get_insights_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> list:
+    """Return cached insights for the insights endpoint.
+    
+    Args:
+        db: Database connection
+        dataset_id: Dataset identifier
+        request_cache: Optional RequestCache for request-scoped caching
+    
+    Returns:
+        List of insight dictionaries
+    """
     from . import config_service
 
     config = config_service.build_reader_config(db)
@@ -151,14 +231,27 @@ def get_insights_response(db: sqlite3.Connection, dataset_id: str) -> list:
     insights_key = f"insights:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config))
+        backlog = _get_or_build(
+            backlog_key,
+            lambda: _build_backlog(db, dataset_id, config),
+            request_cache
+        )
         return backlog.get_insights()
 
-    return _get_or_build(insights_key, build)
+    return _get_or_build(insights_key, build, request_cache)
 
 
-def get_trends_response(db: sqlite3.Connection, dataset_id: str) -> dict:
-    """Return cached trend charts for the trends endpoint."""
+def get_trends_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
+    """Return cached trend charts for the trends endpoint.
+    
+    Args:
+        db: Database connection
+        dataset_id: Dataset identifier
+        request_cache: Optional RequestCache for request-scoped caching
+    
+    Returns:
+        Dict with trend charts
+    """
     import json as json_mod
     import plotly.graph_objects as go
     from . import config_service
@@ -169,7 +262,11 @@ def get_trends_response(db: sqlite3.Connection, dataset_id: str) -> dict:
     trends_key = f"trends:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config))
+        backlog = _get_or_build(
+            backlog_key,
+            lambda: _build_backlog(db, dataset_id, config),
+            request_cache
+        )
         methods = {
             "cumulative_flow": backlog.draw_cumulative_flow,
             "monthly_throughput": backlog.draw_monthly_throughput,
@@ -184,7 +281,7 @@ def get_trends_response(db: sqlite3.Connection, dataset_id: str) -> dict:
                 raw[name] = go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json()
         return {k: json_mod.loads(v) for k, v in raw.items()}
 
-    return _get_or_build(trends_key, build)
+    return _get_or_build(trends_key, build, request_cache)
 
 
 def invalidate(dataset_id: str) -> None:

@@ -159,8 +159,11 @@ def test_connection(
     except (KeyError, TypeError) as exc:
         logger.warning("Invalid Jira config format: %s", exc)
         return {"success": False, "error": "Invalid Jira configuration"}
+    except (ConnectionError, TimeoutError, OSError) as exc:
+        logger.warning("Network error connecting to Jira: %s", exc)
+        return {"success": False, "error": "Connection error to Jira"}
     except Exception as exc:
-        logger.exception("Unexpected error in test_connection")
+        logger.exception("Unexpected error in test_connection: %s", exc)
         return {"success": False, "error": "Failed to connect to Jira"}
 
 
@@ -186,8 +189,11 @@ def get_jira_statuses(
     except (KeyError, TypeError) as exc:
         logger.warning("Invalid Jira config format: %s", exc)
         raise HTTPException(status_code=400, detail="Invalid Jira configuration")
+    except (ConnectionError, TimeoutError, OSError) as exc:
+        logger.warning("Network error connecting to Jira: %s", exc)
+        raise HTTPException(status_code=502, detail="Connection error to Jira")
     except Exception as exc:
-        logger.exception("Unexpected error in get_jira_statuses")
+        logger.exception("Unexpected error in get_jira_statuses: %s", exc)
         raise HTTPException(status_code=502, detail="Failed to fetch statuses")
 
 
@@ -217,8 +223,11 @@ def get_jira_projects(
     except (KeyError, TypeError) as exc:
         logger.warning("Invalid Jira config format: %s", exc)
         raise HTTPException(status_code=400, detail="Invalid Jira configuration")
+    except (ConnectionError, TimeoutError, OSError) as exc:
+        logger.warning("Network error connecting to Jira: %s", exc)
+        raise HTTPException(status_code=502, detail="Connection error to Jira")
     except Exception as exc:
-        logger.exception("Unexpected error in get_jira_projects")
+        logger.exception("Unexpected error in get_jira_projects: %s", exc)
         raise HTTPException(status_code=502, detail="Failed to fetch projects")
 
 
@@ -243,8 +252,11 @@ def get_jira_issue_types(
     except (KeyError, TypeError) as exc:
         logger.warning("Invalid Jira config format: %s", exc)
         raise HTTPException(status_code=400, detail="Invalid Jira configuration")
+    except (ConnectionError, TimeoutError, OSError) as exc:
+        logger.warning("Network error connecting to Jira: %s", exc)
+        raise HTTPException(status_code=502, detail="Connection error to Jira")
     except Exception as exc:
-        logger.exception("Unexpected error in get_jira_issue_types")
+        logger.exception("Unexpected error in get_jira_issue_types: %s", exc)
         raise HTTPException(status_code=502, detail="Failed to fetch issue types")
 
 
@@ -285,7 +297,10 @@ def get_jira_fields(
     except (KeyError, TypeError) as exc:
         logger.warning("Invalid Jira config format: %s", exc)
         raise HTTPException(status_code=400, detail="Invalid Jira configuration")
+    except (ConnectionError, TimeoutError, OSError) as exc:
+        logger.warning("Network error connecting to Jira: %s", exc)
+        raise HTTPException(status_code=502, detail="Connection error to Jira")
     except Exception as exc:
-        logger.exception("Unexpected error in get_jira_fields")
+        logger.exception("Unexpected error in get_jira_fields: %s", exc)
         raise HTTPException(status_code=502, detail="Failed to fetch fields")
 

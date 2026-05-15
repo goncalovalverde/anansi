@@ -113,11 +113,12 @@ class TestTrendsEndpoint:
         data_service.save_dataframe(conn, dataset_id, sample_dataframe)
         conn.close()
         
-        with patch("backend.services.backlog_cache.get_trends_response", side_effect=Exception("Render failed")):
+        with patch("backend.services.backlog_cache.get_trends_response", side_effect=ValueError("Render failed")):
             response = client.get(f"/api/trends/{dataset_id}")
         
-        # Should return 500 since we now let exceptions bubble to error handler
+        # Should return 500 since we now catch specific exceptions (ValueError, etc.)
         assert response.status_code == 500
+        assert "rendering failed" in response.json()["detail"].lower()
 
     def test_trends_returns_valid_json(self, client: TestClient, db_temp, sample_dataframe):
         """GET /api/trends/{dataset_id} returns valid JSON structure."""

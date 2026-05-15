@@ -14,6 +14,9 @@ def get_trends(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
     if row["status"] != "ready": raise HTTPException(409, "Dataset not ready")
     try:
         return backlog_cache.get_trends_response(db, dataset_id)
-    except Exception:
-        logger.exception("Trend charts failed for dataset %s", dataset_id)
+    except (ValueError, KeyError, TypeError, AttributeError) as e:
+        logger.exception("Trend charts failed for dataset %s: %s", dataset_id, e)
         raise HTTPException(500, "Trend chart rendering failed")
+    except Exception as e:
+        logger.exception("Unexpected error during trend chart rendering for dataset %s: %s", dataset_id, e)
+        raise

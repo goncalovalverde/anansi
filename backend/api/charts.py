@@ -29,10 +29,13 @@ def get_charts(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
 
     try:
         response = backlog_cache.get_dashboard_response(db, dataset_id)
-    except Exception:
-        logger.exception("Chart rendering failed for dataset %s", dataset_id)
+    except (ValueError, KeyError, TypeError, AttributeError) as e:
+        logger.exception("Chart rendering failed for dataset %s: %s", dataset_id, e)
         raise HTTPException(
             status_code=500, detail="Chart rendering failed - check server logs for details"
         )
+    except Exception as e:
+        logger.exception("Unexpected error during chart rendering for dataset %s: %s", dataset_id, e)
+        raise
 
     return response

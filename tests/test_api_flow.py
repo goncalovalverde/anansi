@@ -83,7 +83,7 @@ class TestFlowEndpoint:
         conn.close()
         
         with patch("backend.services.backlog_cache.get_flow_response") as mock_flow:
-            mock_flow.side_effect = Exception("Flow rendering failed")
+            mock_flow.side_effect = ValueError("Flow rendering failed")
             response = client.get(f"/api/flow/{dataset_id}")
         
         assert response.status_code == 500
