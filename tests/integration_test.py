@@ -41,10 +41,10 @@ class TestChartIntegration:
 
     def test_chart_config_constants(self):
         """Test that constants are defined."""
-        assert hasattr(ChartConfig, 'HEATMAP_MIN_HEIGHT')
+        assert hasattr(ChartConfig, "HEATMAP_MIN_HEIGHT")
         cfg = ChartConfig()
-        assert hasattr(cfg, 'ROLLING_AVG_WINDOW')
-        assert hasattr(cfg, 'AGING_CRITICAL_DAYS')
+        assert hasattr(cfg, "ROLLING_AVG_WINDOW")
+        assert hasattr(cfg, "AGING_CRITICAL_DAYS")
         assert cfg.ROLLING_AVG_WINDOW == 4
 
     def test_aging_heatmap_generation(self):
@@ -55,38 +55,39 @@ class TestChartIntegration:
 
         # Create 3 epics
         for epic_id in range(1, 4):
-            data.append({
-                "Key": f"E-{epic_id}",
-                "Summary": f"Epic {epic_id}",
-                "Type": "Epic",
-                "Epic Link": None,
-                "Story Points": 0,
-                "Created": today.strftime("%Y-%m-%d"),
-                "Done": None,
-            })
+            data.append(
+                {
+                    "Key": f"E-{epic_id}",
+                    "Summary": f"Epic {epic_id}",
+                    "Type": "Epic",
+                    "Epic Link": None,
+                    "Story Points": 0,
+                    "Created": today.strftime("%Y-%m-%d"),
+                    "Done": None,
+                }
+            )
 
         # Create stories linked to epics
         for epic_id in range(1, 4):
             for i in range(5):
                 age_days = [5, 10, 20, 45, 90][i]
                 created = (today - timedelta(days=age_days)).strftime("%Y-%m-%d")
-                data.append({
-                    "Key": f"S-E{epic_id}-{i}",
-                    "Summary": f"Epic {epic_id} story {i}",
-                    "Type": "Story",
-                    "Epic Link": f"E-{epic_id}",
-                    "Story Points": 3,
-                    "Created": created,
-                    "Done": None,
-                })
+                data.append(
+                    {
+                        "Key": f"S-E{epic_id}-{i}",
+                        "Summary": f"Epic {epic_id} story {i}",
+                        "Type": "Story",
+                        "Epic Link": f"E-{epic_id}",
+                        "Story Points": 3,
+                        "Created": created,
+                        "Done": None,
+                    }
+                )
 
         df = pd.DataFrame(data)
 
         # Create backlog with proper DataFrame
-        backlog = Backlog(
-            cycle_data=df,
-            config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]}
-        )
+        backlog = Backlog(cycle_data=df, config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]})
 
         # Generate chart
         result = backlog.draw_aging_heatmap()
@@ -104,20 +105,65 @@ class TestChartIntegration:
         today = datetime.now()
         data = [
             # Epics
-            {"Key": "BE-1", "Summary": "Backend Work", "Type": "Epic", "Epic Link": None, "Story Points": 0, "Created": today.strftime("%Y-%m-%d"), "Done": None},
-            {"Key": "FE-1", "Summary": "Frontend Work", "Type": "Epic", "Epic Link": None, "Story Points": 0, "Created": today.strftime("%Y-%m-%d"), "Done": None},
+            {
+                "Key": "BE-1",
+                "Summary": "Backend Work",
+                "Type": "Epic",
+                "Epic Link": None,
+                "Story Points": 0,
+                "Created": today.strftime("%Y-%m-%d"),
+                "Done": None,
+            },
+            {
+                "Key": "FE-1",
+                "Summary": "Frontend Work",
+                "Type": "Epic",
+                "Epic Link": None,
+                "Story Points": 0,
+                "Created": today.strftime("%Y-%m-%d"),
+                "Done": None,
+            },
             # Stories
-            {"Key": "S-1", "Summary": "Backend task 1", "Type": "Story", "Epic Link": "BE-1", "Story Points": 5, "Created": today.strftime("%Y-%m-%d"), "Done": None},
-            {"Key": "S-2", "Summary": "Backend task 2", "Type": "Story", "Epic Link": "BE-1", "Story Points": 3, "Created": today.strftime("%Y-%m-%d"), "Done": None},
-            {"Key": "S-3", "Summary": "Frontend task 1", "Type": "Story", "Epic Link": "FE-1", "Story Points": 8, "Created": today.strftime("%Y-%m-%d"), "Done": None},
-            {"Key": "S-4", "Summary": "Frontend task 2", "Type": "Story", "Epic Link": "FE-1", "Story Points": 2, "Created": today.strftime("%Y-%m-%d"), "Done": None},
+            {
+                "Key": "S-1",
+                "Summary": "Backend task 1",
+                "Type": "Story",
+                "Epic Link": "BE-1",
+                "Story Points": 5,
+                "Created": today.strftime("%Y-%m-%d"),
+                "Done": None,
+            },
+            {
+                "Key": "S-2",
+                "Summary": "Backend task 2",
+                "Type": "Story",
+                "Epic Link": "BE-1",
+                "Story Points": 3,
+                "Created": today.strftime("%Y-%m-%d"),
+                "Done": None,
+            },
+            {
+                "Key": "S-3",
+                "Summary": "Frontend task 1",
+                "Type": "Story",
+                "Epic Link": "FE-1",
+                "Story Points": 8,
+                "Created": today.strftime("%Y-%m-%d"),
+                "Done": None,
+            },
+            {
+                "Key": "S-4",
+                "Summary": "Frontend task 2",
+                "Type": "Story",
+                "Epic Link": "FE-1",
+                "Story Points": 2,
+                "Created": today.strftime("%Y-%m-%d"),
+                "Done": None,
+            },
         ]
         df = pd.DataFrame(data)
 
-        backlog = Backlog(
-            cycle_data=df,
-            config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]}
-        )
+        backlog = Backlog(cycle_data=df, config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]})
 
         result = backlog.draw_epic_investment()
         fig = json.loads(result)
@@ -133,36 +179,37 @@ class TestChartIntegration:
         data = []
 
         # Create an epic
-        data.append({
-            "Key": "E-1",
-            "Summary": "Work Epic",
-            "Type": "Epic",
-            "Epic Link": None,
-            "Story Points": 0,
-            "Created": today.strftime("%Y-%m-%d"),
-            "Done": None,
-        })
+        data.append(
+            {
+                "Key": "E-1",
+                "Summary": "Work Epic",
+                "Type": "Epic",
+                "Epic Link": None,
+                "Story Points": 0,
+                "Created": today.strftime("%Y-%m-%d"),
+                "Done": None,
+            }
+        )
 
         # Create stories linked to epic, with done dates
         for week in range(8):
             for day in range(3):  # 3 items per week
-                done_date = (today - timedelta(weeks=8-week, days=day)).strftime("%Y-%m-%d")
-                data.append({
-                    "Key": f"S-{week}-{day}",
-                    "Summary": f"Completed task {week}-{day}",
-                    "Type": "Story",
-                    "Epic Link": "E-1",
-                    "Story Points": 2,
-                    "Created": (today - timedelta(weeks=10)).strftime("%Y-%m-%d"),
-                    "Done": done_date,
-                })
+                done_date = (today - timedelta(weeks=8 - week, days=day)).strftime("%Y-%m-%d")
+                data.append(
+                    {
+                        "Key": f"S-{week}-{day}",
+                        "Summary": f"Completed task {week}-{day}",
+                        "Type": "Story",
+                        "Epic Link": "E-1",
+                        "Story Points": 2,
+                        "Created": (today - timedelta(weeks=10)).strftime("%Y-%m-%d"),
+                        "Done": done_date,
+                    }
+                )
 
         df = pd.DataFrame(data)
 
-        backlog = Backlog(
-            cycle_data=df,
-            config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]}
-        )
+        backlog = Backlog(cycle_data=df, config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]})
 
         result = backlog.draw_throughput_histogram()
         fig = json.loads(result)
@@ -180,34 +227,37 @@ class TestChartIntegration:
 
         # Create 10 epics
         for epic_id in range(10):
-            data.append({
-                "Key": f"E-{epic_id}",
-                "Summary": f"Epic {epic_id}",
-                "Type": "Epic",
-                "Epic Link": None,
-                "Story Points": 0,
-                "Created": today.strftime("%Y-%m-%d"),
-                "Done": None,
-            })
+            data.append(
+                {
+                    "Key": f"E-{epic_id}",
+                    "Summary": f"Epic {epic_id}",
+                    "Type": "Epic",
+                    "Epic Link": None,
+                    "Story Points": 0,
+                    "Created": today.strftime("%Y-%m-%d"),
+                    "Done": None,
+                }
+            )
 
         # Create 1000 stories
         for i in range(1000):
             epic_id = i % 10
-            data.append({
-                "Key": f"S-{i}",
-                "Summary": f"Task {i}",
-                "Type": "Story" if i % 2 == 0 else "Bug",
-                "Epic Link": f"E-{epic_id}",
-                "Story Points": (i % 13) + 1 if i % 5 != 0 else None,
-                "Created": (today - timedelta(days=i % 90)).strftime("%Y-%m-%d"),
-                "Done": None if i % 3 != 0 else (today - timedelta(days=i % 30)).strftime("%Y-%m-%d"),
-            })
+            data.append(
+                {
+                    "Key": f"S-{i}",
+                    "Summary": f"Task {i}",
+                    "Type": "Story" if i % 2 == 0 else "Bug",
+                    "Epic Link": f"E-{epic_id}",
+                    "Story Points": (i % 13) + 1 if i % 5 != 0 else None,
+                    "Created": (today - timedelta(days=i % 90)).strftime("%Y-%m-%d"),
+                    "Done": None if i % 3 != 0 else (today - timedelta(days=i % 30)).strftime("%Y-%m-%d"),
+                }
+            )
 
         df = pd.DataFrame(data)
 
         backlog = Backlog(
-            cycle_data=df,
-            config={"Workflow": ["To Do", "In Progress", "Done"], "issue_type": ["Story", "Bug", "Epic"]}
+            cycle_data=df, config={"Workflow": ["To Do", "In Progress", "Done"], "issue_type": ["Story", "Bug", "Epic"]}
         )
 
         # Should handle large data efficiently

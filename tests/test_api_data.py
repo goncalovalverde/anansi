@@ -23,7 +23,7 @@ class TestDataLoad:
                 "jira_username": "testuser",
                 "jira_password": "testpass",
                 "input_mode": "jira",
-            }
+            },
         )
 
         with patch("backend.services.data_service.load_data_task"):
@@ -47,7 +47,7 @@ class TestDataLoad:
                 "jira_username": "testuser",
                 "jira_password": "testpass",
                 "input_mode": "jira",
-            }
+            },
         )
 
         with patch("backend.services.data_service.load_data_task"):
@@ -68,7 +68,7 @@ class TestDataLoad:
                 "jira_username": "testuser",
                 "jira_password": "testpass",
                 "input_mode": "jira",
-            }
+            },
         )
 
         with patch("backend.services.data_service.load_data_task"):
@@ -89,7 +89,7 @@ class TestDataLoad:
                 "jira_username": "testuser",
                 "jira_password": "testpass",
                 "input_mode": "jira",
-            }
+            },
         )
 
         # First load
@@ -102,11 +102,9 @@ class TestDataLoad:
 
         # Mark dataset as ready to enable caching
         from backend import database
+
         conn = database.get_db(db_temp)
-        conn.execute(
-            "UPDATE datasets SET status='ready' WHERE id=?",
-            (dataset_id_1,)
-        )
+        conn.execute("UPDATE datasets SET status='ready' WHERE id=?", (dataset_id_1,))
         conn.commit()
         conn.close()
 
@@ -125,7 +123,7 @@ class TestDataLoad:
             json={
                 "input_mode": "csv",
                 "input_csv_file": "",
-            }
+            },
         )
 
         with patch("backend.services.data_service.load_data_task"):
@@ -241,7 +239,7 @@ TEST-2,Second Issue,2024-01-02,In Progress"""
     def test_upload_csv_non_utf8_encoding(self, client: TestClient):
         """POST /api/data/upload-csv rejects non-UTF8 encoded files."""
         # Create non-UTF8 content
-        csv_content = b"\xFF\xFEKey,Summary"  # Invalid UTF-8
+        csv_content = b"\xff\xfeKey,Summary"  # Invalid UTF-8
 
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
         response = client.post("/api/data/upload-csv", files=files)

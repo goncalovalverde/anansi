@@ -24,20 +24,33 @@ _ALLOWED_CONFIG_KEYS = {
 }
 
 # Chart threshold keys are also allowed (prefixed with "chart_")
-_ALLOWED_CHART_KEYS = {f"chart_{k}" for k in (
-    "wip_high_threshold", "wip_elevated_threshold",
-    "cycle_time_high_days", "cycle_time_healthy_days",
-    "bug_ratio_high_pct", "bug_ratio_elevated_pct",
-    "backlog_growth_ratio",
-    "aging_critical_days", "aging_critical_count",
-    "aging_warning_days", "aging_warning_count",
-    "callout_bug_ratio_high_pct",
-    "callout_cycle_time_alert_days", "callout_cycle_time_warn_days",
-    "callout_outlier_ct_multiplier", "callout_epic_concentration_pct",
-    "complexity_ratio_threshold", "unestimated_items_threshold",
-    "flow_efficiency_good_pct", "flow_efficiency_ok_pct",
-    "stddev_threshold", "rolling_avg_window",
-)}
+_ALLOWED_CHART_KEYS = {
+    f"chart_{k}"
+    for k in (
+        "wip_high_threshold",
+        "wip_elevated_threshold",
+        "cycle_time_high_days",
+        "cycle_time_healthy_days",
+        "bug_ratio_high_pct",
+        "bug_ratio_elevated_pct",
+        "backlog_growth_ratio",
+        "aging_critical_days",
+        "aging_critical_count",
+        "aging_warning_days",
+        "aging_warning_count",
+        "callout_bug_ratio_high_pct",
+        "callout_cycle_time_alert_days",
+        "callout_cycle_time_warn_days",
+        "callout_outlier_ct_multiplier",
+        "callout_epic_concentration_pct",
+        "complexity_ratio_threshold",
+        "unestimated_items_threshold",
+        "flow_efficiency_good_pct",
+        "flow_efficiency_ok_pct",
+        "stddev_threshold",
+        "rolling_avg_window",
+    )
+}
 
 
 def get_config(db: sqlite3.Connection) -> dict:
@@ -65,17 +78,14 @@ def set_config(db: sqlite3.Connection, updates: dict) -> None:
         if key in SECRET_KEYS and value in ("", "***"):
             continue
         db.execute(
-            "INSERT INTO config (key, value) VALUES (?, ?) "
-            "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            "INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
             (key, value),
         )
     db.commit()
 
 
 def get_workflow(db: sqlite3.Connection) -> list[str]:
-    rows = db.execute(
-        "SELECT step FROM workflow_steps ORDER BY position"
-    ).fetchall()
+    rows = db.execute("SELECT step FROM workflow_steps ORDER BY position").fetchall()
     return [row["step"] for row in rows]
 
 
@@ -130,6 +140,7 @@ def detect_story_point_fields(fields: list[dict]) -> list[dict]:
     Matches on field name containing 'story point' or 'storypoint' (case-insensitive).
     Short tokens like 'sp' or 'points' are excluded as they match unrelated fields.
     """
+
     def _is_sp_name(name: str) -> bool:
         n = name.lower()
         return "story point" in n or "storypoint" in n
@@ -151,13 +162,14 @@ def detect_epic_link_fields(fields: list[dict]) -> list[dict]:
     EPIC_SCHEMA_TYPES = ("gh-epic-link", "gh-epic-label", "greenhopper-epic")
 
     candidates = [
-        f for f in fields
+        f
+        for f in fields
         if f["id"].startswith("customfield_")
         and (
             any(t in f.get("schema", {}).get("custom", "").lower() for t in EPIC_SCHEMA_TYPES)
-            or any(kw in f.get("name", "").lower() for kw in (
-                "epic link", "epic_link", "epic name", "parent epic", "epic"
-            ))
+            or any(
+                kw in f.get("name", "").lower() for kw in ("epic link", "epic_link", "epic name", "parent epic", "epic")
+            )
         )
     ]
 
@@ -181,11 +193,7 @@ def build_reader_config(db: sqlite3.Connection) -> dict:
         start_step = workflow[1] if len(workflow) > 1 else (workflow[0] if workflow else "In Progress")
 
     # Collect chart threshold overrides (keys prefixed with "chart_")
-    chart_thresholds = {
-        k[len("chart_"):]: v
-        for k, v in raw.items()
-        if k.startswith("chart_") and v
-    }
+    chart_thresholds = {k[len("chart_") :]: v for k, v in raw.items() if k.startswith("chart_") and v}
 
     return {
         "input": {
@@ -225,8 +233,7 @@ def set_chart_thresholds(db: sqlite3.Connection, thresholds: dict) -> None:
             continue
         db_key = f"chart_{key}"
         db.execute(
-            "INSERT INTO config (key, value) VALUES (?, ?) "
-            "ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+            "INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
             (db_key, str(value)),
         )
     db.commit()
@@ -251,4 +258,5 @@ def reset_chart_thresholds(db: sqlite3.Connection, keys: list[str] | None = None
 def get_chart_threshold_defaults() -> dict:
     """Return the built-in default thresholds (no DB access)."""
     from ..viewer.chart_config import _THRESHOLD_DEFAULTS
+
     return dict(_THRESHOLD_DEFAULTS)

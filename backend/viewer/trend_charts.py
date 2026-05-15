@@ -38,17 +38,26 @@ class TrendChartsMixin:
 
         xs = [str(d.date()) for d in week_range]
         fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=xs, y=cum_created.tolist(),
-            mode="lines", name="Created",
-            line={"color": ANANSI_COLORS[1], "width": 2},
-            fill="tonexty", fillcolor="rgba(0,123,133,0.1)",
-        ))
-        fig.add_trace(go.Scatter(
-            x=xs, y=cum_done.tolist(),
-            mode="lines", name="Completed",
-            line={"color": ANANSI_COLORS[0], "width": 2},
-        ))
+        fig.add_trace(
+            go.Scatter(
+                x=xs,
+                y=cum_created.tolist(),
+                mode="lines",
+                name="Created",
+                line={"color": ANANSI_COLORS[1], "width": 2},
+                fill="tonexty",
+                fillcolor="rgba(0,123,133,0.1)",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=xs,
+                y=cum_done.tolist(),
+                mode="lines",
+                name="Completed",
+                line={"color": ANANSI_COLORS[0], "width": 2},
+            )
+        )
         fig.update_layout(
             xaxis={"tickformat": "%b %Y", "tickangle": -30},
             yaxis={"title": "Cumulative items"},
@@ -70,7 +79,11 @@ class TrendChartsMixin:
             trend = ys[:]
         fig = go.Figure()
         fig.add_trace(go.Bar(x=xs, y=ys, name="Monthly completions", marker_color=ANANSI_COLORS[0]))
-        fig.add_trace(go.Scatter(x=xs, y=trend, mode="lines", name="Trend", line={"color": ANANSI_COLORS[2], "width": 2, "dash": "dot"}))
+        fig.add_trace(
+            go.Scatter(
+                x=xs, y=trend, mode="lines", name="Trend", line={"color": ANANSI_COLORS[2], "width": 2, "dash": "dot"}
+            )
+        )
         fig.update_layout(
             xaxis={"type": "category", "tickangle": -30},
             yaxis={"title": "Items completed"},
@@ -89,11 +102,14 @@ class TrendChartsMixin:
         epics = sorted(set(epic_first.index) & set(epic_last.index))
         if not epics:
             return go.Figure(layout={"title": "epic_progress unavailable: No completed items"}).to_json()
-        epic_df = pd.DataFrame([
-            {"Epic": e, "Start": epic_first[e], "End": epic_last[e], "Count": int(epic_count.get(e, 1))}
-            for e in epics
-        ])
-        fig = px.timeline(epic_df, x_start="Start", x_end="End", y="Epic", color="Epic",
-                          color_discrete_sequence=ANANSI_COLORS)
+        epic_df = pd.DataFrame(
+            [
+                {"Epic": e, "Start": epic_first[e], "End": epic_last[e], "Count": int(epic_count.get(e, 1))}
+                for e in epics
+            ]
+        )
+        fig = px.timeline(
+            epic_df, x_start="Start", x_end="End", y="Epic", color="Epic", color_discrete_sequence=ANANSI_COLORS
+        )
         fig.update_layout(showlegend=False, yaxis={"automargin": True})
         return fig.to_json()

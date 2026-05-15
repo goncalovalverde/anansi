@@ -96,7 +96,7 @@ def init_db(db_path: str = DB_PATH) -> None:
         existing_cols = {row[1] for row in conn.execute("PRAGMA table_info(datasets)")}
         for col, definition in [
             ("progress_loaded", "INTEGER DEFAULT 0"),
-            ("progress_total",  "INTEGER DEFAULT 0"),
+            ("progress_total", "INTEGER DEFAULT 0"),
         ]:
             if col not in existing_cols:
                 conn.execute(f"ALTER TABLE datasets ADD COLUMN {col} {definition}")

@@ -45,6 +45,7 @@ def client(db_temp):
 
     Overrides get_db dependency to use the test database.
     """
+
     def get_test_db():
         """Test database dependency override."""
         conn = database.get_db(db_temp)
@@ -96,48 +97,50 @@ def sample_dataframe():
 
     base_date = datetime(2024, 1, 1)
 
-    return pd.DataFrame({
-        "Key": ["TEST-1", "TEST-2", "TEST-3", "TEST-4", "TEST-5"],
-        "Summary": [
-            "First issue",
-            "Second issue",
-            "Third issue",
-            "Fourth issue",
-            "Fifth issue",
-        ],
-        "Type": ["Story", "Story", "Bug", "Task", "Epic"],
-        "Status": ["Done", "In Progress", "Backlog", "Done", "Backlog"],
-        "Created": [
-            base_date,
-            base_date + timedelta(days=1),
-            base_date + timedelta(days=2),
-            base_date + timedelta(days=3),
-            base_date + timedelta(days=4),
-        ],
-        "Backlog": [
-            base_date + timedelta(days=1),
-            base_date + timedelta(days=2),
-            None,
-            base_date + timedelta(days=3),
-            None,
-        ],
-        "In Progress": [
-            base_date + timedelta(days=2),
-            base_date + timedelta(days=5),
-            None,
-            base_date + timedelta(days=4),
-            None,
-        ],
-        "Done": [
-            base_date + timedelta(days=5),
-            None,
-            None,
-            base_date + timedelta(days=7),
-            None,
-        ],
-        "Story Points": [5.0, 3.0, 2.0, 8.0, 0.0],
-        "Epic Link": ["EPIC-1", "EPIC-1", "EPIC-2", "EPIC-2", "No Epic"],
-    })
+    return pd.DataFrame(
+        {
+            "Key": ["TEST-1", "TEST-2", "TEST-3", "TEST-4", "TEST-5"],
+            "Summary": [
+                "First issue",
+                "Second issue",
+                "Third issue",
+                "Fourth issue",
+                "Fifth issue",
+            ],
+            "Type": ["Story", "Story", "Bug", "Task", "Epic"],
+            "Status": ["Done", "In Progress", "Backlog", "Done", "Backlog"],
+            "Created": [
+                base_date,
+                base_date + timedelta(days=1),
+                base_date + timedelta(days=2),
+                base_date + timedelta(days=3),
+                base_date + timedelta(days=4),
+            ],
+            "Backlog": [
+                base_date + timedelta(days=1),
+                base_date + timedelta(days=2),
+                None,
+                base_date + timedelta(days=3),
+                None,
+            ],
+            "In Progress": [
+                base_date + timedelta(days=2),
+                base_date + timedelta(days=5),
+                None,
+                base_date + timedelta(days=4),
+                None,
+            ],
+            "Done": [
+                base_date + timedelta(days=5),
+                None,
+                None,
+                base_date + timedelta(days=7),
+                None,
+            ],
+            "Story Points": [5.0, 3.0, 2.0, 8.0, 0.0],
+            "Epic Link": ["EPIC-1", "EPIC-1", "EPIC-2", "EPIC-2", "No Epic"],
+        }
+    )
 
 
 @pytest.fixture

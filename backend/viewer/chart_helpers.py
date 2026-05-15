@@ -11,9 +11,7 @@ import plotly.graph_objects as go
 from .chart_config import ChartConfig
 
 
-def create_empty_state_figure(
-    message: str, height: int = ChartConfig.EMPTY_STATE_HEIGHT
-) -> str:
+def create_empty_state_figure(message: str, height: int = ChartConfig.EMPTY_STATE_HEIGHT) -> str:
     """Create a standardized empty state figure with a centered message.
 
     Used by chart methods when there is no data to display, so every empty
@@ -29,8 +27,10 @@ def create_empty_state_figure(
     fig = go.Figure()
     fig.add_annotation(
         text=message,
-        xref="paper", yref="paper",
-        x=0.5, y=0.5,
+        xref="paper",
+        yref="paper",
+        x=0.5,
+        y=0.5,
         showarrow=False,
         font=dict(
             size=ChartConfig.EMPTY_STATE_FONT_SIZE,

@@ -22,8 +22,7 @@ def compute_config_hash(db: sqlite3.Connection) -> str:
 
 def find_valid_dataset(db: sqlite3.Connection, config_hash: str) -> str | None:
     row = db.execute(
-        "SELECT id FROM datasets WHERE config_hash=? AND status='ready' "
-        "ORDER BY created_at DESC LIMIT 1",
+        "SELECT id FROM datasets WHERE config_hash=? AND status='ready' ORDER BY created_at DESC LIMIT 1",
         (config_hash,),
     ).fetchone()
     return row["id"] if row else None
@@ -66,10 +65,7 @@ def update_dataset_progress(
 
 
 def save_dataframe(db: sqlite3.Connection, dataset_id: str, df: DataFrame) -> None:
-    rows = [
-        (dataset_id, idx, json.dumps(row, default=str))
-        for idx, row in enumerate(df.to_dict(orient="records"))
-    ]
+    rows = [(dataset_id, idx, json.dumps(row, default=str)) for idx, row in enumerate(df.to_dict(orient="records"))]
     db.execute("DELETE FROM dataset_rows WHERE dataset_id=?", (dataset_id,))
     db.executemany(
         "INSERT INTO dataset_rows (dataset_id, row_index, row_data) VALUES (?, ?, ?)",
@@ -87,6 +83,7 @@ def load_dataframe(db: sqlite3.Connection, dataset_id: str) -> DataFrame:
     df = DataFrame(records)
 
     import pandas as pd
+
     datetime_cols = ["Created", "Done", "In Progress", "Backlog"]
     for col in datetime_cols:
         if col in df.columns:
@@ -96,6 +93,7 @@ def load_dataframe(db: sqlite3.Connection, dataset_id: str) -> DataFrame:
         if df[col].dtype == object:
             try:
                 import warnings
+
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     converted = pd.to_datetime(df[col], errors="coerce", format="mixed")
@@ -126,6 +124,7 @@ def load_data_task(dataset_id: str, db_path: str) -> None:
         update_dataset_status(conn, dataset_id, "ready")
         # Invalidate stale cache so the next request rebuilds with fresh data
         from . import backlog_cache
+
         backlog_cache.invalidate(dataset_id)
         logger.info("Dataset %s loaded successfully (%d rows)", dataset_id, len(df))
     except Exception as exc:

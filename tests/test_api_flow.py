@@ -65,9 +65,7 @@ class TestFlowEndpoint:
         conn.close()
 
         with patch("backend.services.backlog_cache.get_flow_response") as mock_flow:
-            mock_flow.return_value = {
-                "flow": {"type": "scatter", "data": []}
-            }
+            mock_flow.return_value = {"flow": {"type": "scatter", "data": []}}
             response = client.get(f"/api/flow/{dataset_id}")
 
         assert response.status_code == 200

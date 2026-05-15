@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # CONFIG MODELS
 # ============================================================================
 
+
 class ConfigUpdate(BaseModel):
     """Configuration update request for JIRA and input settings.
 
@@ -28,14 +29,16 @@ class ConfigUpdate(BaseModel):
         Update story points field: {"jira_story_points_field": "customfield_10016"}
     """
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "jira_url": "https://jira.example.com",
-            "jira_jql_query": "project = PROJ",
-            "jira_auth_method": "basic",
-            "jira_username": "user@example.com",
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "jira_url": "https://jira.example.com",
+                "jira_jql_query": "project = PROJ",
+                "jira_auth_method": "basic",
+                "jira_username": "user@example.com",
+            }
         }
-    })
+    )
 
     jira_url: Optional[str] = Field(None, description="Jira instance URL")
     jira_jql_query: Optional[str] = Field(None, description="JQL query for fetching issues")
@@ -47,9 +50,7 @@ class ConfigUpdate(BaseModel):
     jira_username: Optional[str] = Field(None, description="Jira username (for basic auth)")
     jira_password: Optional[str] = Field(None, description="Jira password (for basic auth)")
     jira_pat_token: Optional[str] = Field(None, description="Jira Personal Access Token")
-    jira_story_points_field: Optional[str] = Field(
-        None, description="Custom field ID for story points"
-    )
+    jira_story_points_field: Optional[str] = Field(None, description="Custom field ID for story points")
     jira_epic_link_field: Optional[str] = Field(None, description="Custom field ID for epic link")
     workflow_start_step: Optional[str] = Field(None, description="Start step in workflow")
     input_mode: Optional[str] = Field(
@@ -72,15 +73,17 @@ class ConfigResponse(BaseModel):
     Unset secret fields are returned as empty strings ('').
     """
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "jira_url": "https://jira.example.com",
-            "jira_jql_query": "project = PROJ",
-            "jira_auth_method": "basic",
-            "jira_username": "user@example.com",
-            "jira_password": "***",
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "jira_url": "https://jira.example.com",
+                "jira_jql_query": "project = PROJ",
+                "jira_auth_method": "basic",
+                "jira_username": "user@example.com",
+                "jira_password": "***",
+            }
         }
-    })
+    )
 
     jira_url: Optional[str] = None
     jira_jql_query: Optional[str] = None
@@ -179,14 +182,16 @@ class TestConnectionRequest(BaseModel):
         Test current config: {} (empty request body)
     """
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "jira_url": "https://jira.example.com",
-            "jira_jql_query": "project = PROJ",
-            "jira_auth_method": "basic",
-            "jira_username": "user@example.com",
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "jira_url": "https://jira.example.com",
+                "jira_jql_query": "project = PROJ",
+                "jira_auth_method": "basic",
+                "jira_username": "user@example.com",
+            }
         }
-    })
+    )
 
     jira_url: Optional[str] = Field(None, description="Jira instance URL")
     jira_jql_query: Optional[str] = Field(None, description="JQL query for fetching issues")
@@ -208,12 +213,14 @@ class TestConnectionRequest(BaseModel):
 class TestConnectionResponse(BaseModel):
     """Test connection response."""
 
-    model_config = ConfigDict(json_schema_extra={
-        "examples": [
-            {"success": True},
-            {"success": False, "error": "Invalid credentials"},
-        ]
-    })
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {"success": True},
+                {"success": False, "error": "Invalid credentials"},
+            ]
+        }
+    )
 
     success: bool = Field(..., description="Whether connection was successful")
     error: Optional[str] = Field(None, description="Error message if connection failed")
@@ -242,14 +249,16 @@ class ProjectReference(BaseModel):
 class JiraProjectsResponse(BaseModel):
     """Response containing accessible Jira projects."""
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "projects": [
-                {"key": "PROJ", "name": "My Project"},
-                {"key": "OTHER", "name": "Other Project"},
-            ]
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "projects": [
+                    {"key": "PROJ", "name": "My Project"},
+                    {"key": "OTHER", "name": "Other Project"},
+                ]
+            }
         }
-    })
+    )
 
     projects: List[ProjectReference] = Field(..., description="List of accessible projects")
 
@@ -272,26 +281,22 @@ class FieldDefinition(BaseModel):
 class JiraFieldsResponse(BaseModel):
     """Response containing field detection results and all custom fields."""
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "story_points": [{"id": "customfield_10001", "name": "Story Points"}],
-            "epic_link": [{"id": "customfield_10002", "name": "Epic Link"}],
-            "all_custom_fields": [
-                {"id": "customfield_10001", "name": "Story Points"},
-                {"id": "customfield_10002", "name": "Epic Link"},
-            ],
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "story_points": [{"id": "customfield_10001", "name": "Story Points"}],
+                "epic_link": [{"id": "customfield_10002", "name": "Epic Link"}],
+                "all_custom_fields": [
+                    {"id": "customfield_10001", "name": "Story Points"},
+                    {"id": "customfield_10002", "name": "Epic Link"},
+                ],
+            }
         }
-    })
+    )
 
-    story_points: List[FieldDefinition] = Field(
-        ..., description="Candidate fields for story points"
-    )
-    epic_link: List[FieldDefinition] = Field(
-        ..., description="Candidate fields for epic link"
-    )
-    all_custom_fields: List[FieldDefinition] = Field(
-        ..., description="All custom fields available"
-    )
+    story_points: List[FieldDefinition] = Field(..., description="Candidate fields for story points")
+    epic_link: List[FieldDefinition] = Field(..., description="Candidate fields for epic link")
+    all_custom_fields: List[FieldDefinition] = Field(..., description="All custom fields available")
 
 
 # ============================================================================
@@ -311,26 +316,24 @@ class DatasetResponse(BaseModel):
 class DatasetStatusResponse(BaseModel):
     """Response containing dataset loading status."""
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "status": "loading",
-            "error": None,
-            "progress_loaded": 50,
-            "progress_total": 100,
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "status": "loading",
+                "error": None,
+                "progress_loaded": 50,
+                "progress_total": 100,
+            }
         }
-    })
+    )
 
     status: str = Field(
         ...,
         description="Dataset status: 'loading', 'ready', or 'error'",
     )
     error: Optional[str] = Field(None, description="Error message if status is 'error'")
-    progress_loaded: int = Field(
-        ..., ge=0, description="Number of items loaded so far"
-    )
-    progress_total: int = Field(
-        ..., ge=0, description="Total number of items to load (0 if unknown)"
-    )
+    progress_loaded: int = Field(..., ge=0, description="Number of items loaded so far")
+    progress_total: int = Field(..., ge=0, description="Total number of items to load (0 if unknown)")
 
 
 # ============================================================================
@@ -344,4 +347,3 @@ class CacheClearResponse(BaseModel):
     model_config = ConfigDict(json_schema_extra={"example": {"deleted": 5}})
 
     deleted: int = Field(..., ge=0, description="Number of cached datasets deleted")
-

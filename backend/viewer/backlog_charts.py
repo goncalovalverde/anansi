@@ -22,9 +22,7 @@ class BacklogChartsMixin:
         """Treemap of completed work only, coloured by Epic."""
         done_data = self._done_df
         if done_data.empty:
-            return go.Figure(
-                layout={"title": f"No completed items — need '{self.done_step}' dates"}
-            ).to_json()
+            return go.Figure(layout={"title": f"No completed items — need '{self.done_step}' dates"}).to_json()
 
         done_data = done_data.assign(Count=1)
 
@@ -55,9 +53,9 @@ class BacklogChartsMixin:
             Progress=self.treemap_data["Status"].apply(self._normalize_status),
         )
         color_map = {
-            "Done":        ANANSI_COLORS[0],
+            "Done": ANANSI_COLORS[0],
             "In Progress": ANANSI_COLORS[1],
-            "To Do":       ANANSI_COLORS[3],
+            "To Do": ANANSI_COLORS[3],
         }
         fig = px.treemap(
             df,
@@ -87,7 +85,10 @@ class BacklogChartsMixin:
             self.in_progress_step: ANANSI_COLORS[1],
         }
         fig = px.scatter(
-            long, x="Date", y="Epic Name", color="Stage",
+            long,
+            x="Date",
+            y="Epic Name",
+            color="Stage",
             color_discrete_map=color_map,
             title=f"{self.done_step} and {self.in_progress_step} dates",
         )
@@ -109,28 +110,26 @@ class BacklogChartsMixin:
     def draw_story_points(self) -> str:
         sp_col = "Story Points"
         if sp_col not in self.treemap_data.columns:
-            return go.Figure(
-                layout={"title": "story_points unavailable: Story Points column missing"}
-            ).to_json()
+            return go.Figure(layout={"title": "story_points unavailable: Story Points column missing"}).to_json()
         df = self.treemap_data.copy()
         df[sp_col] = pd.to_numeric(df[sp_col], errors="coerce").fillna(0)
         agg = df.groupby("Epic Name", as_index=False)[sp_col].sum()
         if agg[sp_col].sum() == 0:
-            return go.Figure(
-                layout={"title": "story_points unavailable: No story points data"}
-            ).to_json()
+            return go.Figure(layout={"title": "story_points unavailable: No story points data"}).to_json()
 
         agg_dict = agg.to_dict(orient="records")
         fig = go.Figure()
         for i, row in enumerate(agg_dict):
-            fig.add_trace(go.Bar(
-                x=[row["Epic Name"]],
-                y=[row[sp_col]],
-                name=row["Epic Name"],
-                marker=dict(color=ANANSI_COLORS[i % len(ANANSI_COLORS)]),
-                legendgroup=row["Epic Name"],
-                showlegend=True,
-            ))
+            fig.add_trace(
+                go.Bar(
+                    x=[row["Epic Name"]],
+                    y=[row[sp_col]],
+                    name=row["Epic Name"],
+                    marker=dict(color=ANANSI_COLORS[i % len(ANANSI_COLORS)]),
+                    legendgroup=row["Epic Name"],
+                    showlegend=True,
+                )
+            )
         fig.update_layout(
             xaxis=dict(type="category", tickangle=-30, automargin=True, showticklabels=False),
             barmode="relative",
@@ -149,9 +148,7 @@ class BacklogChartsMixin:
 
     def draw_timeline_size(self) -> str:
         if self._done_df.empty:
-            return go.Figure(
-                layout={"title": f"No data — No issues have {self.done_step} date assigned"}
-            ).to_json()
+            return go.Figure(layout={"title": f"No data — No issues have {self.done_step} date assigned"}).to_json()
 
         done_data = self._done_df.copy()
         min_ct = float(done_data["Cycle Time"].min())
@@ -176,10 +173,11 @@ class BacklogChartsMixin:
         )
 
         hover = (
-            "<b>%{hovertext}</b><br>" +
-            self.done_step + ": %{x|%Y-%m-%d}<br>" +
-            "Cycle Time: %{customdata[0]}<br>" +
-            "Epic: %{y}<extra></extra>"
+            "<b>%{hovertext}</b><br>"
+            + self.done_step
+            + ": %{x|%Y-%m-%d}<br>"
+            + "Cycle Time: %{customdata[0]}<br>"
+            + "Epic: %{y}<extra></extra>"
         )
         for trace in fig.data:
             epic_mask = done_data["Epic Name"] == trace.name
@@ -195,9 +193,7 @@ class BacklogChartsMixin:
         active_df = self._active_df
 
         if active_df.empty:
-            return _create_empty_state_figure(
-                "No active backlog items - everything has reached Done status"
-            )
+            return _create_empty_state_figure("No active backlog items - everything has reached Done status")
 
         if "Created" not in active_df.columns:
             return go.Figure(layout={"title": "aging_heatmap unavailable: No Created date"}).to_json()
@@ -207,44 +203,46 @@ class BacklogChartsMixin:
         age_days = (today - created).dt.days.fillna(0)
 
         def assign_bucket(days: int) -> str:
-            if days <= 7:   return "0-7d"
-            if days <= 14:  return "8-14d"
-            if days <= 30:  return "15-30d"
-            if days <= 60:  return "31-60d"
+            if days <= 7:
+                return "0-7d"
+            if days <= 14:
+                return "8-14d"
+            if days <= 30:
+                return "15-30d"
+            if days <= 60:
+                return "31-60d"
             return "60d+"
 
         age_buckets = age_days.apply(assign_bucket)
         grouped = active_df.assign(Age_Bucket=age_buckets)
         count_dict = {
-            (epic, bucket): len(group)
-            for (epic, bucket), group in grouped.groupby(["Epic Name", "Age_Bucket"])
+            (epic, bucket): len(group) for (epic, bucket), group in grouped.groupby(["Epic Name", "Age_Bucket"])
         }
 
         epic_counts = active_df["Epic Name"].value_counts()
         epics = epic_counts.index.tolist()
         age_order = ["0-7d", "8-14d", "15-30d", "31-60d", "60d+"]
 
-        z_data = [
-            [int(count_dict.get((epic, bucket), 0)) for bucket in age_order]
-            for epic in epics
-        ]
+        z_data = [[int(count_dict.get((epic, bucket), 0)) for bucket in age_order] for epic in epics]
 
         height = max(
             ChartConfig.HEATMAP_MIN_HEIGHT,
             len(epics) * ChartConfig.HEATMAP_EPIC_ROW_HEIGHT + ChartConfig.HEATMAP_PADDING,
         )
 
-        fig = go.Figure(data=go.Heatmap(
-            z=z_data,
-            x=age_order,
-            y=epics,
-            colorscale=ChartConfig.HEATMAP_COLORSCALE,
-            text=[[str(v) if v > 0 else "" for v in row] for row in z_data],
-            texttemplate="%{text}",
-            hovertemplate="%{y} / %{x}: %{z} items<extra></extra>",
-            showscale=True,
-            colorbar=dict(title=dict(text="Items"), thickness=12, len=0.8),
-        ))
+        fig = go.Figure(
+            data=go.Heatmap(
+                z=z_data,
+                x=age_order,
+                y=epics,
+                colorscale=ChartConfig.HEATMAP_COLORSCALE,
+                text=[[str(v) if v > 0 else "" for v in row] for row in z_data],
+                texttemplate="%{text}",
+                hovertemplate="%{y} / %{x}: %{z} items<extra></extra>",
+                showscale=True,
+                colorbar=dict(title=dict(text="Items"), thickness=12, len=0.8),
+            )
+        )
         fig.update_layout(
             xaxis=dict(side="top", tickfont=dict(size=12)),
             yaxis=dict(tickfont=dict(size=11), automargin=True),
@@ -258,10 +256,16 @@ class BacklogChartsMixin:
         """Side-by-side treemaps: epic scope by item count vs story points."""
         df = self.treemap_data
 
-        epic_groups = df.groupby("Epic Name").agg({
-            "Key": "count",
-            "Story Points": lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum(),
-        }).reset_index()
+        epic_groups = (
+            df.groupby("Epic Name")
+            .agg(
+                {
+                    "Key": "count",
+                    "Story Points": lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum(),
+                }
+            )
+            .reset_index()
+        )
         epic_groups.columns = ["Epic", "ItemCount", "StoryPoints"]
         epic_groups = epic_groups[epic_groups["ItemCount"] > 0].sort_values("ItemCount", ascending=False)
 
@@ -275,21 +279,51 @@ class BacklogChartsMixin:
         # Use plain Python lists — pandas int64 serialises to a binary typed array
         # that Plotly.js cannot resolve inside template strings.
         item_counts = [int(n) for n in epic_groups["ItemCount"]]
-        pt_counts   = [int(n) for n in epic_groups["StoryPoints"]]
+        pt_counts = [int(n) for n in epic_groups["StoryPoints"]]
 
         item_text = [f"{n} item{'s' if n != 1 else ''}" for n in item_counts]
-        pts_text  = [f"{n} pts" for n in pt_counts]
+        pts_text = [f"{n} pts" for n in pt_counts]
 
         # customdata carries values for hover — more reliable than %{value}
         # when values are passed as typed arrays.
         item_cd = [[n] for n in item_counts]
-        pts_cd  = [[n] for n in pt_counts]
+        pts_cd = [[n] for n in pt_counts]
 
         hover_items = "%{label}<br>Items: %{customdata[0]}<br>Share: %{percentRoot:.1%}<extra></extra>"
-        hover_pts   = "%{label}<br>Points: %{customdata[0]}<br>Share: %{percentRoot:.1%}<extra></extra>"
+        hover_pts = "%{label}<br>Points: %{customdata[0]}<br>Share: %{percentRoot:.1%}<extra></extra>"
 
         if not has_story_points:
-            fig = go.Figure(data=go.Treemap(
+            fig = go.Figure(
+                data=go.Treemap(
+                    labels=epic_groups["Epic"].tolist(),
+                    parents=[""] * len(epic_groups),
+                    values=item_counts,
+                    text=item_text,
+                    customdata=item_cd,
+                    texttemplate="%{label}<br>%{text}",
+                    hovertemplate=hover_items,
+                    marker=dict(colors=epic_colors, line=dict(width=2, color="#F9F9F7")),
+                    name="By item count",
+                )
+            )
+            fig.add_annotation(
+                text=(
+                    "Story points not available - configure the Story Points"
+                    " Field ID in Configuration to enable the right panel"
+                ),
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=-0.15,
+                showarrow=False,
+                font=dict(size=12, color="#2C3E50"),
+            )
+            fig.update_layout(height=340, margin=dict(t=40, r=16, b=60, l=16))
+            return fig.to_json()
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Treemap(
                 labels=epic_groups["Epic"].tolist(),
                 parents=[""] * len(epic_groups),
                 values=item_counts,
@@ -299,37 +333,40 @@ class BacklogChartsMixin:
                 hovertemplate=hover_items,
                 marker=dict(colors=epic_colors, line=dict(width=2, color="#F9F9F7")),
                 name="By item count",
-            ))
-            fig.add_annotation(
-                text="Story points not available - configure the Story Points Field ID in Configuration to enable the right panel",
-                xref="paper", yref="paper", x=0.5, y=-0.15,
-                showarrow=False, font=dict(size=12, color="#2C3E50"),
+                domain=dict(x=[0, 0.47], y=[0, 1]),
             )
-            fig.update_layout(height=340, margin=dict(t=40, r=16, b=60, l=16))
-            return fig.to_json()
-
-        fig = go.Figure()
-        fig.add_trace(go.Treemap(
-            labels=epic_groups["Epic"].tolist(), parents=[""] * len(epic_groups),
-            values=item_counts,
-            text=item_text, customdata=item_cd,
-            texttemplate="%{label}<br>%{text}",
-            hovertemplate=hover_items,
-            marker=dict(colors=epic_colors, line=dict(width=2, color="#F9F9F7")),
-            name="By item count", domain=dict(x=[0, 0.47], y=[0, 1]),
-        ))
-        fig.add_trace(go.Treemap(
-            labels=epic_groups["Epic"].tolist(), parents=[""] * len(epic_groups),
-            values=pt_counts,
-            text=pts_text, customdata=pts_cd,
-            texttemplate="%{label}<br>%{text}",
-            hovertemplate=hover_pts,
-            marker=dict(colors=epic_colors, line=dict(width=2, color="#F9F9F7")),
-            name="By story points", domain=dict(x=[0.53, 1], y=[0, 1]),
-        ))
-        fig.add_annotation(text="By item count", x=0.23, y=1.05, xref="paper", yref="paper",
-                           showarrow=False, font=dict(size=12, color="#2C3E50"))
-        fig.add_annotation(text="By story points", x=0.77, y=1.05, xref="paper", yref="paper",
-                           showarrow=False, font=dict(size=12, color="#2C3E50"))
+        )
+        fig.add_trace(
+            go.Treemap(
+                labels=epic_groups["Epic"].tolist(),
+                parents=[""] * len(epic_groups),
+                values=pt_counts,
+                text=pts_text,
+                customdata=pts_cd,
+                texttemplate="%{label}<br>%{text}",
+                hovertemplate=hover_pts,
+                marker=dict(colors=epic_colors, line=dict(width=2, color="#F9F9F7")),
+                name="By story points",
+                domain=dict(x=[0.53, 1], y=[0, 1]),
+            )
+        )
+        fig.add_annotation(
+            text="By item count",
+            x=0.23,
+            y=1.05,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=12, color="#2C3E50"),
+        )
+        fig.add_annotation(
+            text="By story points",
+            x=0.77,
+            y=1.05,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=12, color="#2C3E50"),
+        )
         fig.update_layout(height=340, margin=dict(t=40, r=16, b=8, l=16), showlegend=False)
         return fig.to_json()

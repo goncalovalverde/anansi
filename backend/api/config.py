@@ -21,9 +21,7 @@ def read_config(db: sqlite3.Connection = Depends(get_db)):
 
 @router.put("/", response_model=schemas.ConfigResponse)
 @router.put("", response_model=schemas.ConfigResponse)
-def write_config(
-    updates: schemas.ConfigUpdate, db: sqlite3.Connection = Depends(get_db)
-):
+def write_config(updates: schemas.ConfigUpdate, db: sqlite3.Connection = Depends(get_db)):
     """Update configuration with partial or full config updates."""
     config_service.set_config(db, updates.model_dump(exclude_none=True))
     return config_service.get_config(db)
@@ -36,9 +34,7 @@ def read_workflow(db: sqlite3.Connection = Depends(get_db)):
 
 
 @router.put("/workflow", response_model=schemas.WorkflowResponse)
-def write_workflow(
-    body: schemas.WorkflowUpdate, db: sqlite3.Connection = Depends(get_db)
-):
+def write_workflow(body: schemas.WorkflowUpdate, db: sqlite3.Connection = Depends(get_db)):
     """Update workflow steps (minimum 2 steps required)."""
     config_service.set_workflow(db, body.steps)
     return {"steps": config_service.get_workflow(db)}
@@ -51,9 +47,7 @@ def read_issue_types(db: sqlite3.Connection = Depends(get_db)):
 
 
 @router.put("/issue-types", response_model=schemas.IssueTypesResponse)
-def write_issue_types(
-    body: schemas.IssueTypesUpdate, db: sqlite3.Connection = Depends(get_db)
-):
+def write_issue_types(body: schemas.IssueTypesUpdate, db: sqlite3.Connection = Depends(get_db)):
     """Update issue types (minimum 1 type required)."""
     config_service.set_issue_types(db, body.types)
     return {"types": config_service.get_issue_types(db)}
@@ -72,9 +66,7 @@ def read_chart_threshold_defaults():
 
 
 @router.put("/chart-thresholds")
-def write_chart_thresholds(
-    body: dict, db: sqlite3.Connection = Depends(get_db)
-):
+def write_chart_thresholds(body: dict, db: sqlite3.Connection = Depends(get_db)):
     """Update chart thresholds (partial update supported)."""
     config_service.set_chart_thresholds(db, body)
     return config_service.get_chart_thresholds(db)
@@ -212,12 +204,7 @@ def get_jira_projects(
         jr = jira_reader.Jira(jira_config, [], database.DB_PATH)
         jira_instance = jr.get_jira_instance()
         projects = jira_instance.projects()
-        return {
-            "projects": [
-                {"key": p.key, "name": p.name}
-                for p in sorted(projects, key=lambda p: p.name)
-            ]
-        }
+        return {"projects": [{"key": p.key, "name": p.name} for p in sorted(projects, key=lambda p: p.name)]}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
     except (KeyError, TypeError) as exc:
@@ -303,4 +290,3 @@ def get_jira_fields(
     except Exception as exc:
         logger.exception("Unexpected error in get_jira_fields: %s", exc)
         raise HTTPException(status_code=502, detail="Failed to fetch fields")
-

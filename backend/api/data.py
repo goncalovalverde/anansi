@@ -34,7 +34,10 @@ def load_data(
         if not reader_config["jira"]["jql_query"].strip():
             raise HTTPException(
                 status_code=400,
-                detail="JQL query is required. Please enter a query in Settings (e.g., 'project = PNC' or leave empty for all issues with a trailing space)."
+                detail=(
+                    "JQL query is required. Please enter a query in Settings"
+                    " (e.g., 'project = PNC' or leave empty for all issues with a trailing space)."
+                ),
             )
 
     elif source == "csv":
@@ -50,10 +53,7 @@ def load_data(
             ).fetchone()
             if row:
                 return {"dataset_id": row["id"], "cached": True}
-            raise HTTPException(
-                status_code=400,
-                detail="No CSV data available. Please upload a CSV file in Settings."
-            )
+            raise HTTPException(status_code=400, detail="No CSV data available. Please upload a CSV file in Settings.")
 
     config_hash = data_service.compute_config_hash(db)
     existing_id = data_service.find_valid_dataset(db, config_hash)
@@ -63,9 +63,7 @@ def load_data(
 
     dataset_id = data_service.create_dataset(db, config_hash, source)
 
-    background_tasks.add_task(
-        data_service.load_data_task, dataset_id, database.DB_PATH
-    )
+    background_tasks.add_task(data_service.load_data_task, dataset_id, database.DB_PATH)
     return {"dataset_id": dataset_id, "cached": False}
 
 
@@ -115,6 +113,7 @@ async def upload_csv(
         raise HTTPException(status_code=422, detail=f"Could not parse CSV: {exc}")
 
     import hashlib
+
     content_hash = hashlib.md5(contents).hexdigest()
     config_hash = f"csv:{content_hash}"
 

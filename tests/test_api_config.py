@@ -14,19 +14,21 @@ class TestConfigRead:
 
         # Check that all expected keys are present
         expected_keys = {
-            "jira_url", "jira_jql_query", "jira_auth_method",
-            "jira_username", "jira_password", "jira_api_version",
-            "input_mode", "input_csv_file"
+            "jira_url",
+            "jira_jql_query",
+            "jira_auth_method",
+            "jira_username",
+            "jira_password",
+            "jira_api_version",
+            "input_mode",
+            "input_csv_file",
         }
         assert expected_keys.issubset(set(data.keys()))
 
     def test_get_config_masks_secrets(self, client: TestClient):
         """GET /api/config masks secret keys as '***' or ''."""
         # Set a password
-        client.put(
-            "/api/config",
-            json={"jira_password": "mysecretpass"}
-        )
+        client.put("/api/config", json={"jira_password": "mysecretpass"})
 
         response = client.get("/api/config")
         assert response.status_code == 200
@@ -55,19 +57,13 @@ class TestConfigWrite:
 
     def test_put_config_updates_single_key(self, client: TestClient):
         """PUT /api/config updates a valid config key."""
-        response = client.put(
-            "/api/config",
-            json={"jira_url": "https://test.jira.com"}
-        )
+        response = client.put("/api/config", json={"jira_url": "https://test.jira.com"})
         assert response.status_code == 200
         assert response.json()["jira_url"] == "https://test.jira.com"
 
     def test_put_config_persists_changes(self, client: TestClient):
         """Changes made via PUT are returned in subsequent GET."""
-        client.put(
-            "/api/config",
-            json={"jira_url": "https://persistent.jira.com"}
-        )
+        client.put("/api/config", json={"jira_url": "https://persistent.jira.com"})
 
         response = client.get("/api/config")
         assert response.json()["jira_url"] == "https://persistent.jira.com"
@@ -80,7 +76,7 @@ class TestConfigWrite:
                 "jira_url": "https://jira.test.com",
                 "jira_jql_query": "project = TEST",
                 "jira_username": "testuser",
-            }
+            },
         )
         assert response.status_code == 200
         data = response.json()
@@ -96,7 +92,7 @@ class TestConfigWrite:
                 "jira_url": "https://valid.jira.com",
                 "invalid_key": "should_be_ignored",
                 "another_bad_key": "also_ignored",
-            }
+            },
         )
         assert response.status_code == 200
         # Valid key should be updated
@@ -107,20 +103,14 @@ class TestConfigWrite:
 
     def test_put_config_saves_non_secret_values(self, client: TestClient):
         """PUT /api/config saves non-secret values."""
-        client.put(
-            "/api/config",
-            json={"jira_auth_method": "pat"}
-        )
+        client.put("/api/config", json={"jira_auth_method": "pat"})
 
         response = client.get("/api/config")
         assert response.json()["jira_auth_method"] == "pat"
 
     def test_put_config_saves_secret_values(self, client: TestClient):
         """PUT /api/config saves actual secret values (not empty/masked)."""
-        client.put(
-            "/api/config",
-            json={"jira_pat_token": "secret_token_value"}
-        )
+        client.put("/api/config", json={"jira_pat_token": "secret_token_value"})
 
         # Verify via GET (which masks secrets)
         response = client.get("/api/config")
@@ -129,22 +119,13 @@ class TestConfigWrite:
     def test_put_config_ignores_empty_secret(self, client: TestClient):
         """PUT /api/config doesn't overwrite secrets when passed '' or '***'."""
         # Set initial secret
-        client.put(
-            "/api/config",
-            json={"jira_password": "initial_secret"}
-        )
+        client.put("/api/config", json={"jira_password": "initial_secret"})
 
         # Try to update with empty string (should be ignored)
-        client.put(
-            "/api/config",
-            json={"jira_password": ""}
-        )
+        client.put("/api/config", json={"jira_password": ""})
 
         # Try to update with masked value (should be ignored)
-        client.put(
-            "/api/config",
-            json={"jira_password": "***"}
-        )
+        client.put("/api/config", json={"jira_password": "***"})
 
         # Secret should remain unchanged (masked as ***)
         response = client.get("/api/config")
@@ -152,10 +133,7 @@ class TestConfigWrite:
 
     def test_put_config_with_slash(self, client: TestClient):
         """PUT /api/config/ (with trailing slash) also works."""
-        response = client.put(
-            "/api/config/",
-            json={"jira_url": "https://test.com"}
-        )
+        response = client.put("/api/config/", json={"jira_url": "https://test.com"})
         assert response.status_code == 200
         assert response.json()["jira_url"] == "https://test.com"
 
@@ -173,47 +151,32 @@ class TestWorkflow:
 
     def test_put_workflow_updates_steps(self, client: TestClient):
         """PUT /api/config/workflow updates workflow steps."""
-        response = client.put(
-            "/api/config/workflow",
-            json={"steps": ["To Do", "Doing", "Review", "Done"]}
-        )
+        response = client.put("/api/config/workflow", json={"steps": ["To Do", "Doing", "Review", "Done"]})
         assert response.status_code == 200
         assert response.json()["steps"] == ["To Do", "Doing", "Review", "Done"]
 
     def test_put_workflow_persists_changes(self, client: TestClient):
         """Workflow changes persist across requests."""
         new_steps = ["Start", "Middle", "End"]
-        client.put(
-            "/api/config/workflow",
-            json={"steps": new_steps}
-        )
+        client.put("/api/config/workflow", json={"steps": new_steps})
 
         response = client.get("/api/config/workflow")
         assert response.json()["steps"] == new_steps
 
     def test_put_workflow_rejects_non_list(self, client: TestClient):
         """PUT /api/config/workflow rejects non-list values."""
-        response = client.put(
-            "/api/config/workflow",
-            json={"steps": "not a list"}
-        )
+        response = client.put("/api/config/workflow", json={"steps": "not a list"})
         assert response.status_code == 422  # Validation error
 
     def test_put_workflow_rejects_single_step(self, client: TestClient):
         """PUT /api/config/workflow requires minimum 2 steps."""
-        response = client.put(
-            "/api/config/workflow",
-            json={"steps": ["OnlyOne"]}
-        )
+        response = client.put("/api/config/workflow", json={"steps": ["OnlyOne"]})
         assert response.status_code == 422  # Validation error
 
     def test_put_workflow_with_many_steps(self, client: TestClient):
         """PUT /api/config/workflow accepts many steps."""
         steps = ["Step1", "Step2", "Step3", "Step4", "Step5"]
-        response = client.put(
-            "/api/config/workflow",
-            json={"steps": steps}
-        )
+        response = client.put("/api/config/workflow", json={"steps": steps})
         assert response.status_code == 200
         assert response.json()["steps"] == steps
 
@@ -231,56 +194,38 @@ class TestIssueTypes:
 
     def test_put_issue_types_updates_types(self, client: TestClient):
         """PUT /api/config/issue-types updates issue types."""
-        response = client.put(
-            "/api/config/issue-types",
-            json={"types": ["Feature", "Defect", "Improvement"]}
-        )
+        response = client.put("/api/config/issue-types", json={"types": ["Feature", "Defect", "Improvement"]})
         assert response.status_code == 200
         assert response.json()["types"] == ["Feature", "Defect", "Improvement"]
 
     def test_put_issue_types_persists_changes(self, client: TestClient):
         """Issue type changes persist across requests."""
         new_types = ["CustomType1", "CustomType2"]
-        client.put(
-            "/api/config/issue-types",
-            json={"types": new_types}
-        )
+        client.put("/api/config/issue-types", json={"types": new_types})
 
         response = client.get("/api/config/issue-types")
         assert response.json()["types"] == new_types
 
     def test_put_issue_types_rejects_non_list(self, client: TestClient):
         """PUT /api/config/issue-types rejects non-list values."""
-        response = client.put(
-            "/api/config/issue-types",
-            json={"types": "not a list"}
-        )
+        response = client.put("/api/config/issue-types", json={"types": "not a list"})
         assert response.status_code == 422
 
     def test_put_issue_types_rejects_empty_list(self, client: TestClient):
         """PUT /api/config/issue-types requires at least 1 type."""
-        response = client.put(
-            "/api/config/issue-types",
-            json={"types": []}
-        )
+        response = client.put("/api/config/issue-types", json={"types": []})
         assert response.status_code == 422
 
     def test_put_issue_types_with_single_type(self, client: TestClient):
         """PUT /api/config/issue-types accepts single type."""
-        response = client.put(
-            "/api/config/issue-types",
-            json={"types": ["OnlyType"]}
-        )
+        response = client.put("/api/config/issue-types", json={"types": ["OnlyType"]})
         assert response.status_code == 200
         assert response.json()["types"] == ["OnlyType"]
 
     def test_put_issue_types_with_many_types(self, client: TestClient):
         """PUT /api/config/issue-types accepts many types."""
         types = ["Type1", "Type2", "Type3", "Type4", "Type5"]
-        response = client.put(
-            "/api/config/issue-types",
-            json={"types": types}
-        )
+        response = client.put("/api/config/issue-types", json={"types": types})
         assert response.status_code == 200
         assert response.json()["types"] == types
 
@@ -290,20 +235,14 @@ class TestJiraFieldsEdgeCases:
 
     def test_workflow_requires_minimum_two_steps(self, client):
         """PUT /api/config/workflow requires at least 2 steps."""
-        response = client.put(
-            "/api/config/workflow",
-            json={"steps": ["OnlyStep"]}
-        )
+        response = client.put("/api/config/workflow", json={"steps": ["OnlyStep"]})
         # Should reject with validation error
         assert response.status_code == 422
 
     def test_workflow_accepts_many_steps(self, client):
         """PUT /api/config/workflow accepts many workflow steps."""
         steps = ["Backlog", "To Do", "In Progress", "Review", "Testing", "Done", "Archived"]
-        response = client.put(
-            "/api/config/workflow",
-            json={"steps": steps}
-        )
+        response = client.put("/api/config/workflow", json={"steps": steps})
         assert response.status_code == 200
         assert response.json()["steps"] == steps
 
@@ -311,11 +250,7 @@ class TestJiraFieldsEdgeCases:
         """PUT /api/config handles partial OAuth field updates."""
         response = client.put(
             "/api/config",
-            json={
-                "jira_auth_method": "oauth",
-                "jira_oauth_token": "token123",
-                "jira_oauth_consumer_key": "key123"
-            }
+            json={"jira_auth_method": "oauth", "jira_oauth_token": "token123", "jira_oauth_consumer_key": "key123"},
         )
         assert response.status_code == 200
         data = response.json()
@@ -324,10 +259,7 @@ class TestJiraFieldsEdgeCases:
     def test_issue_types_with_distinct_names(self, client):
         """PUT /api/config/issue-types accepts multiple distinct types."""
         types = ["Story", "Bug", "Task", "Enhancement"]
-        response = client.put(
-            "/api/config/issue-types",
-            json={"types": types}
-        )
+        response = client.put("/api/config/issue-types", json={"types": types})
         # API should accept distinct types
         assert response.status_code == 200
         returned_types = response.json()["types"]
@@ -337,12 +269,7 @@ class TestJiraFieldsEdgeCases:
     def test_config_multiple_secret_fields_preserved(self, client):
         """Multiple secret fields can be set and are masked on retrieval."""
         response = client.put(
-            "/api/config",
-            json={
-                "jira_password": "pass123",
-                "jira_pat_token": "pat123",
-                "jira_oauth_token": "oauth123"
-            }
+            "/api/config", json={"jira_password": "pass123", "jira_pat_token": "pat123", "jira_oauth_token": "oauth123"}
         )
         assert response.status_code == 200
 
@@ -356,20 +283,14 @@ class TestJiraFieldsEdgeCases:
     def test_issue_types_with_special_characters(self, client):
         """PUT /api/config/issue-types accepts types with special characters."""
         types = ["User Story", "Technical Debt", "Bug Fix", "Feature Request"]
-        response = client.put(
-            "/api/config/issue-types",
-            json={"types": types}
-        )
+        response = client.put("/api/config/issue-types", json={"types": types})
         assert response.status_code == 200
         assert response.json()["types"] == types
 
     def test_workflow_preserves_order(self, client):
         """PUT /api/config/workflow preserves step order."""
         steps = ["Blocked", "Backlog", "Groomed", "Sprint Ready", "In Progress", "Code Review", "QA", "Done"]
-        response = client.put(
-            "/api/config/workflow",
-            json={"steps": steps}
-        )
+        response = client.put("/api/config/workflow", json={"steps": steps})
         assert response.status_code == 200
         retrieved_steps = response.json()["steps"]
         assert retrieved_steps == steps

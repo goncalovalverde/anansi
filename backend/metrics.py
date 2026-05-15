@@ -55,6 +55,7 @@ def track_metrics(endpoint: str = None):
     Args:
         endpoint: Optional endpoint name for metrics labeling
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -71,4 +72,5 @@ def track_metrics(endpoint: str = None):
                 request_duration.labels(method="GET", endpoint=ep_name).observe(duration)
 
         return wrapper
+
     return decorator

@@ -39,13 +39,20 @@ class BacklogInsightsMixin:
         if in_prog > cfg.WIP_HIGH_THRESHOLD:
             insights.append({"type": "alert", "message": f"High WIP - {in_prog} items active simultaneously"})
         elif in_prog > cfg.WIP_ELEVATED_THRESHOLD:
-            insights.append({"type": "warn", "message": f"WIP is elevated ({in_prog} items) - consider limiting parallel work"})
+            insights.append(
+                {"type": "warn", "message": f"WIP is elevated ({in_prog} items) - consider limiting parallel work"}
+            )
 
         # 3. Cycle time check
         if not self._ct_df.empty:
             avg = round(float(self._ct_df["Cycle Time"].mean()), 1)
             if avg > cfg.CYCLE_TIME_HIGH_DAYS:
-                insights.append({"type": "warn", "message": f"Average cycle time is {avg} days - items are taking over a month to complete"})
+                insights.append(
+                    {
+                        "type": "warn",
+                        "message": f"Average cycle time is {avg} days - items are taking over a month to complete",
+                    }
+                )
             elif avg <= cfg.CYCLE_TIME_HEALTHY_DAYS:
                 insights.append({"type": "ok", "message": f"Cycle time is healthy at {avg} days on average"})
 
@@ -56,7 +63,12 @@ class BacklogInsightsMixin:
             if total > 0:
                 ratio = round(bugs / total * 100, 1)
                 if ratio > cfg.BUG_RATIO_HIGH_PCT:
-                    insights.append({"type": "alert", "message": f"Bug ratio is {ratio}% - quality issues may be affecting delivery"})
+                    insights.append(
+                        {
+                            "type": "alert",
+                            "message": f"Bug ratio is {ratio}% - quality issues may be affecting delivery",
+                        }
+                    )
                 elif ratio > cfg.BUG_RATIO_ELEVATED_PCT:
                     insights.append({"type": "warn", "message": f"Bug ratio is {ratio}% - worth monitoring"})
 
@@ -69,7 +81,12 @@ class BacklogInsightsMixin:
                 second_half = (created > mid).sum()
                 if first_half > 0 and second_half > first_half * cfg.BACKLOG_GROWTH_RATIO:
                     pct = round((second_half - first_half) / first_half * 100)
-                    insights.append({"type": "warn", "message": f"Backlog grew {pct}% this period - more is being added than completed"})
+                    insights.append(
+                        {
+                            "type": "warn",
+                            "message": f"Backlog grew {pct}% this period - more is being added than completed",
+                        }
+                    )
                 elif second_half < first_half:
                     insights.append({"type": "ok", "message": "Backlog is shrinking - good sign of delivery focus"})
 
@@ -88,11 +105,17 @@ class BacklogInsightsMixin:
 
         # treemap
         if done_data.empty:
-            callouts["treemap"] = {"message": "No completed work to display - items may not be reaching Done status", "severity": "alert"}
+            callouts["treemap"] = {
+                "message": "No completed work to display - items may not be reaching Done status",
+                "severity": "alert",
+            }
         else:
             n_epics = done_data["Epic Name"].nunique()
             if n_epics == 1:
-                callouts["treemap"] = {"message": "Only 1 epic has completed items - are other epics blocked or not yet started?", "severity": "warn"}
+                callouts["treemap"] = {
+                    "message": "Only 1 epic has completed items - are other epics blocked or not yet started?",
+                    "severity": "warn",
+                }
 
         # pbis_done
         if done_data.empty:
@@ -101,14 +124,20 @@ class BacklogInsightsMixin:
         # story_points
         sp_col = "Story Points"
         if sp_col not in df.columns or pd.to_numeric(df[sp_col], errors="coerce").fillna(0).sum() == 0:
-            callouts["story_points"] = {"message": "No story points recorded - check that story point field ID is configured correctly", "severity": "warn"}
+            callouts["story_points"] = {
+                "message": "No story points recorded - check that story point field ID is configured correctly",
+                "severity": "warn",
+            }
         else:
             by_epic = df.groupby("Epic Name")[sp_col].apply(lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum())
             total_sp = by_epic.sum()
             if total_sp > 0:
                 top_pct = by_epic.max() / total_sp
                 if top_pct > cfg.CALLOUT_EPIC_CONCENTRATION_PCT:
-                    callouts["story_points"] = {"message": "One epic is consuming most delivery capacity - other areas may be under-resourced", "severity": "warn"}
+                    callouts["story_points"] = {
+                        "message": "One epic is consuming most delivery capacity - other areas may be under-resourced",
+                        "severity": "warn",
+                    }
 
         # type_issue - bug ratio
         if "Type" in df.columns:
@@ -118,7 +147,10 @@ class BacklogInsightsMixin:
             if total > 0:
                 ratio = round(bugs / total * 100, 1)
                 if ratio > cfg.CALLOUT_BUG_RATIO_HIGH_PCT:
-                    callouts["type_issue"] = {"message": f"High defect ratio ({ratio}%) - more than 1 in 4 items is a bug or defect", "severity": "alert"}
+                    callouts["type_issue"] = {
+                        "message": f"High defect ratio ({ratio}%) - more than 1 in 4 items is a bug or defect",
+                        "severity": "alert",
+                    }
                 elif bugs == 0:
                     callouts["type_issue"] = {"message": "No bugs or defects in this period", "severity": "ok"}
 
@@ -129,14 +161,26 @@ class BacklogInsightsMixin:
             max_ct = int(max_row["Cycle Time"])
             if max_ct > cfg.CALLOUT_CYCLE_TIME_ALERT_DAYS:
                 name = str(max_row.get("Summary", "An item"))[:50]
-                callouts["timeline_size"] = {"message": f"{name} has been in progress for {max_ct} days", "severity": "alert"}
+                callouts["timeline_size"] = {
+                    "message": f"{name} has been in progress for {max_ct} days",
+                    "severity": "alert",
+                }
             elif avg_ct > cfg.CALLOUT_CYCLE_TIME_WARN_DAYS:
-                callouts["timeline_size"] = {"message": f"Average item age is {round(avg_ct)} days - consider breaking work into smaller pieces", "severity": "warn"}
+                callouts["timeline_size"] = {
+                    "message": f"Average item age is {round(avg_ct)} days - consider breaking work into smaller pieces",
+                    "severity": "warn",
+                }
             else:
                 outliers = (ct_df["Cycle Time"] > cfg.CALLOUT_OUTLIER_CT_MULTIPLIER * avg_ct).sum()
                 if outliers > 0:
                     label = "items" if outliers > 1 else "item"
-                    callouts["timeline_size"] = {"message": f"{outliers} {label} took more than {cfg.CALLOUT_OUTLIER_CT_MULTIPLIER}x the average to complete", "severity": "warn"}
+                    callouts["timeline_size"] = {
+                        "message": (
+                            f"{outliers} {label} took more than"
+                            f" {cfg.CALLOUT_OUTLIER_CT_MULTIPLIER}x the average to complete"
+                        ),
+                        "severity": "warn",
+                    }
 
         # aging_heatmap - use pre-computed active_df
         if not active_df.empty and "Created" in active_df.columns:
@@ -149,41 +193,76 @@ class BacklogInsightsMixin:
                 worst_epic = old_counts.idxmax()
                 worst_count = int(old_counts[worst_epic])
                 if worst_count > cfg.AGING_CRITICAL_COUNT:
-                    callouts["aging_heatmap"] = {"message": f"{worst_epic} has {worst_count} items older than {cfg.AGING_CRITICAL_DAYS} days - these may be blocked or forgotten", "severity": "alert"}
+                    callouts["aging_heatmap"] = {
+                        "message": (
+                            f"{worst_epic} has {worst_count} items older than"
+                            f" {cfg.AGING_CRITICAL_DAYS} days - these may be blocked or forgotten"
+                        ),
+                        "severity": "alert",
+                    }
                 else:
                     month_mask = (age_days >= cfg.AGING_WARNING_DAYS) & (age_days < cfg.AGING_CRITICAL_DAYS)
                     month_total = int(month_mask.sum())
                     if month_total > cfg.AGING_WARNING_COUNT:
-                        callouts["aging_heatmap"] = {"message": f"{month_total} items are between {cfg.AGING_WARNING_DAYS}-{cfg.AGING_CRITICAL_DAYS} days old - review before they become critical", "severity": "warn"}
+                        callouts["aging_heatmap"] = {
+                            "message": (
+                                f"{month_total} items are between"
+                                f" {cfg.AGING_WARNING_DAYS}-{cfg.AGING_CRITICAL_DAYS} days old"
+                                " - review before they become critical"
+                            ),
+                            "severity": "warn",
+                        }
                     else:
-                        callouts["aging_heatmap"] = {"message": "Backlog age is healthy - no major stale item clusters detected", "severity": "ok"}
+                        callouts["aging_heatmap"] = {
+                            "message": "Backlog age is healthy - no major stale item clusters detected",
+                            "severity": "ok",
+                        }
 
         # epic_investment
-        epic_groups = df.groupby("Epic Name").agg({
-            "Key": "count",
-            "Story Points": lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum(),
-        }).reset_index()
+        epic_groups = (
+            df.groupby("Epic Name")
+            .agg(
+                {
+                    "Key": "count",
+                    "Story Points": lambda x: pd.to_numeric(x, errors="coerce").fillna(0).sum(),
+                }
+            )
+            .reset_index()
+        )
         epic_groups.columns = ["Epic", "ItemCount", "StoryPoints"]
         epic_groups = epic_groups[epic_groups["ItemCount"] > 0]
 
         if not epic_groups.empty:
             has_story_points = epic_groups["StoryPoints"].sum() > 0
             if not has_story_points:
-                callouts["epic_investment"] = {"message": "Story points not configured - add your Story Points Field ID in Configuration to unlock this view", "severity": "warn"}
+                callouts["epic_investment"] = {
+                    "message": (
+                        "Story points not configured - add your Story Points"
+                        " Field ID in Configuration to unlock this view"
+                    ),
+                    "severity": "warn",
+                }
             else:
                 epic_groups["complexity"] = epic_groups["StoryPoints"] / epic_groups["ItemCount"]
                 high_complexity = epic_groups.loc[epic_groups["complexity"].idxmax()]
                 low_complexity = epic_groups.loc[epic_groups["complexity"].idxmin()]
                 complexity_ratio = (
                     high_complexity["complexity"] / low_complexity["complexity"]
-                    if low_complexity["complexity"] > 0 else 0
+                    if low_complexity["complexity"] > 0
+                    else 0
                 )
                 if complexity_ratio > cfg.COMPLEXITY_RATIO_THRESHOLD:
                     high_name = high_complexity["Epic"]
                     low_name = low_complexity["Epic"]
                     high_avg = round(high_complexity["complexity"], 1)
                     low_avg = round(low_complexity["complexity"], 1)
-                    callouts["epic_investment"] = {"message": f"{high_name} items average {high_avg} points each vs {low_avg} for {low_name} - large complexity gap between epics", "severity": "warn"}
+                    callouts["epic_investment"] = {
+                        "message": (
+                            f"{high_name} items average {high_avg} points each vs"
+                            f" {low_avg} for {low_name} - large complexity gap between epics"
+                        ),
+                        "severity": "warn",
+                    }
 
         return callouts
 

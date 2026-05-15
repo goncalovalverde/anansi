@@ -26,9 +26,9 @@ class BacklogData:
     """
 
     treemap_data: pd.DataFrame  # all non-epic issues with cycle time appended
-    done_df: pd.DataFrame       # treemap_data rows where done_step column is not null
-    active_df: pd.DataFrame     # treemap_data rows where done_step column is null
-    ct_df: pd.DataFrame         # done_df rows with valid positive cycle time
+    done_df: pd.DataFrame  # treemap_data rows where done_step column is not null
+    active_df: pd.DataFrame  # treemap_data rows where done_step column is null
+    ct_df: pd.DataFrame  # done_df rows with valid positive cycle time
 
     @classmethod
     def from_cycle_data(cls, treemap_data: pd.DataFrame, done_step: str) -> "BacklogData":

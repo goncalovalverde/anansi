@@ -27,13 +27,13 @@ class SafeJsonFormatter(jsonlogger.JsonFormatter):
 
     # Patterns to match and mask secrets in formatted output
     SECRET_PATTERNS = [
-        (r'password["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'password=***'),
-        (r'api[_-]?key["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'api_key=***'),
-        (r'(?:oauth_|pat_)?token["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'token=***'),
-        (r'token[_-]?secret["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'token_secret=***'),
-        (r'jira[_-]?pat[_-]?token["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'jira_pat_token=***'),
-        (r'consumer[_-]?key["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'consumer_key=***'),
-        (r'key[_-]?cert[_-]?file["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'key_cert_file=***'),
+        (r'password["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', "password=***"),
+        (r'api[_-]?key["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', "api_key=***"),
+        (r'(?:oauth_|pat_)?token["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', "token=***"),
+        (r'token[_-]?secret["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', "token_secret=***"),
+        (r'jira[_-]?pat[_-]?token["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', "jira_pat_token=***"),
+        (r'consumer[_-]?key["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', "consumer_key=***"),
+        (r'key[_-]?cert[_-]?file["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', "key_cert_file=***"),
     ]
 
     def format(self, record: logging.LogRecord) -> str:

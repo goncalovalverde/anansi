@@ -66,11 +66,7 @@ class TestChartsEndpoint:
         conn.close()
 
         with patch("backend.services.backlog_cache.get_dashboard_response") as mock_charts:
-            mock_charts.return_value = {
-                "charts": [
-                    {"name": "test_chart", "data": [1, 2, 3]}
-                ]
-            }
+            mock_charts.return_value = {"charts": [{"name": "test_chart", "data": [1, 2, 3]}]}
             response = client.get(f"/api/charts/{dataset_id}")
 
         assert response.status_code == 200

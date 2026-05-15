@@ -11,7 +11,7 @@ Nothing in this module imports Plotly, pandas, or any HTTP framework.
 import threading
 from typing import Dict, List
 
-ANANSI_COLORS = ['#007B85', '#F5A623', '#D35400', '#2C3E50', '#5DADE2', '#A569BD', '#52BE80']
+ANANSI_COLORS = ["#007B85", "#F5A623", "#D35400", "#2C3E50", "#5DADE2", "#A569BD", "#52BE80"]
 
 # Tunable threshold defaults — can be overridden per-instance via DB config
 _THRESHOLD_DEFAULTS = {
@@ -52,19 +52,16 @@ class ChartConfig:
     HEATMAP_MIN_HEIGHT = 240
     HEATMAP_EPIC_ROW_HEIGHT = 36
     HEATMAP_PADDING = 80
-    HEATMAP_COLORSCALE = [
-        [0, '#e0f4f5'], [0.25, '#9fd4dc'], [0.5, '#F5A623'],
-        [0.75, '#D35400'], [1.0, '#7B1A00']
-    ]
+    HEATMAP_COLORSCALE = [[0, "#e0f4f5"], [0.25, "#9fd4dc"], [0.5, "#F5A623"], [0.75, "#D35400"], [1.0, "#7B1A00"]]
 
-    NORMAL_WEEK_COLOR = '#007B85'
-    ABOVE_MEAN_COLOR = '#F5A623'
-    BELOW_MEAN_COLOR = '#2C3E50'
-    ZERO_WEEK_COLOR = '#2C3E50'
+    NORMAL_WEEK_COLOR = "#007B85"
+    ABOVE_MEAN_COLOR = "#F5A623"
+    BELOW_MEAN_COLOR = "#2C3E50"
+    ZERO_WEEK_COLOR = "#2C3E50"
 
     EMPTY_STATE_HEIGHT = 240
     EMPTY_STATE_FONT_SIZE = 13
-    EMPTY_STATE_FONT_COLOR = '#888888'
+    EMPTY_STATE_FONT_COLOR = "#888888"
 
     def __init__(self, overrides: dict | None = None):
         merged = dict(_THRESHOLD_DEFAULTS)
@@ -100,6 +97,7 @@ class ChartConfig:
 
 class EpicColorMap:
     """Singleton managing consistent epic-to-color mapping across charts."""
+
     _instance = None
     _color_map: Dict[str, str] = {}
     _lock = threading.Lock()

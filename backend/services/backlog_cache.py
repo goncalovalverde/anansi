@@ -55,6 +55,7 @@ def _is_fresh(key: str) -> bool:
 
 def _config_signature(config: dict) -> str:
     import json
+
     return json.dumps(config, sort_keys=True, default=str)
 
 
@@ -69,6 +70,7 @@ def _evict_stale() -> None:
 # ------------------------------------------------------------------ #
 #  Internal builders                                                   #
 # ------------------------------------------------------------------ #
+
 
 def _build_backlog(db: sqlite3.Connection, dataset_id: str, config: dict):
     from ..viewer.backlog import Backlog
@@ -127,6 +129,7 @@ def _get_or_build(key: str, builder, request_cache=None) -> Any:
 #  Public API                                                          #
 # ------------------------------------------------------------------ #
 
+
 def get_backlog(db: sqlite3.Connection, dataset_id: str, request_cache=None):
     """Return a cached Backlog for this dataset, rebuilding if stale.
 
@@ -168,12 +171,8 @@ def get_dashboard_response(db: sqlite3.Connection, dataset_id: str, request_cach
     dash_key = f"dashboard:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(
-            backlog_key,
-            lambda: _build_backlog(db, dataset_id, config),
-            request_cache
-        )
-        response = backlog.get_all_charts()   # already parsed dicts
+        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config), request_cache)
+        response = backlog.get_all_charts()  # already parsed dicts
         response["kpis"] = backlog.get_kpis()
         response["callouts"] = backlog.get_callouts()
         return response
@@ -200,12 +199,8 @@ def get_flow_response(db: sqlite3.Connection, dataset_id: str, request_cache=Non
     flow_key = f"flow:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(
-            backlog_key,
-            lambda: _build_backlog(db, dataset_id, config),
-            request_cache
-        )
-        response = backlog.get_flow_charts()   # already parsed dicts
+        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config), request_cache)
+        response = backlog.get_flow_charts()  # already parsed dicts
         response["callouts"] = backlog.get_flow_callouts()
         return response
 
@@ -231,11 +226,7 @@ def get_insights_response(db: sqlite3.Connection, dataset_id: str, request_cache
     insights_key = f"insights:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(
-            backlog_key,
-            lambda: _build_backlog(db, dataset_id, config),
-            request_cache
-        )
+        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config), request_cache)
         return backlog.get_insights()
 
     return _get_or_build(insights_key, build, request_cache)
@@ -264,11 +255,7 @@ def get_trends_response(db: sqlite3.Connection, dataset_id: str, request_cache=N
     trends_key = f"trends:{dataset_id}:{sig}"
 
     def build():
-        backlog = _get_or_build(
-            backlog_key,
-            lambda: _build_backlog(db, dataset_id, config),
-            request_cache
-        )
+        backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config), request_cache)
         methods = {
             "cumulative_flow": backlog.draw_cumulative_flow,
             "monthly_throughput": backlog.draw_monthly_throughput,

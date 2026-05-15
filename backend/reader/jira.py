@@ -21,20 +21,16 @@ def validate_auth_config(jira_config: dict) -> None:
 
     elif method == "oauth":
         oauth = jira_config.get("oauth", {})
-        missing = [k for k in ("token", "token_secret", "consumer_key", "key_cert_file")
-                   if not oauth.get(k, "").strip()]
+        missing = [
+            k for k in ("token", "token_secret", "consumer_key", "key_cert_file") if not oauth.get(k, "").strip()
+        ]
         if missing:
-            raise ValueError(
-                f"OAuth fields are required: {', '.join(missing)}."
-            )
+            raise ValueError(f"OAuth fields are required: {', '.join(missing)}.")
 
     else:  # basic
-        missing = [k for k in ("username", "password")
-                   if not jira_config.get(k, "").strip()]
+        missing = [k for k in ("username", "password") if not jira_config.get(k, "").strip()]
         if missing:
-            raise ValueError(
-                f"Basic auth fields are required: {', '.join(missing)}."
-            )
+            raise ValueError(f"Basic auth fields are required: {', '.join(missing)}.")
 
 
 class Jira:
@@ -48,9 +44,7 @@ class Jira:
         issue_data["Type"].append(issue.fields.issuetype.name)
         issue_data["Creator"].append(issue.fields.creator.displayName)
         issue_data["Summary"].append(issue.fields.summary)
-        issue_data["Created"].append(
-            dateutil.parser.parse(issue.fields.created).replace(tzinfo=None)
-        )
+        issue_data["Created"].append(dateutil.parser.parse(issue.fields.created).replace(tzinfo=None))
         issue_data["Status"].append(issue.fields.status.name)
 
         story_points_field = self.jira_config.get("story_points_field")
@@ -84,9 +78,7 @@ class Jira:
         for history in issue.changelog.histories:
             for item in history.items:
                 if item.field == "status":
-                    history_item[item.toString] = dateutil.parser.parse(
-                        history.created
-                    ).replace(tzinfo=None)
+                    history_item[item.toString] = dateutil.parser.parse(history.created).replace(tzinfo=None)
 
         for workflow_step in self.workflow:
             issue_data[workflow_step].append(history_item[workflow_step])
@@ -99,10 +91,7 @@ class Jira:
         chunk_size = 100
 
         # Build list of custom fields to request
-        fields_to_request = [
-            "key", "issuetype", "creator", "summary", "created", "status",
-            "changelog", "parent"
-        ]
+        fields_to_request = ["key", "issuetype", "creator", "summary", "created", "status", "changelog", "parent"]
 
         # Add custom field IDs if configured
         if self.jira_config.get("story_points_field"):
@@ -128,7 +117,9 @@ class Jira:
                 if len(issues) == 0:
                     story_points_field = self.jira_config.get("story_points_field")
                     sp_value = getattr(issue.fields, story_points_field, None)
-                    logger.info(f"First issue {issue.key}: {story_points_field} = {sp_value} (type: {type(sp_value).__name__})")
+                    logger.info(
+                        f"First issue {issue.key}: {story_points_field} = {sp_value} (type: {type(sp_value).__name__})"
+                    )
                 issues.append(issue)
 
             if progress_callback:
@@ -172,8 +163,7 @@ class Jira:
 
         if auth_method == "pat":
             logger.debug("Using PAT authentication")
-            return JIRA(jira_url, token_auth=self.jira_config["pat_token"],
-                        options=options)
+            return JIRA(jira_url, token_auth=self.jira_config["pat_token"], options=options)
 
         if auth_method == "oauth":
             logger.debug("Using OAuth authentication")

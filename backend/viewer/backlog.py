@@ -27,7 +27,8 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         if self.done_step != raw_done:
             logger.warning(
                 "Configured done step '%s' not found in data. Falling back to '%s'.",
-                raw_done, self.done_step,
+                raw_done,
+                self.done_step,
             )
 
         raw_in_prog = config.get("start_step") or (workflow[1] if len(workflow) > 1 else "In Progress")
@@ -35,7 +36,8 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         if self.in_progress_step != raw_in_prog:
             logger.warning(
                 "Configured in-progress step '%s' not found in data. Falling back to '%s'.",
-                raw_in_prog, self.in_progress_step,
+                raw_in_prog,
+                self.in_progress_step,
             )
 
         # Guard: in_progress_step must not equal done_step (e.g. 2-step workflow
@@ -55,14 +57,12 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
             if fallback:
                 logger.warning(
                     "in_progress_step resolved to done_step '%s'. Using '%s' instead.",
-                    self.done_step, fallback,
+                    self.done_step,
+                    fallback,
                 )
                 self.in_progress_step = fallback
 
-        self.link_ref = (
-            '<a href="{}browse/{}" style="cursor:pointer" '
-            'target="_blank" rel="noopener noreferrer">{}</a>'
-        )
+        self.link_ref = '<a href="{}browse/{}" style="cursor:pointer" target="_blank" rel="noopener noreferrer">{}</a>'
         self.raw_data = cycle_data.copy()  # Store raw unfiltered data for charts like issues_by_status
         self.treemap_data = self.get_treemap_data(cycle_data)
         self.treemap_data = self.calculate_cycle_time(self.treemap_data)
@@ -103,7 +103,9 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         s = str(status).lower()
         if status == self.done_step or any(k in s for k in ("done", "closed", "resolved", "released", "complete")):
             return "Done"
-        if status == self.in_progress_step or any(k in s for k in ("progress", "review", "active", "doing", "development", "dev")):
+        if status == self.in_progress_step or any(
+            k in s for k in ("progress", "review", "active", "doing", "development", "dev")
+        ):
             return "In Progress"
         return "To Do"
 
@@ -115,15 +117,15 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         """Generate all dashboard charts. Returns a dict of parsed Plotly dicts
         (not JSON strings) so the API layer avoids a redundant encode/decode."""
         chart_methods = {
-            "treemap":        self.draw_treemap,
-            "treemap_all":    self.draw_treemap_all,
-            "distribution":   self.draw_distribution,
-            "pbis_done":      lambda: self.draw_issues_histogram(self.done_step),
-            "pbis_created":   lambda: self.draw_issues_histogram("Created"),
-            "story_points":   self.draw_story_points,
-            "type_issue":     self.draw_type_issue,
-            "timeline_size":  self.draw_timeline_size,
-            "aging_heatmap":  self.draw_aging_heatmap,
+            "treemap": self.draw_treemap,
+            "treemap_all": self.draw_treemap_all,
+            "distribution": self.draw_distribution,
+            "pbis_done": lambda: self.draw_issues_histogram(self.done_step),
+            "pbis_created": lambda: self.draw_issues_histogram("Created"),
+            "story_points": self.draw_story_points,
+            "type_issue": self.draw_type_issue,
+            "timeline_size": self.draw_timeline_size,
+            "aging_heatmap": self.draw_aging_heatmap,
             "epic_investment": self.draw_epic_investment,
         }
         results = {}
@@ -132,19 +134,17 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
                 results[name] = json.loads(method())
             except Exception as exc:
                 logger.exception("Chart '%s' failed: %s", name, exc)
-                results[name] = json.loads(
-                    go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json()
-                )
+                results[name] = json.loads(go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json())
         return results
 
     def get_flow_charts(self) -> dict:
         """Generate all Flow tab charts. Returns parsed Plotly dicts."""
         flow_methods = {
-            "flow_efficiency":      self.draw_flow_efficiency,
-            "wip_trend":            self.draw_wip_trend,
+            "flow_efficiency": self.draw_flow_efficiency,
+            "wip_trend": self.draw_wip_trend,
             "throughput_histogram": self.draw_throughput_histogram,
-            "distribution":         self.draw_distribution,
-            "timeline_size":        self.draw_timeline_size,
+            "distribution": self.draw_distribution,
+            "timeline_size": self.draw_timeline_size,
         }
         results = {}
         for name, method in flow_methods.items():
@@ -152,9 +152,7 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
                 results[name] = json.loads(method())
             except Exception as exc:
                 logger.error("Chart '%s' failed: %s", name, exc, exc_info=True)
-                results[name] = json.loads(
-                    go.Figure(layout={"title": f"{name} unavailable"}).to_json()
-                )
+                results[name] = json.loads(go.Figure(layout={"title": f"{name} unavailable"}).to_json())
         return results
 
     def get_kpis(self) -> dict:
@@ -164,9 +162,7 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
 
         done_count = len(self._done_df)
         if "Status" in df.columns:
-            in_progress_count = int(
-                (df["Status"].apply(self._normalize_status) == "In Progress").sum()
-            )
+            in_progress_count = int((df["Status"].apply(self._normalize_status) == "In Progress").sum())
         else:
             in_progress_count = int(df[in_progress_col].notna().sum()) if in_progress_col in df.columns else 0
 
@@ -249,19 +245,13 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         # When they are not fetched (e.g. JQL filters to Stories/Bugs/Tasks only),
         # fall back to the raw Epic Link key so grouping still works meaningfully
         # rather than collapsing everything into "No Epic".
-        merged["Epic Name"] = (
-            merged["Epic Name"]
-            .fillna(merged.get("Epic Link"))
-            .fillna("No Epic")
-        )
+        merged["Epic Name"] = merged["Epic Name"].fillna(merged.get("Epic Link")).fillna("No Epic")
 
         epic_dist = merged["Epic Name"].value_counts()
         logger.info(f"Epic distribution after merge: {epic_dist.to_dict()}")
 
         jira_url = self.config.get("jira", {}).get("url", "")
-        merged["Key"] = merged["Key"].apply(
-            lambda item: self.link_ref.format(jira_url, item, item)
-        )
+        merged["Key"] = merged["Key"].apply(lambda item: self.link_ref.format(jira_url, item, item))
         merged["Composed"] = merged["Summary"] + "\n" + merged["Key"]
 
         # Parse all date columns once at load time so every chart receives

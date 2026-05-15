@@ -28,20 +28,14 @@ class TestCorrelationIDMiddleware:
     def test_correlation_id_from_request_header_preserved(self, client: TestClient):
         """Correlation ID from request X-Correlation-ID header is preserved."""
         test_correlation_id = "test-correlation-123"
-        response = client.get(
-            "/api/health",
-            headers={"X-Correlation-ID": test_correlation_id}
-        )
+        response = client.get("/api/health", headers={"X-Correlation-ID": test_correlation_id})
         assert response.status_code == 200
         assert response.headers["X-Correlation-ID"] == test_correlation_id
 
     def test_correlation_id_case_insensitive(self, client: TestClient):
         """Correlation ID header is case-insensitive."""
         test_correlation_id = "test-correlation-456"
-        response = client.get(
-            "/api/health",
-            headers={"x-correlation-id": test_correlation_id}
-        )
+        response = client.get("/api/health", headers={"x-correlation-id": test_correlation_id})
         assert response.status_code == 200
         assert response.headers["X-Correlation-ID"] == test_correlation_id
 
@@ -242,6 +236,7 @@ class TestMetricsDecorator:
 
     def test_track_metrics_decorator_success(self):
         """track_metrics decorator tracks successful function calls."""
+
         @metrics.track_metrics(endpoint="test_endpoint")
         def test_func():
             return "success"
@@ -252,6 +247,7 @@ class TestMetricsDecorator:
 
     def test_track_metrics_decorator_records_error(self):
         """track_metrics decorator records errors."""
+
         @metrics.track_metrics(endpoint="error_endpoint")
         def test_func_error():
             raise ValueError("Test error")
@@ -266,6 +262,7 @@ class TestMetricsDecorator:
 
     def test_track_metrics_decorator_preserves_function_name(self):
         """track_metrics decorator preserves original function name."""
+
         @metrics.track_metrics(endpoint="test")
         def original_function():
             pass

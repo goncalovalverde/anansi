@@ -27,10 +27,7 @@ def get_cors_origins() -> list[str]:
     Returns:
         List of allowed CORS origins
     """
-    origins_env = os.environ.get(
-        "ANANSI_CORS_ORIGINS",
-        "http://localhost:3000,http://localhost:5173"
-    )
+    origins_env = os.environ.get("ANANSI_CORS_ORIGINS", "http://localhost:3000,http://localhost:5173")
     # Parse comma-separated list and strip whitespace
     return [origin.strip() for origin in origins_env.split(",") if origin.strip()]
 

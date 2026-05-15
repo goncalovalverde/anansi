@@ -54,28 +54,28 @@ class TestCachingPerformance:
 
         # Create test data
         data = {
-            'Key': [f'PROJ-{i}' for i in range(1, num_issues + 1)],
-            'Summary': [f'Issue {i}' for i in range(1, num_issues + 1)],
-            'Type': ['Story' if i % 3 == 0 else 'Bug' if i % 3 == 1 else 'Task'
-                    for i in range(num_issues)],
-            'Status': ['Done' if i % 2 == 0 else 'In Progress' for i in range(num_issues)],
-            'Created': pd.date_range('2024-01-01', periods=num_issues, freq='D'),
-            'Done': [pd.Timestamp('2024-12-01') if i % 2 == 0 else None
-                    for i in range(num_issues)],
-            'Story Points': [3 if i % 5 == 0 else 5 if i % 5 == 1 else 8 if i % 5 == 2 else 2 if i % 5 == 3 else 1
-                           for i in range(num_issues)],
-            'Epic Link': [f'EPIC-{i % 10}' if i % 10 > 0 else None for i in range(num_issues)],
-            'Epic': [f'Feature {i % 10}' if i % 10 > 0 else 'No Epic' for i in range(num_issues)],
+            "Key": [f"PROJ-{i}" for i in range(1, num_issues + 1)],
+            "Summary": [f"Issue {i}" for i in range(1, num_issues + 1)],
+            "Type": ["Story" if i % 3 == 0 else "Bug" if i % 3 == 1 else "Task" for i in range(num_issues)],
+            "Status": ["Done" if i % 2 == 0 else "In Progress" for i in range(num_issues)],
+            "Created": pd.date_range("2024-01-01", periods=num_issues, freq="D"),
+            "Done": [pd.Timestamp("2024-12-01") if i % 2 == 0 else None for i in range(num_issues)],
+            "Story Points": [
+                3 if i % 5 == 0 else 5 if i % 5 == 1 else 8 if i % 5 == 2 else 2 if i % 5 == 3 else 1
+                for i in range(num_issues)
+            ],
+            "Epic Link": [f"EPIC-{i % 10}" if i % 10 > 0 else None for i in range(num_issues)],
+            "Epic": [f"Feature {i % 10}" if i % 10 > 0 else "No Epic" for i in range(num_issues)],
         }
 
         df = pd.DataFrame(data)
 
         # Save to database
-        dataset_id = data_service.create_dataset(db, 'test_hash', 'jira')
+        dataset_id = data_service.create_dataset(db, "test_hash", "jira")
 
         start = time.perf_counter()
         data_service.save_dataframe(db, dataset_id, df)
-        data_service.update_dataset_status(db, dataset_id, 'ready')
+        data_service.update_dataset_status(db, dataset_id, "ready")
         creation_time = time.perf_counter() - start
 
         db.close()
@@ -83,7 +83,7 @@ class TestCachingPerformance:
 
     def test_first_request_builds_once(self):
         """Verify get_dashboard_response only calls its builder once on first access."""
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 
         try:
@@ -108,7 +108,7 @@ class TestCachingPerformance:
 
     def test_cached_response_returns_same_data(self):
         """Verify cached get_dashboard_response returns identical data."""
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 
         try:
@@ -131,7 +131,7 @@ class TestCachingPerformance:
 
     def test_different_datasets_have_separate_cache_entries(self):
         """Verify different dataset_ids get separate cache entries."""
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 
         try:
@@ -139,25 +139,27 @@ class TestCachingPerformance:
             db = database.get_db(db_path)
 
             # Create two datasets
-            data = pd.DataFrame({
-                'Key': ['PROJ-1', 'PROJ-2'],
-                'Summary': ['Issue 1', 'Issue 2'],
-                'Type': ['Story', 'Bug'],
-                'Status': ['Done', 'In Progress'],
-                'Created': pd.date_range('2024-01-01', periods=2),
-                'Done': [pd.Timestamp('2024-01-10'), None],
-                'Story Points': [3, 5],
-                'Epic Link': ['EPIC-1', None],
-                'Epic': ['Feature A', 'No Epic'],
-            })
+            data = pd.DataFrame(
+                {
+                    "Key": ["PROJ-1", "PROJ-2"],
+                    "Summary": ["Issue 1", "Issue 2"],
+                    "Type": ["Story", "Bug"],
+                    "Status": ["Done", "In Progress"],
+                    "Created": pd.date_range("2024-01-01", periods=2),
+                    "Done": [pd.Timestamp("2024-01-10"), None],
+                    "Story Points": [3, 5],
+                    "Epic Link": ["EPIC-1", None],
+                    "Epic": ["Feature A", "No Epic"],
+                }
+            )
 
-            dataset_id1 = data_service.create_dataset(db, 'hash1', 'jira')
+            dataset_id1 = data_service.create_dataset(db, "hash1", "jira")
             data_service.save_dataframe(db, dataset_id1, data)
-            data_service.update_dataset_status(db, dataset_id1, 'ready')
+            data_service.update_dataset_status(db, dataset_id1, "ready")
 
-            dataset_id2 = data_service.create_dataset(db, 'hash2', 'jira')
+            dataset_id2 = data_service.create_dataset(db, "hash2", "jira")
             data_service.save_dataframe(db, dataset_id2, data)
-            data_service.update_dataset_status(db, dataset_id2, 'ready')
+            data_service.update_dataset_status(db, dataset_id2, "ready")
 
             backlog_cache._cache.clear()
             backlog_cache.get_backlog(db, dataset_id1)
@@ -174,7 +176,7 @@ class TestCachingPerformance:
 
     def test_invalidate_clears_dataset_entries(self):
         """Verify invalidate() removes all entries for a dataset."""
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
 
         try:

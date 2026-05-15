@@ -27,9 +27,9 @@ class TestChartConfig:
         """Ensure throughput histogram constants are defined."""
         cfg = ChartConfig()
         assert cfg.ROLLING_AVG_WINDOW == 4
-        assert ChartConfig.NORMAL_WEEK_COLOR == '#007B85'
-        assert ChartConfig.ABOVE_MEAN_COLOR == '#F5A623'
-        assert ChartConfig.BELOW_MEAN_COLOR == '#2C3E50'
+        assert ChartConfig.NORMAL_WEEK_COLOR == "#007B85"
+        assert ChartConfig.ABOVE_MEAN_COLOR == "#F5A623"
+        assert ChartConfig.BELOW_MEAN_COLOR == "#2C3E50"
 
     def test_callout_thresholds_reasonable(self):
         """Ensure callout thresholds make business sense."""
@@ -158,12 +158,14 @@ class TestBacklogAgingHeatmap:
         for epic in ["Backend", "Frontend", "DevOps"]:
             for days_ago in [5, 10, 20, 45, 90]:
                 created = (today - timedelta(days=days_ago)).strftime("%Y-%m-%d")
-                data.append({
-                    "Key": f"{epic}-{days_ago}",
-                    "Epic Name": epic,
-                    "Created": created,
-                    "Done": None,  # Active items
-                })
+                data.append(
+                    {
+                        "Key": f"{epic}-{days_ago}",
+                        "Epic Name": epic,
+                        "Created": created,
+                        "Done": None,  # Active items
+                    }
+                )
 
         mock_backlog.treemap_data = pd.DataFrame(data)
         mock_backlog._active_df = pd.DataFrame(data)
@@ -182,12 +184,14 @@ class TestBacklogAgingHeatmap:
         data = []
         for epic in epics:
             created = (today - timedelta(days=30)).strftime("%Y-%m-%d")
-            data.append({
-                "Key": epic,
-                "Epic Name": epic,
-                "Created": created,
-                "Done": None,
-            })
+            data.append(
+                {
+                    "Key": epic,
+                    "Epic Name": epic,
+                    "Created": created,
+                    "Done": None,
+                }
+            )
 
         mock_backlog.treemap_data = pd.DataFrame(data)
         mock_backlog._active_df = pd.DataFrame(data)
@@ -269,10 +273,7 @@ class TestBacklogThroughputHistogram:
 
     def test_no_done_items_returns_empty_state(self, mock_backlog):
         """No done items should return empty state."""
-        mock_backlog.treemap_data = pd.DataFrame({
-            "Key": ["A", "B"],
-            "Done": [None, None]
-        })
+        mock_backlog.treemap_data = pd.DataFrame({"Key": ["A", "B"], "Done": [None, None]})
         # _done_df is already empty from fixture
 
         result = Backlog.draw_throughput_histogram(mock_backlog)
@@ -284,7 +285,7 @@ class TestBacklogThroughputHistogram:
         dates = []
         for week in range(8):
             for day in range(3):  # 3 items per week
-                date = (datetime.now() - timedelta(weeks=8-week, days=day)).strftime("%Y-%m-%d")
+                date = (datetime.now() - timedelta(weeks=8 - week, days=day)).strftime("%Y-%m-%d")
                 dates.append(date)
 
         data = [{"Key": f"Item{i}", "Done": dates[i]} for i in range(len(dates))]
@@ -308,7 +309,7 @@ class TestBacklogThroughputHistogram:
 
         for week_idx, count in enumerate(weeks_data):
             for item in range(count):
-                date = (datetime.now() - timedelta(weeks=len(weeks_data)-week_idx)).strftime("%Y-%m-%d")
+                date = (datetime.now() - timedelta(weeks=len(weeks_data) - week_idx)).strftime("%Y-%m-%d")
                 dates.append(date)
 
         data = [{"Key": f"Item{i}", "Done": dates[i]} for i in range(len(dates))]
@@ -340,12 +341,14 @@ class TestPerformanceOptimizations:
         data = []
         today = datetime.now()
         for i in range(1000):
-            data.append({
-                "Key": f"Item{i}",
-                "Epic Name": f"Epic{i % 5}",
-                "Created": (today - timedelta(days=i % 90)).strftime("%Y-%m-%d"),
-                "Done": None,
-            })
+            data.append(
+                {
+                    "Key": f"Item{i}",
+                    "Epic Name": f"Epic{i % 5}",
+                    "Created": (today - timedelta(days=i % 90)).strftime("%Y-%m-%d"),
+                    "Done": None,
+                }
+            )
 
         df = pd.DataFrame(data)
         backlog.treemap_data = df
@@ -355,7 +358,6 @@ class TestPerformanceOptimizations:
         result = Backlog.draw_aging_heatmap(backlog)
         assert result is not None
         assert len(json.loads(result)) > 0
-
 
 
 class TestEdgeCases:
@@ -369,10 +371,7 @@ class TestEdgeCases:
         today = datetime.now()
         created_date = (today - timedelta(days=15)).strftime("%Y-%m-%d")
 
-        data = [
-            {"Key": f"Item{i}", "Epic Name": "Backend", "Created": created_date, "Done": None}
-            for i in range(5)
-        ]
+        data = [{"Key": f"Item{i}", "Epic Name": "Backend", "Created": created_date, "Done": None} for i in range(5)]
         df = pd.DataFrame(data)
         backlog.treemap_data = df
         backlog._active_df = df
@@ -385,11 +384,13 @@ class TestEdgeCases:
     def test_single_epic(self):
         """Test charts with only one epic."""
         backlog = MagicMock(spec=Backlog)
-        backlog.treemap_data = pd.DataFrame({
-            "Key": ["A", "B", "C"],
-            "Epic Name": ["Single"] * 3,
-            "Story Points": [3, 5, 2],
-        })
+        backlog.treemap_data = pd.DataFrame(
+            {
+                "Key": ["A", "B", "C"],
+                "Epic Name": ["Single"] * 3,
+                "Story Points": [3, 5, 2],
+            }
+        )
 
         result = Backlog.draw_epic_investment(backlog)
         fig = json.loads(result)
@@ -400,11 +401,13 @@ class TestEdgeCases:
     def test_very_large_story_points(self):
         """Test handling of large story point values."""
         backlog = MagicMock(spec=Backlog)
-        backlog.treemap_data = pd.DataFrame({
-            "Key": ["A", "B", "C"],
-            "Epic Name": ["Backend", "Frontend", "Backend"],
-            "Story Points": [1000, 2000, 1500],
-        })
+        backlog.treemap_data = pd.DataFrame(
+            {
+                "Key": ["A", "B", "C"],
+                "Epic Name": ["Backend", "Frontend", "Backend"],
+                "Story Points": [1000, 2000, 1500],
+            }
+        )
 
         result = Backlog.draw_epic_investment(backlog)
         assert result is not None

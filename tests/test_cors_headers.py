@@ -5,7 +5,6 @@ per SECURITY-001 requirements.
 """
 
 
-
 class TestCORSConfiguration:
     """Tests for CORS configuration validation."""
 
@@ -73,6 +72,7 @@ class TestCORSConfiguration:
 
         # Need to reload the module to pick up the new env var
         import importlib
+
         importlib.reload(cors_config)
 
         origins = cors_config.get_cors_origins()

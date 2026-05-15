@@ -9,6 +9,7 @@ from ..services import backlog_cache
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/flow", tags=["flow"])
 
+
 @router.get("/{dataset_id}")
 def get_flow(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
     row = db.execute("SELECT status FROM datasets WHERE id=?", (dataset_id,)).fetchone()

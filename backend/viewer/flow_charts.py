@@ -36,24 +36,27 @@ class FlowChartsMixin:
         total = done_count + current_wip
         efficiency = round(done_count / total * 100, 1) if total > 0 else 0
         color = (
-            "#52BE80" if efficiency > self.chart_config.FLOW_EFFICIENCY_GOOD_PCT
+            "#52BE80"
+            if efficiency > self.chart_config.FLOW_EFFICIENCY_GOOD_PCT
             else ("#F5A623" if efficiency >= self.chart_config.FLOW_EFFICIENCY_OK_PCT else "#D35400")
         )
-        fig = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=efficiency,
-            number={"suffix": "%", "font": {"size": 28}},
-            gauge={
-                "axis": {"range": [0, 100]},
-                "bar": {"color": color},
-                "steps": [
-                    {"range": [0, 20], "color": "#fdeee5"},
-                    {"range": [20, 40], "color": "#fff3dc"},
-                    {"range": [40, 100], "color": "#e8f8f0"},
-                ],
-                "threshold": {"line": {"color": "#2C3E50", "width": 2}, "thickness": 0.75, "value": efficiency},
-            },
-        ))
+        fig = go.Figure(
+            go.Indicator(
+                mode="gauge+number",
+                value=efficiency,
+                number={"suffix": "%", "font": {"size": 28}},
+                gauge={
+                    "axis": {"range": [0, 100]},
+                    "bar": {"color": color},
+                    "steps": [
+                        {"range": [0, 20], "color": "#fdeee5"},
+                        {"range": [20, 40], "color": "#fff3dc"},
+                        {"range": [40, 100], "color": "#e8f8f0"},
+                    ],
+                    "threshold": {"line": {"color": "#2C3E50", "width": 2}, "thickness": 0.75, "value": efficiency},
+                },
+            )
+        )
         return fig.to_json()
 
     def draw_wip_trend(self) -> str:
@@ -66,11 +69,7 @@ class FlowChartsMixin:
         # the step-date column is absent, has no data, or resolves to the same
         # column as done_step (e.g. single-step workflow with no active step column).
         using_fallback = False
-        if (
-            in_prog_col in df.columns
-            and in_prog_col != done_col
-            and df[in_prog_col].notna().any()
-        ):
+        if in_prog_col in df.columns and in_prog_col != done_col and df[in_prog_col].notna().any():
             entry_dates = df[in_prog_col]
         elif "Created" in df.columns:
             entry_dates = df["Created"]
@@ -85,19 +84,19 @@ class FlowChartsMixin:
 
         wip_df = pd.DataFrame({"week": wip.index, "wip": wip.values})
 
-        rising = (
-            len(wip_df) >= 8
-            and wip_df["wip"].iloc[-4:].mean() > wip_df["wip"].iloc[-8:-4].mean() * 1.2
-        )
+        rising = len(wip_df) >= 8 and wip_df["wip"].iloc[-4:].mean() > wip_df["wip"].iloc[-8:-4].mean() * 1.2
         color = ANANSI_COLORS[2] if rising else ANANSI_COLORS[0]
         y_title = "Items in backlog (not done)" if using_fallback else "Items in Progress"
 
-        fig = go.Figure(go.Scatter(
-            x=wip_df["week"], y=wip_df["wip"],
-            mode="lines+markers",
-            line={"color": color, "width": 2},
-            name="WIP",
-        ))
+        fig = go.Figure(
+            go.Scatter(
+                x=wip_df["week"],
+                y=wip_df["wip"],
+                mode="lines+markers",
+                line={"color": color, "width": 2},
+                name="WIP",
+            )
+        )
         fig.update_layout(xaxis={"title": "Week"}, yaxis={"title": y_title})
         return fig.to_json()
 
@@ -112,7 +111,15 @@ class FlowChartsMixin:
         rolling = pd.Series(counts).rolling(4, min_periods=1).mean().round(1).tolist()
         fig = go.Figure()
         fig.add_trace(go.Bar(x=weeks, y=counts, name="Completed", marker_color=ANANSI_COLORS[0]))
-        fig.add_trace(go.Scatter(x=weeks, y=rolling, mode="lines", name="4-week avg", line={"color": ANANSI_COLORS[1], "width": 2, "dash": "dot"}))
+        fig.add_trace(
+            go.Scatter(
+                x=weeks,
+                y=rolling,
+                mode="lines",
+                name="4-week avg",
+                line={"color": ANANSI_COLORS[1], "width": 2, "dash": "dot"},
+            )
+        )
         fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
         return fig.to_json()
 
@@ -151,21 +158,30 @@ class FlowChartsMixin:
             else:
                 colors.append(ChartConfig.NORMAL_WEEK_COLOR)
 
-        rolling = pd.Series(counts).rolling(self.chart_config.ROLLING_AVG_WINDOW, min_periods=1).mean().round(1).tolist()
+        rolling = (
+            pd.Series(counts).rolling(self.chart_config.ROLLING_AVG_WINDOW, min_periods=1).mean().round(1).tolist()
+        )
 
         fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=week_labels, y=counts,
-            marker=dict(color=colors),
-            name="Items completed",
-            hovertemplate="%{x}<br>Items: %{y}<extra></extra>",
-        ))
-        fig.add_trace(go.Scatter(
-            x=week_labels, y=rolling,
-            mode="lines", name="4-week avg",
-            line=dict(color=ChartConfig.ABOVE_MEAN_COLOR, width=2, dash="dot"),
-            hovertemplate="%{x}<br>4-week avg: %{y}<extra></extra>",
-        ))
+        fig.add_trace(
+            go.Bar(
+                x=week_labels,
+                y=counts,
+                marker=dict(color=colors),
+                name="Items completed",
+                hovertemplate="%{x}<br>Items: %{y}<extra></extra>",
+            )
+        )
+        fig.add_trace(
+            go.Scatter(
+                x=week_labels,
+                y=rolling,
+                mode="lines",
+                name="4-week avg",
+                line=dict(color=ChartConfig.ABOVE_MEAN_COLOR, width=2, dash="dot"),
+                hovertemplate="%{x}<br>4-week avg: %{y}<extra></extra>",
+            )
+        )
         fig.update_layout(
             xaxis=dict(tickangle=-45, nticks=12, title=dict(text="")),
             yaxis=dict(title=dict(text="Items / week"), dtick=1),
