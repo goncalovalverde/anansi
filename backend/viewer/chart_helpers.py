@@ -7,6 +7,7 @@ Depends on: plotly, viewer.chart_config. Does not import pandas or backlog logic
 """
 
 import plotly.graph_objects as go
+
 from .chart_config import ChartConfig
 
 

@@ -1,19 +1,16 @@
-import os
 import logging
+import os
 import time
 from typing import Callable
+
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 from prometheus_client import REGISTRY, generate_latest
 
-from . import database
-from . import api
-from . import cors_config
-from . import logging_config
-from . import metrics
-from .api import config, data, charts, insights, flow, trends, health
+from . import cors_config, database, logging_config, metrics
+from .api import charts, config, data, flow, health, insights, trends
 
 # Set up structured JSON logging
 logging_config.setup_logging()
@@ -37,23 +34,23 @@ async def add_correlation_id_middleware(request: Request, call_next: Callable) -
         correlation_id = logging_config.get_or_create_correlation_id()
     else:
         logging_config.set_correlation_id(correlation_id)
-    
+
     # Process request
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
-    
+
     # Add correlation ID to response header
     response.headers["X-Correlation-ID"] = correlation_id
-    
+
     # Record metrics
     method = request.method
     endpoint = request.url.path
     status = response.status_code
-    
+
     metrics.request_count.labels(method=method, endpoint=endpoint, status=status).inc()
     metrics.request_duration.labels(method=method, endpoint=endpoint).observe(process_time)
-    
+
     return response
 
 

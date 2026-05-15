@@ -15,15 +15,15 @@ import os
 
 def get_cors_origins() -> list[str]:
     """Get allowed CORS origins from environment variables or use secure defaults.
-    
+
     Environment variable: ANANSI_CORS_ORIGINS
     - Use comma-separated values for multiple origins (e.g., "http://localhost:3000,http://localhost:5173")
     - Default: ["http://localhost:3000", "http://localhost:5173"] for development
-    
+
     Origins by environment:
     - Development: http://localhost:3000 (legacy Vue CLI), http://localhost:5173 (Vite)
     - Production: https://yourdomain.com (must be configured via env var)
-    
+
     Returns:
         List of allowed CORS origins
     """
@@ -37,7 +37,7 @@ def get_cors_origins() -> list[str]:
 
 def get_cors_config() -> dict:
     """Get the complete CORS middleware configuration.
-    
+
     Returns:
         Dictionary of CORS middleware options
     """

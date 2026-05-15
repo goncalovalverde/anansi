@@ -1,8 +1,6 @@
 """Tests for the /api/config endpoints."""
 
-import pytest
 from fastapi.testclient import TestClient
-import sqlite3
 
 
 class TestConfigRead:
@@ -13,7 +11,7 @@ class TestConfigRead:
         response = client.get("/api/config")
         assert response.status_code == 200
         data = response.json()
-        
+
         # Check that all expected keys are present
         expected_keys = {
             "jira_url", "jira_jql_query", "jira_auth_method",
@@ -29,11 +27,11 @@ class TestConfigRead:
             "/api/config",
             json={"jira_password": "mysecretpass"}
         )
-        
+
         response = client.get("/api/config")
         assert response.status_code == 200
         data = response.json()
-        
+
         # Secret should be masked
         assert data["jira_password"] == "***"
 
@@ -41,7 +39,7 @@ class TestConfigRead:
         """GET /api/config returns empty string for empty secrets."""
         response = client.get("/api/config")
         data = response.json()
-        
+
         # Unset secret should be empty string
         assert data["jira_password"] == ""
 
@@ -70,7 +68,7 @@ class TestConfigWrite:
             "/api/config",
             json={"jira_url": "https://persistent.jira.com"}
         )
-        
+
         response = client.get("/api/config")
         assert response.json()["jira_url"] == "https://persistent.jira.com"
 
@@ -113,7 +111,7 @@ class TestConfigWrite:
             "/api/config",
             json={"jira_auth_method": "pat"}
         )
-        
+
         response = client.get("/api/config")
         assert response.json()["jira_auth_method"] == "pat"
 
@@ -123,7 +121,7 @@ class TestConfigWrite:
             "/api/config",
             json={"jira_pat_token": "secret_token_value"}
         )
-        
+
         # Verify via GET (which masks secrets)
         response = client.get("/api/config")
         assert response.json()["jira_pat_token"] == "***"
@@ -135,19 +133,19 @@ class TestConfigWrite:
             "/api/config",
             json={"jira_password": "initial_secret"}
         )
-        
+
         # Try to update with empty string (should be ignored)
         client.put(
             "/api/config",
             json={"jira_password": ""}
         )
-        
+
         # Try to update with masked value (should be ignored)
         client.put(
             "/api/config",
             json={"jira_password": "***"}
         )
-        
+
         # Secret should remain unchanged (masked as ***)
         response = client.get("/api/config")
         assert response.json()["jira_password"] == "***"
@@ -189,7 +187,7 @@ class TestWorkflow:
             "/api/config/workflow",
             json={"steps": new_steps}
         )
-        
+
         response = client.get("/api/config/workflow")
         assert response.json()["steps"] == new_steps
 
@@ -247,7 +245,7 @@ class TestIssueTypes:
             "/api/config/issue-types",
             json={"types": new_types}
         )
-        
+
         response = client.get("/api/config/issue-types")
         assert response.json()["types"] == new_types
 
@@ -347,7 +345,7 @@ class TestJiraFieldsEdgeCases:
             }
         )
         assert response.status_code == 200
-        
+
         # Retrieve and verify they're masked
         response = client.get("/api/config")
         data = response.json()

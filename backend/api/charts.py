@@ -1,10 +1,10 @@
 import logging
 import sqlite3
+
 from fastapi import APIRouter, Depends, HTTPException
 
-from .. import database
-from ..services import backlog_cache
 from ..dependencies import get_db
+from ..services import backlog_cache
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/charts", tags=["charts"])

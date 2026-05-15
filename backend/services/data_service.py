@@ -1,13 +1,13 @@
 import hashlib
 import json
+import logging
 import sqlite3
 import uuid
-import logging
+
 from pandas import DataFrame
 
-from .. import database
+from .. import database, reader
 from . import config_service
-from .. import reader
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
 import sqlite3
 
-from ..services import backlog_cache
+from fastapi import APIRouter, Depends, HTTPException
+
 from ..dependencies import get_db
+from ..services import backlog_cache
 
 router = APIRouter(prefix="/api/insights", tags=["insights"])
 

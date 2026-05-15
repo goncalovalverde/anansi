@@ -1,9 +1,10 @@
 """Prometheus metrics definitions for Anansi observability."""
 
-from prometheus_client import Counter, Histogram, Gauge
-from functools import wraps
-import time
 import logging
+import time
+from functools import wraps
+
+from prometheus_client import Counter, Gauge, Histogram
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ cache_misses = Counter(
 
 def track_metrics(endpoint: str = None):
     """Decorator to track request metrics.
-    
+
     Args:
         endpoint: Optional endpoint name for metrics labeling
     """
@@ -68,6 +69,6 @@ def track_metrics(endpoint: str = None):
             finally:
                 duration = time.time() - start_time
                 request_duration.labels(method="GET", endpoint=ep_name).observe(duration)
-        
+
         return wrapper
     return decorator

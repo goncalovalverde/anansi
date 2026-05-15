@@ -22,11 +22,11 @@ but short enough that a manual data reload is always reflected quickly.
 Explicit invalidation is also called after every data load.
 """
 
-import time
-import threading
 import logging
-from typing import Any, Optional
 import sqlite3
+import threading
+import time
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +71,8 @@ def _evict_stale() -> None:
 # ------------------------------------------------------------------ #
 
 def _build_backlog(db: sqlite3.Connection, dataset_id: str, config: dict):
-    from . import data_service
     from ..viewer.backlog import Backlog
+    from . import data_service
 
     df = data_service.load_dataframe(db, dataset_id)
     return Backlog(df, config)
@@ -80,7 +80,7 @@ def _build_backlog(db: sqlite3.Connection, dataset_id: str, config: dict):
 
 def _get_or_build(key: str, builder, request_cache=None) -> Any:
     """Double-checked locking with optional request-scoped cache fallback.
-    
+
     1. If request_cache provided, check it first (ultrafast, ~0ns)
     2. Then check global cache (fast, ~1-10μs)
     3. If miss, acquire per-key lock and build
@@ -92,7 +92,7 @@ def _get_or_build(key: str, builder, request_cache=None) -> Any:
         if result is not None:
             logger.debug("Request-scope cache hit for '%s'", key)
             return result
-    
+
     # Global cache fast path — no lock needed
     if _is_fresh(key):
         cached_value = _cache[key]["data"]
@@ -115,11 +115,11 @@ def _get_or_build(key: str, builder, request_cache=None) -> Any:
         data = builder()
         _cache[key] = {"data": data, "ts": time.monotonic()}
         _evict_stale()
-        
+
         # Also cache in request scope for subsequent calls in this request
         if request_cache is not None:
             request_cache.set(key, data)
-        
+
         return data
 
 
@@ -129,13 +129,13 @@ def _get_or_build(key: str, builder, request_cache=None) -> Any:
 
 def get_backlog(db: sqlite3.Connection, dataset_id: str, request_cache=None):
     """Return a cached Backlog for this dataset, rebuilding if stale.
-    
+
     Args:
         db: Database connection
         dataset_id: Dataset identifier
         request_cache: Optional RequestCache for request-scoped caching.
                       If provided, check it first before global cache.
-    
+
     Returns:
         Backlog instance (from request-scope, global, or freshly built)
     """
@@ -149,12 +149,12 @@ def get_backlog(db: sqlite3.Connection, dataset_id: str, request_cache=None):
 
 def get_dashboard_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
     """Return cached {charts, kpis, callouts} for the dashboard endpoint.
-    
+
     Args:
         db: Database connection
         dataset_id: Dataset identifier
         request_cache: Optional RequestCache for request-scoped caching
-    
+
     Returns:
         Dict with keys: treemap, treemap_all, distribution, pbis_done, pbis_created,
                        story_points, type_issue, timeline_size, aging_heatmap,
@@ -183,12 +183,12 @@ def get_dashboard_response(db: sqlite3.Connection, dataset_id: str, request_cach
 
 def get_flow_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
     """Return cached flow charts + callouts for the flow endpoint.
-    
+
     Args:
         db: Database connection
         dataset_id: Dataset identifier
         request_cache: Optional RequestCache for request-scoped caching
-    
+
     Returns:
         Dict with flow charts and callouts
     """
@@ -214,12 +214,12 @@ def get_flow_response(db: sqlite3.Connection, dataset_id: str, request_cache=Non
 
 def get_insights_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> list:
     """Return cached insights for the insights endpoint.
-    
+
     Args:
         db: Database connection
         dataset_id: Dataset identifier
         request_cache: Optional RequestCache for request-scoped caching
-    
+
     Returns:
         List of insight dictionaries
     """
@@ -243,17 +243,19 @@ def get_insights_response(db: sqlite3.Connection, dataset_id: str, request_cache
 
 def get_trends_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
     """Return cached trend charts for the trends endpoint.
-    
+
     Args:
         db: Database connection
         dataset_id: Dataset identifier
         request_cache: Optional RequestCache for request-scoped caching
-    
+
     Returns:
         Dict with trend charts
     """
     import json as json_mod
+
     import plotly.graph_objects as go
+
     from . import config_service
 
     config = config_service.build_reader_config(db)

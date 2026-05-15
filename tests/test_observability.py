@@ -1,21 +1,18 @@
 """Tests for observability features: structured logging, metrics, and correlation IDs."""
 
-import json
 import logging
-import pytest
-from io import StringIO
-from unittest.mock import patch, MagicMock
-from fastapi.testclient import TestClient
-from prometheus_client import REGISTRY, CollectorRegistry
 
 # Test imports
 import sys
 from pathlib import Path
 
+import pytest
+from fastapi.testclient import TestClient
+
 backend_path = Path(__file__).parent.parent / "backend"
 sys.path.insert(0, str(backend_path))
 
-from backend import main, logging_config, metrics
+from backend import logging_config, metrics
 
 
 class TestCorrelationIDMiddleware:
@@ -52,10 +49,10 @@ class TestCorrelationIDMiddleware:
         """Each request gets a unique correlation ID if not provided."""
         response1 = client.get("/api/health")
         response2 = client.get("/api/health")
-        
+
         cid1 = response1.headers.get("X-Correlation-ID")
         cid2 = response2.headers.get("X-Correlation-ID")
-        
+
         assert cid1 is not None
         assert cid2 is not None
         # These should be different since no header was provided
@@ -89,7 +86,7 @@ class TestMetricsEndpoint:
         """Metrics include anansi_requests_total counter."""
         # Make a request to generate metrics
         client.get("/api/health")
-        
+
         response = client.get("/metrics")
         assert response.status_code == 200
         text = response.text
@@ -99,7 +96,7 @@ class TestMetricsEndpoint:
         """Metrics include anansi_request_duration_seconds histogram."""
         # Make a request to generate metrics
         client.get("/api/health")
-        
+
         response = client.get("/metrics")
         assert response.status_code == 200
         text = response.text
@@ -128,19 +125,19 @@ class TestMetricsRecording:
         # Get initial metrics
         response1 = client.get("/metrics")
         initial_text = response1.text
-        
+
         # Count occurrences of health endpoint
-        initial_count = initial_text.count('endpoint="/api/health"')
-        
+        initial_text.count('endpoint="/api/health"')
+
         # Make a request
         client.get("/api/health")
-        
+
         # Get updated metrics
         response2 = client.get("/metrics")
         updated_text = response2.text
-        
-        updated_count = updated_text.count('endpoint="/api/health"')
-        
+
+        updated_text.count('endpoint="/api/health"')
+
         # Count should increase or be recorded
         assert "anansi_requests_total" in updated_text
 
@@ -148,12 +145,12 @@ class TestMetricsRecording:
         """Request duration is recorded in histogram."""
         # Make a request
         client.get("/api/health")
-        
+
         # Get metrics
         response = client.get("/metrics")
         assert response.status_code == 200
         text = response.text
-        
+
         # Check histogram has recorded observation
         assert "anansi_request_duration_seconds" in text
         # Histogram should have bucket data
@@ -164,11 +161,11 @@ class TestMetricsRecording:
         # Make requests
         client.get("/api/health")
         client.get("/metrics")
-        
+
         # Get metrics
         response = client.get("/metrics")
         text = response.text
-        
+
         # Check for method labels (GET is most common)
         assert 'method="GET"' in text or "method" in text
 
@@ -181,10 +178,10 @@ class TestLoggingConfig:
         # This test verifies the configuration is done
         # The setup_logging is called on main.py import
         root_logger = logging.getLogger()
-        
+
         # Root logger should have handlers
         assert len(root_logger.handlers) > 0
-        
+
         # At least one handler should have a formatter
         has_formatter = any(h.formatter is not None for h in root_logger.handlers)
         assert has_formatter
@@ -207,7 +204,7 @@ class TestLoggingConfig:
         """get_or_create_correlation_id creates new ID if not set."""
         # Clear the context
         logging_config.correlation_id_var.set("")
-        
+
         # Get or create should return a new ID
         result = logging_config.get_or_create_correlation_id()
         assert result is not None
@@ -219,7 +216,7 @@ class TestLoggingConfig:
         """CorrelationIdFilter adds correlation_id to log records."""
         test_id = "filter-test-123"
         logging_config.set_correlation_id(test_id)
-        
+
         # Create a log record
         record = logging.LogRecord(
             name="test",
@@ -230,11 +227,11 @@ class TestLoggingConfig:
             args=(),
             exc_info=None,
         )
-        
+
         # Create and apply filter
         filter_instance = logging_config.CorrelationIdFilter()
         filter_instance.filter(record)
-        
+
         # Check that correlation_id was added
         assert hasattr(record, "correlation_id")
         assert record.correlation_id == test_id
@@ -248,7 +245,7 @@ class TestMetricsDecorator:
         @metrics.track_metrics(endpoint="test_endpoint")
         def test_func():
             return "success"
-        
+
         # Call the function
         result = test_func()
         assert result == "success"
@@ -258,13 +255,13 @@ class TestMetricsDecorator:
         @metrics.track_metrics(endpoint="error_endpoint")
         def test_func_error():
             raise ValueError("Test error")
-        
+
         # Call the function, expect exception
         with pytest.raises(ValueError):
             test_func_error()
-        
+
         # Errors should be recorded in metrics
-        response = pytest.lazy_fixture("client").get("/metrics") if hasattr(pytest, "lazy_fixture") else None
+        pytest.lazy_fixture("client").get("/metrics") if hasattr(pytest, "lazy_fixture") else None
         # This is a basic check that the decorator doesn't crash on error
 
     def test_track_metrics_decorator_preserves_function_name(self):
@@ -272,7 +269,7 @@ class TestMetricsDecorator:
         @metrics.track_metrics(endpoint="test")
         def original_function():
             pass
-        
+
         assert original_function.__name__ == "original_function"
 
 
@@ -283,11 +280,11 @@ class TestMetricsIntegration:
         """Different endpoints are tracked separately in metrics."""
         # Make requests to different endpoints
         client.get("/api/health")
-        
+
         # Get metrics
         response = client.get("/metrics")
         text = response.text
-        
+
         # Both endpoints should be in metrics
         assert "anansi_requests_total" in text
         # Metrics should have multiple endpoints recorded
@@ -297,11 +294,11 @@ class TestMetricsIntegration:
         """Different HTTP methods are tracked separately."""
         # Make GET request
         client.get("/api/health")
-        
+
         # Get metrics
         response = client.get("/metrics")
         text = response.text
-        
+
         # Should track the GET method
         assert 'method="GET"' in text or "method" in text
 
@@ -310,10 +307,10 @@ class TestMetricsIntegration:
         # Make a request
         response = client.get("/api/health")
         assert response.status_code == 200
-        
+
         # Get metrics
         metrics_response = client.get("/metrics")
         text = metrics_response.text
-        
+
         # Status code should be in metrics
         assert "status=" in text or "200" in text

@@ -5,12 +5,12 @@ set up by ``Backlog.__init__`` (``self.treemap_data``, ``self._done_df``, etc.) 
 normal ``self`` references; no direct dependency on the ``Backlog`` class itself.
 """
 
+from datetime import datetime
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-from datetime import datetime
 
-from .backlog_data import BacklogData
 from .chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap
 from .chart_helpers import _create_empty_state_figure
 

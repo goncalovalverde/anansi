@@ -1,12 +1,12 @@
-import sqlite3
 import logging
+import sqlite3
+
 from fastapi import APIRouter, Depends, HTTPException
 
-from .. import database
-from ..services import config_service
+from .. import database, schemas
 from ..dependencies import get_db
 from ..reader import jira as jira_reader
-from .. import schemas
+from ..services import config_service
 
 router = APIRouter(prefix="/api/config", tags=["config"])
 logger = logging.getLogger(__name__)
@@ -108,7 +108,7 @@ def _merge_overrides(jira_config: dict, overrides: schemas.TestConnectionRequest
         "jira_oauth_consumer_key": "oauth.consumer_key",
         "jira_oauth_key_cert_file": "oauth.key_cert_file",
     }
-    
+
     # Convert Pydantic model to dict, excluding None values
     overrides_dict = overrides.model_dump(exclude_none=True)
     result = dict(jira_config)

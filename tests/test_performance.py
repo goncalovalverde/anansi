@@ -7,15 +7,16 @@ Tests the request-scoped and global caching mechanisms to ensure:
 4. No N+1 loading occurs
 """
 
-import time
 import tempfile
+import time
 from pathlib import Path
+
 import pandas as pd
 import pytest
 
 from backend import database
-from backend.services import data_service, backlog_cache
 from backend.dependencies import RequestCache
+from backend.services import backlog_cache, data_service
 
 
 class TestCachingPerformance:
@@ -39,44 +40,44 @@ class TestCachingPerformance:
 
     def create_test_dataset(self, db_path: str, num_issues: int = 100) -> tuple[str, float]:
         """Create a test dataset and return (dataset_id, load_time).
-        
+
         Args:
             db_path: Path to test database
             num_issues: Number of issues to create
-        
+
         Returns:
             Tuple of (dataset_id, time_to_create_in_seconds)
         """
         # Initialize database
         database.init_db(db_path)
         db = database.get_db(db_path)
-        
+
         # Create test data
         data = {
             'Key': [f'PROJ-{i}' for i in range(1, num_issues + 1)],
             'Summary': [f'Issue {i}' for i in range(1, num_issues + 1)],
-            'Type': ['Story' if i % 3 == 0 else 'Bug' if i % 3 == 1 else 'Task' 
+            'Type': ['Story' if i % 3 == 0 else 'Bug' if i % 3 == 1 else 'Task'
                     for i in range(num_issues)],
             'Status': ['Done' if i % 2 == 0 else 'In Progress' for i in range(num_issues)],
             'Created': pd.date_range('2024-01-01', periods=num_issues, freq='D'),
-            'Done': [pd.Timestamp('2024-12-01') if i % 2 == 0 else None 
+            'Done': [pd.Timestamp('2024-12-01') if i % 2 == 0 else None
                     for i in range(num_issues)],
             'Story Points': [3 if i % 5 == 0 else 5 if i % 5 == 1 else 8 if i % 5 == 2 else 2 if i % 5 == 3 else 1
                            for i in range(num_issues)],
             'Epic Link': [f'EPIC-{i % 10}' if i % 10 > 0 else None for i in range(num_issues)],
             'Epic': [f'Feature {i % 10}' if i % 10 > 0 else 'No Epic' for i in range(num_issues)],
         }
-        
+
         df = pd.DataFrame(data)
-        
+
         # Save to database
         dataset_id = data_service.create_dataset(db, 'test_hash', 'jira')
-        
+
         start = time.perf_counter()
         data_service.save_dataframe(db, dataset_id, df)
         data_service.update_dataset_status(db, dataset_id, 'ready')
         creation_time = time.perf_counter() - start
-        
+
         db.close()
         return dataset_id, creation_time
 
@@ -198,10 +199,10 @@ class TestCachingPerformance:
         """Verify RequestCache is properly isolated per instance."""
         cache1 = RequestCache()
         cache2 = RequestCache()
-        
+
         cache1.set("key1", "value1")
         cache2.set("key2", "value2")
-        
+
         # Each cache should have only its own values
         assert cache1.get("key1") == "value1"
         assert cache1.get("key2") is None
@@ -212,17 +213,17 @@ class TestCachingPerformance:
         """Verify RequestCache.get_or_build builds only once."""
         cache = RequestCache()
         call_count = 0
-        
+
         def builder():
             nonlocal call_count
             call_count += 1
             return f"value_{call_count}"
-        
+
         # First call should build
         result1 = cache.get_or_build("key", builder)
         assert result1 == "value_1"
         assert call_count == 1
-        
+
         # Second call should return cached value
         result2 = cache.get_or_build("key", builder)
         assert result2 == "value_1"  # Same as first, not "value_2"

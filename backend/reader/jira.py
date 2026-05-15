@@ -1,7 +1,8 @@
-from jira import JIRA
-import dateutil.parser
 import logging
-from pandas import NaT, DataFrame
+
+import dateutil.parser
+from jira import JIRA
+from pandas import DataFrame, NaT
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class Jira:
         if story_points_field:
             # Try direct attribute access first
             sp_value = getattr(issue.fields, story_points_field, None)
-            
+
         issue_data["Story Points"].append(sp_value)
 
         epic_link_field = self.jira_config.get("epic_link_field")
@@ -96,23 +97,23 @@ class Jira:
         issues = []
         i = 0
         chunk_size = 100
-        
+
         # Build list of custom fields to request
         fields_to_request = [
             "key", "issuetype", "creator", "summary", "created", "status",
             "changelog", "parent"
         ]
-        
+
         # Add custom field IDs if configured
         if self.jira_config.get("story_points_field"):
             fields_to_request.append(self.jira_config["story_points_field"])
         if self.jira_config.get("epic_link_field"):
             fields_to_request.append(self.jira_config["epic_link_field"])
-        
+
         # Request all custom fields as fallback
         fields_str = ",".join(fields_to_request) + ",customfield_*"
         logger.info(f"Requesting fields: {fields_str}")
-        
+
         while True:
             chunk = jira.search_issues(
                 self.jira_config["jql_query"],
@@ -129,7 +130,7 @@ class Jira:
                     sp_value = getattr(issue.fields, story_points_field, None)
                     logger.info(f"First issue {issue.key}: {story_points_field} = {sp_value} (type: {type(sp_value).__name__})")
                 issues.append(issue)
-            
+
             if progress_callback:
                 progress_callback(len(issues), chunk.total)
             if i >= chunk.total:

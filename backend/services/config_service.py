@@ -1,4 +1,5 @@
 import sqlite3
+
 from .. import database
 
 SECRET_KEYS = database.SECRET_KEYS

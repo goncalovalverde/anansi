@@ -1,6 +1,6 @@
 import logging
-from . import jira
-from . import csv
+
+from . import csv, jira
 
 logger = logging.getLogger(__name__)
 

@@ -5,13 +5,11 @@ Tests the actual chart generation with realistic data.
 """
 
 import json
-import pandas as pd
 from datetime import datetime, timedelta
 
-from backend.viewer.backlog import (
-    Backlog, ChartConfig, EpicColorMap,
-    _create_empty_state_figure
-)
+import pandas as pd
+
+from backend.viewer.backlog import Backlog, ChartConfig, EpicColorMap, _create_empty_state_figure
 
 
 class TestChartIntegration:
@@ -27,16 +25,16 @@ class TestChartIntegration:
     def test_epic_color_map(self):
         """Test singleton color map."""
         EpicColorMap._instance = None  # Reset
-        
+
         map1 = EpicColorMap()
         color1_backend = map1.get_color("Backend")
         color1_frontend = map1.get_color("Frontend")
-        
+
         # Verify consistency
         assert color1_backend == map1.get_color("Backend")
         assert color1_frontend == map1.get_color("Frontend")
         assert color1_backend != color1_frontend
-        
+
         # Verify singleton
         map2 = EpicColorMap()
         assert map2.get_color("Backend") == color1_backend
@@ -54,7 +52,7 @@ class TestChartIntegration:
         # Create realistic data - let Backlog compute Epic Name
         today = datetime.now()
         data = []
-        
+
         # Create 3 epics
         for epic_id in range(1, 4):
             data.append({
@@ -66,7 +64,7 @@ class TestChartIntegration:
                 "Created": today.strftime("%Y-%m-%d"),
                 "Done": None,
             })
-        
+
         # Create stories linked to epics
         for epic_id in range(1, 4):
             for i in range(5):
@@ -81,19 +79,19 @@ class TestChartIntegration:
                     "Created": created,
                     "Done": None,
                 })
-        
+
         df = pd.DataFrame(data)
-        
+
         # Create backlog with proper DataFrame
         backlog = Backlog(
             cycle_data=df,
             config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]}
         )
-        
+
         # Generate chart
         result = backlog.draw_aging_heatmap()
         fig = json.loads(result)
-        
+
         # Verify structure
         assert fig["data"][0]["type"] == "heatmap"
         assert len(fig["data"][0]["y"]) == 3  # 3 epics
@@ -115,15 +113,15 @@ class TestChartIntegration:
             {"Key": "S-4", "Summary": "Frontend task 2", "Type": "Story", "Epic Link": "FE-1", "Story Points": 2, "Created": today.strftime("%Y-%m-%d"), "Done": None},
         ]
         df = pd.DataFrame(data)
-        
+
         backlog = Backlog(
             cycle_data=df,
             config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]}
         )
-        
+
         result = backlog.draw_epic_investment()
         fig = json.loads(result)
-        
+
         # Should have treemaps
         treemaps = [t for t in fig["data"] if t.get("type") == "treemap"]
         assert len(treemaps) >= 1
@@ -133,7 +131,7 @@ class TestChartIntegration:
         # Create done items over 8 weeks
         today = datetime.now()
         data = []
-        
+
         # Create an epic
         data.append({
             "Key": "E-1",
@@ -144,7 +142,7 @@ class TestChartIntegration:
             "Created": today.strftime("%Y-%m-%d"),
             "Done": None,
         })
-        
+
         # Create stories linked to epic, with done dates
         for week in range(8):
             for day in range(3):  # 3 items per week
@@ -158,17 +156,17 @@ class TestChartIntegration:
                     "Created": (today - timedelta(weeks=10)).strftime("%Y-%m-%d"),
                     "Done": done_date,
                 })
-        
+
         df = pd.DataFrame(data)
-        
+
         backlog = Backlog(
             cycle_data=df,
             config={"Workflow": ["To Do", "Done"], "issue_type": ["Story", "Epic"]}
         )
-        
+
         result = backlog.draw_throughput_histogram()
         fig = json.loads(result)
-        
+
         # Should have bar and line
         types = [t.get("type") for t in fig["data"]]
         assert "bar" in types
@@ -179,7 +177,7 @@ class TestChartIntegration:
         # Create 1000 items with epics
         today = datetime.now()
         data = []
-        
+
         # Create 10 epics
         for epic_id in range(10):
             data.append({
@@ -191,7 +189,7 @@ class TestChartIntegration:
                 "Created": today.strftime("%Y-%m-%d"),
                 "Done": None,
             })
-        
+
         # Create 1000 stories
         for i in range(1000):
             epic_id = i % 10
@@ -204,14 +202,14 @@ class TestChartIntegration:
                 "Created": (today - timedelta(days=i % 90)).strftime("%Y-%m-%d"),
                 "Done": None if i % 3 != 0 else (today - timedelta(days=i % 30)).strftime("%Y-%m-%d"),
             })
-        
+
         df = pd.DataFrame(data)
-        
+
         backlog = Backlog(
             cycle_data=df,
             config={"Workflow": ["To Do", "In Progress", "Done"], "issue_type": ["Story", "Bug", "Epic"]}
         )
-        
+
         # Should handle large data efficiently
         result = backlog.draw_aging_heatmap()
         fig = json.loads(result)

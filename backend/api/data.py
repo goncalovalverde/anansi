@@ -1,13 +1,12 @@
-import io
 import sqlite3
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
 
-from .. import database
-from ..services import config_service, data_service
-from ..reader import jira as jira_reader
-from ..reader import csv as csv_reader
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+
+from .. import database, schemas
 from ..dependencies import get_db
-from .. import schemas
+from ..reader import csv as csv_reader
+from ..reader import jira as jira_reader
+from ..services import config_service, data_service
 
 router = APIRouter(prefix="/api/data", tags=["data"])
 
@@ -18,7 +17,7 @@ def load_data(
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Load data from configured source (Jira or CSV).
-    
+
     Validates configuration and returns cached dataset if available.
     Otherwise creates new dataset and queues background loading task.
     """
@@ -30,14 +29,14 @@ def load_data(
             jira_reader.validate_auth_config(reader_config["jira"])
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc))
-        
+
         # Validate JQL query is not empty
         if not reader_config["jira"]["jql_query"].strip():
             raise HTTPException(
-                status_code=400, 
+                status_code=400,
                 detail="JQL query is required. Please enter a query in Settings (e.g., 'project = PNC' or leave empty for all issues with a trailing space)."
             )
-    
+
     elif source == "csv":
         if not reader_config["input"]["csv_file"].strip():
             # CSV uploads create datasets directly — check for existing one
@@ -73,7 +72,7 @@ def load_data(
 @router.get("/{dataset_id}/status", response_model=schemas.DatasetStatusResponse)
 def get_dataset_status(dataset_id: str, db: sqlite3.Connection = Depends(get_db)):
     """Get status and progress of dataset loading.
-    
+
     Returns status ('loading', 'ready', or 'error'), error message if applicable,
     and progress counts for loaded/total items.
     """
@@ -97,7 +96,7 @@ async def upload_csv(
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Upload and parse CSV file for data analysis.
-    
+
     Validates file format, parses CSV, and returns cached dataset if available.
     """
     if not file.filename.endswith(".csv"):
@@ -115,7 +114,7 @@ async def upload_csv(
     except Exception as exc:
         raise HTTPException(status_code=422, detail=f"Could not parse CSV: {exc}")
 
-    import hashlib, json
+    import hashlib
     content_hash = hashlib.md5(contents).hexdigest()
     config_hash = f"csv:{content_hash}"
 

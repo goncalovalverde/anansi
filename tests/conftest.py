@@ -2,13 +2,12 @@
 
 import os
 import sys
-import sqlite3
 import tempfile
 from pathlib import Path
+
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
 
 # Add backend to path so we can import it
 backend_path = Path(__file__).parent.parent / "backend"
@@ -21,18 +20,18 @@ from backend.dependencies import get_db
 @pytest.fixture
 def db_temp():
     """Temporary SQLite database for each test.
-    
+
     Uses an in-memory database or temporary file.
     Database is initialized with schema and default data.
     """
     # Use temporary file instead of in-memory to support concurrent access
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
         db_path = tmp.name
-    
+
     try:
         # Initialize database with schema
         database.init_db(db_path)
-        
+
         yield db_path
     finally:
         # Clean up
@@ -43,7 +42,7 @@ def db_temp():
 @pytest.fixture
 def client(db_temp):
     """FastAPI TestClient with test database dependency override.
-    
+
     Overrides get_db dependency to use the test database.
     """
     def get_test_db():
@@ -53,15 +52,15 @@ def client(db_temp):
             yield conn
         finally:
             conn.close()
-    
+
     # Override the dependency
     main.app.dependency_overrides[get_db] = get_test_db
-    
+
     # Create client
     test_client = TestClient(main.app)
-    
+
     yield test_client
-    
+
     # Clean up overrides
     main.app.dependency_overrides.clear()
 
@@ -85,7 +84,7 @@ def sample_config():
 @pytest.fixture
 def sample_dataframe():
     """Sample pandas DataFrame with Jira-like data.
-    
+
     Contains typical columns that Anansi processes:
     - Backlog: Date when moved to backlog
     - In Progress: Date when moved to in progress
@@ -93,11 +92,10 @@ def sample_dataframe():
     - Story Points: Numeric story points
     - Epic Link: Epic name/link (expected by Backlog viewer)
     """
-    import pandas as pd
     from datetime import datetime, timedelta
-    
+
     base_date = datetime(2024, 1, 1)
-    
+
     return pd.DataFrame({
         "Key": ["TEST-1", "TEST-2", "TEST-3", "TEST-4", "TEST-5"],
         "Summary": [

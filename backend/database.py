@@ -1,6 +1,5 @@
-import sqlite3
 import os
-from pathlib import Path
+import sqlite3
 
 DB_PATH = os.environ.get("ANANSI_DB_PATH", "anansi.db")
 

@@ -1,15 +1,14 @@
 import json
 import logging
+
 import pandas as pd
 import plotly.graph_objects as go
-from datetime import datetime
-from typing import Optional, Dict, List
 
-from .backlog_data import BacklogData
-from .chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap  # re-exported for callers
-from .chart_helpers import _create_empty_state_figure               # re-exported for callers
 from .backlog_charts import BacklogChartsMixin
+from .backlog_data import BacklogData
 from .backlog_insights import BacklogInsightsMixin
+from .chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap  # re-exported for callers  # noqa: F401
+from .chart_helpers import _create_empty_state_figure  # re-exported for callers  # noqa: F401
 from .flow_charts import FlowChartsMixin
 from .trend_charts import TrendChartsMixin
 
@@ -222,18 +221,18 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
             if filtered_types:
                 df = df[df["Type"].isin(filtered_types)].copy()
                 logger.info(f"Filtered to tracked types: {filtered_types}, {len(df)} issues remaining")
-        
+
         non_epics = df.query('Type != "Epic"')
         epics = df.query('Type == "Epic"')
         epics = epics.rename(columns={"Key": "Epic Key", "Summary": "Epic Name"})
 
         logger.info(f"Data load: {len(non_epics)} non-epics, {len(epics)} epics")
-        
+
         # Convert "No Epic" to NaN so merge treats it as missing instead of a literal key
         non_epics = non_epics.copy()
         original_no_epic = (non_epics["Epic Link"] == "No Epic").sum()
         non_epics.loc[non_epics["Epic Link"] == "No Epic", "Epic Link"] = None
-        
+
         # Check which non-epics have an Epic Link value
         has_epic_link = non_epics["Epic Link"].notna().sum()
         logger.info(f"Epic Links: {has_epic_link} issues linked to epics, {original_no_epic} with 'No Epic'")
@@ -245,7 +244,7 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
             right_on="Epic Key",
             how="left",
         )
-        
+
         # When Epic issues are in the dataset their Summary becomes the Epic Name.
         # When they are not fetched (e.g. JQL filters to Stories/Bugs/Tasks only),
         # fall back to the raw Epic Link key so grouping still works meaningfully
@@ -255,7 +254,7 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
             .fillna(merged.get("Epic Link"))
             .fillna("No Epic")
         )
-        
+
         epic_dist = merged["Epic Name"].value_counts()
         logger.info(f"Epic distribution after merge: {epic_dist.to_dict()}")
 

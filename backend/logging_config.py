@@ -2,11 +2,12 @@
 
 import logging
 import logging.config
+import re
 import sys
 import uuid
-import re
-from pythonjsonlogger import jsonlogger
 from contextvars import ContextVar
+
+from pythonjsonlogger import jsonlogger
 
 # Context variable to store correlation ID per request
 correlation_id_var: ContextVar[str] = ContextVar("correlation_id", default="")
@@ -23,7 +24,7 @@ class CorrelationIdFilter(logging.Filter):
 
 class SafeJsonFormatter(jsonlogger.JsonFormatter):
     """Safe JSON formatter that handles format string mismatches and masks secrets."""
-    
+
     # Patterns to match and mask secrets in formatted output
     SECRET_PATTERNS = [
         (r'password["\']?\s*[:=]\s*["\']?([^"\'\\s,}]+)', 'password=***'),
@@ -43,11 +44,11 @@ class SafeJsonFormatter(jsonlogger.JsonFormatter):
                 record.msg = record.getMessage()
                 record.args = ()
             msg = super().format(record)
-            
+
             # Apply secret masking to the formatted output
             for pattern, replacement in self.SECRET_PATTERNS:
                 msg = re.sub(pattern, replacement, msg, flags=re.IGNORECASE)
-            
+
             return msg
         except (TypeError, ValueError):
             # Fall back to basic formatting if JSON formatting fails
@@ -64,7 +65,7 @@ def setup_logging() -> None:
     # These loggers may have format strings that don't play well with JSON formatting
     for logger_name in ["httpx", "httpcore", "urllib3"]:
         logging.getLogger(logger_name).setLevel(logging.WARNING)
-    
+
     # Remove existing handlers from root logger
     root_logger = logging.getLogger()
     for handler in root_logger.handlers[:]:
@@ -72,21 +73,21 @@ def setup_logging() -> None:
 
     # Create stream handler with safe JSON formatter
     handler = logging.StreamHandler(sys.stdout)
-    
+
     # Use safe JSON formatter
     formatter = SafeJsonFormatter(
         fmt="%(timestamp)s %(level)s %(name)s %(correlation_id)s %(message)s",
         timestamp=True,
     )
     handler.setFormatter(formatter)
-    
+
     # Add correlation ID filter
     handler.addFilter(CorrelationIdFilter())
-    
+
     # Configure root logger
     root_logger.addHandler(handler)
     root_logger.setLevel(logging.INFO)
-    
+
     # Set specific loggers
     logging.getLogger("uvicorn").setLevel(logging.INFO)
     logging.getLogger("uvicorn.access").setLevel(logging.INFO)

@@ -1,15 +1,15 @@
 """Edge case tests for Anansi API - covers boundary conditions, error handling, and resilience."""
 
-import pytest
 import io
-import json
 import threading
-import time
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch
+
+import pytest
 from fastapi.testclient import TestClient
-from backend.services import data_service
+
 from backend import database
+from backend.services import data_service
 
 
 class TestEmptyResults:
@@ -28,11 +28,11 @@ class TestEmptyResults:
                 "input_mode": "jira",
             }
         )
-        
-        with patch("backend.services.data_service.load_data_task") as mock_task:
+
+        with patch("backend.services.data_service.load_data_task"):
             with patch("backend.reader.jira.validate_auth_config"):
                 response = client.post("/api/data/load")
-        
+
         assert response.status_code == 200
         assert "dataset_id" in response.json()
 
@@ -40,29 +40,29 @@ class TestEmptyResults:
         """POST /api/data/upload-csv with empty CSV file (only headers)."""
         csv_content = b"Key,Summary,Status\n"
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         with patch("backend.reader.csv.read_from_string") as mock_read:
             import pandas as pd
             mock_read.return_value = pd.DataFrame(columns=["Key", "Summary", "Status"])
             response = client.post("/api/data/upload-csv", files=files)
-        
+
         assert response.status_code == 200
 
     def test_charts_with_empty_dataframe(self, client: TestClient, db_temp):
         """GET /api/charts/{dataset_id} with empty but ready dataset."""
         import pandas as pd
-        
+
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "empty_hash", "jira")
         data_service.update_dataset_status(conn, dataset_id, "ready")
         empty_df = pd.DataFrame()
         data_service.save_dataframe(conn, dataset_id, empty_df)
         conn.close()
-        
+
         with patch("backend.services.backlog_cache.get_dashboard_response") as mock_charts:
             mock_charts.return_value = {"charts": []}
             response = client.get(f"/api/charts/{dataset_id}")
-        
+
         assert response.status_code == 200
 
 
@@ -82,30 +82,30 @@ class TestMalformedInputs:
                 "input_mode": "jira",
             }
         )
-        
-        with patch("backend.services.data_service.load_data_task") as mock_task:
+
+        with patch("backend.services.data_service.load_data_task"):
             with patch("backend.reader.jira.validate_auth_config"):
                 response = client.post("/api/data/load")
-        
+
         assert response.status_code == 200  # Still creates dataset, error happens in background
 
     def test_upload_csv_missing_required_columns(self, client: TestClient):
         """POST /api/data/upload-csv with CSV missing expected columns."""
         csv_content = b"WrongColumn1,WrongColumn2\nvalue1,value2"
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         with patch("backend.reader.csv.read_from_string") as mock_read:
             import pandas as pd
             mock_read.return_value = pd.DataFrame({"WrongColumn1": ["value1"], "WrongColumn2": ["value2"]})
             response = client.post("/api/data/upload-csv", files=files)
-        
+
         assert response.status_code == 200
 
     def test_upload_csv_corrupted_encoding(self, client: TestClient):
         """POST /api/data/upload-csv with non-UTF8 encoded file."""
         csv_content = b"\xFF\xFEKey,Summary"  # UTF-16LE BOM
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         response = client.post("/api/data/upload-csv", files=files)
         assert response.status_code == 400
 
@@ -113,7 +113,7 @@ class TestMalformedInputs:
         """POST /api/data/upload-csv with special/unicode characters."""
         csv_content = "Key,Summary,Status\nTEST-1,Issue with émojis 🚀,Done\nTEST-2,中文测试,In Progress".encode('utf-8')
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         with patch("backend.reader.csv.read_from_string") as mock_read:
             import pandas as pd
             df = pd.DataFrame({
@@ -123,7 +123,7 @@ class TestMalformedInputs:
             })
             mock_read.return_value = df
             response = client.post("/api/data/upload-csv", files=files)
-        
+
         assert response.status_code == 200
 
     def test_put_config_with_extremely_long_values(self, client: TestClient):
@@ -140,12 +140,12 @@ class TestMalformedInputs:
         """POST /api/data/upload-csv with CSV file missing trailing newline."""
         csv_content = b"Key,Summary\nTEST-1,Issue"  # No trailing newline
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         with patch("backend.reader.csv.read_from_string") as mock_read:
             import pandas as pd
             mock_read.return_value = pd.DataFrame({"Key": ["TEST-1"], "Summary": ["Issue"]})
             response = client.post("/api/data/upload-csv", files=files)
-        
+
         assert response.status_code == 200
 
 
@@ -165,14 +165,14 @@ class TestNetworkErrors:
                 "input_mode": "jira",
             }
         )
-        
-        with patch("backend.services.data_service.load_data_task") as mock_task:
+
+        with patch("backend.services.data_service.load_data_task"):
             with patch("backend.reader.jira.validate_auth_config"):
                 response = client.post("/api/data/load")
-        
+
         assert response.status_code == 200
         dataset_id = response.json()["dataset_id"]
-        
+
         # Simulate timeout in background task
         conn = database.get_db(db_temp)
         data_service.update_dataset_status(
@@ -180,7 +180,7 @@ class TestNetworkErrors:
             error="Connection timeout after 30 seconds"
         )
         conn.close()
-        
+
         status_response = client.get(f"/api/data/{dataset_id}/status")
         assert status_response.status_code == 200
         assert status_response.json()["status"] == "failed"
@@ -198,11 +198,11 @@ class TestNetworkErrors:
                 "input_mode": "jira",
             }
         )
-        
+
         with patch("backend.services.data_service.load_data_task"):
             with patch("backend.reader.jira.validate_auth_config"):
                 response = client.post("/api/data/load")
-        
+
         assert response.status_code == 200
 
 
@@ -213,7 +213,7 @@ class TestDatabaseErrors:
         """GET /api/config when database is locked."""
         conn = database.get_db(db_temp)
         conn.execute("BEGIN EXCLUSIVE")  # Lock the database
-        
+
         try:
             # Try to read config - should wait or timeout
             response = client.get("/api/config")
@@ -225,12 +225,11 @@ class TestDatabaseErrors:
 
     def test_dataset_status_with_corrupted_data(self, client: TestClient, db_temp):
         """GET /api/data/{dataset_id}/status with corrupted dataset record."""
-        import sqlite3
         from fastapi.exceptions import ResponseValidationError
-        
+
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "test_hash", "jira")
-        
+
         # Manually corrupt the progress data
         conn.execute(
             "UPDATE datasets SET progress_total = -1, progress_loaded = -999 WHERE id = ?",
@@ -238,7 +237,7 @@ class TestDatabaseErrors:
         )
         conn.commit()
         conn.close()
-        
+
         # Pydantic response model has ge=0 on progress fields; negative values
         # cause ResponseValidationError (TestClient raises it with default settings)
         with pytest.raises(ResponseValidationError):
@@ -250,17 +249,16 @@ class TestConcurrentOperations:
 
     def test_concurrent_chart_requests(self, client: TestClient, db_temp, sample_dataframe):
         """GET /api/charts/{dataset_id} from multiple threads simultaneously."""
-        import pandas as pd
-        
+
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "concurrent_hash", "jira")
         data_service.update_dataset_status(conn, dataset_id, "ready")
         data_service.save_dataframe(conn, dataset_id, sample_dataframe)
         conn.close()
-        
+
         results = []
         errors = []
-        
+
         def make_request():
             try:
                 with patch("backend.services.backlog_cache.get_dashboard_response") as mock:
@@ -269,14 +267,14 @@ class TestConcurrentOperations:
                     results.append(resp.status_code)
             except Exception as e:
                 errors.append(str(e))
-        
+
         # Create 5 concurrent requests
         threads = [threading.Thread(target=make_request) for _ in range(5)]
         for t in threads:
             t.start()
         for t in threads:
             t.join()
-        
+
         # All requests should succeed
         assert len(errors) == 0, f"Errors occurred: {errors}"
         assert all(code == 200 for code in results)
@@ -285,7 +283,7 @@ class TestConcurrentOperations:
         """PUT /api/config from multiple threads simultaneously."""
         results = []
         errors = []
-        
+
         def update_config(value):
             try:
                 resp = client.put(
@@ -295,14 +293,14 @@ class TestConcurrentOperations:
                 results.append(resp.status_code)
             except Exception as e:
                 errors.append(str(e))
-        
+
         # Create 5 concurrent update requests
         threads = [threading.Thread(target=update_config, args=(i,)) for i in range(5)]
         for t in threads:
             t.start()
         for t in threads:
             t.join()
-        
+
         # All updates should succeed
         assert len(errors) == 0
         assert all(code == 200 for code in results)
@@ -319,9 +317,9 @@ class TestLargeDatasets:
         for i in range(1000):
             rows.append(f"TEST-{i},Issue {i},Done,2024-01-01")
         csv_content = "\n".join(rows).encode('utf-8')
-        
+
         files = {"file": ("large.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         with patch("backend.reader.csv.read_from_string") as mock_read:
             import pandas as pd
             data = {
@@ -332,13 +330,13 @@ class TestLargeDatasets:
             }
             mock_read.return_value = pd.DataFrame(data)
             response = client.post("/api/data/upload-csv", files=files)
-        
+
         assert response.status_code == 200
 
     def test_charts_rendering_with_large_dataframe(self, client: TestClient, db_temp):
         """GET /api/charts/{dataset_id} with large dataset (1000+ rows)."""
         import pandas as pd
-        
+
         # Create large dataframe
         base_date = datetime(2024, 1, 1)
         large_df = pd.DataFrame({
@@ -353,17 +351,17 @@ class TestLargeDatasets:
             "Story Points": [5.0] * 1000,
             "Epic Link": ["EPIC-1"] * 1000,
         })
-        
+
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "large_hash", "jira")
         data_service.update_dataset_status(conn, dataset_id, "ready")
         data_service.save_dataframe(conn, dataset_id, large_df)
         conn.close()
-        
+
         with patch("backend.services.backlog_cache.get_dashboard_response") as mock_charts:
             mock_charts.return_value = {"charts": [{"name": "test", "data": []}]}
             response = client.get(f"/api/charts/{dataset_id}")
-        
+
         assert response.status_code == 200
 
 
@@ -412,7 +410,7 @@ class TestNullOptionalFields:
     def test_jira_issue_without_story_points(self, client: TestClient, db_temp):
         """Loading Jira data where some issues lack story points."""
         import pandas as pd
-        
+
         df = pd.DataFrame({
             "Key": ["TEST-1", "TEST-2"],
             "Summary": ["Issue with SP", "Issue without SP"],
@@ -425,13 +423,13 @@ class TestNullOptionalFields:
             "Story Points": [5.0, None],  # Second issue has no SP
             "Epic Link": ["EPIC-1", None],
         })
-        
+
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "null_sp_hash", "jira")
         data_service.update_dataset_status(conn, dataset_id, "ready")
         data_service.save_dataframe(conn, dataset_id, df)
         conn.close()
-        
+
         response = client.get(f"/api/data/{dataset_id}/status")
         assert response.status_code == 200
 
@@ -442,10 +440,10 @@ TEST-1,Issue 1,Done,5,EPIC-1
 TEST-2,Issue 2,In Progress,,
 TEST-3,Issue 3,Backlog,3,"""
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         with patch("backend.reader.csv.read_from_string") as mock_read:
-            import pandas as pd
             import numpy as np
+            import pandas as pd
             df = pd.DataFrame({
                 "Key": ["TEST-1", "TEST-2", "TEST-3"],
                 "Summary": ["Issue 1", "Issue 2", "Issue 3"],
@@ -455,7 +453,7 @@ TEST-3,Issue 3,Backlog,3,"""
             })
             mock_read.return_value = df
             response = client.post("/api/data/upload-csv", files=files)
-        
+
         assert response.status_code == 200
 
 
@@ -475,7 +473,7 @@ class TestAuthenticationErrors:
                 "input_mode": "jira",
             }
         )
-        
+
         response = client.post("/api/data/load")
         assert response.status_code == 400
 
@@ -491,7 +489,7 @@ class TestAuthenticationErrors:
                 "input_mode": "jira",
             }
         )
-        
+
         response = client.post("/api/data/load")
         assert response.status_code == 400
 
@@ -507,7 +505,7 @@ class TestAuthenticationErrors:
                 "input_mode": "jira",
             }
         )
-        
+
         response = client.post("/api/data/load")
         assert response.status_code == 400
 
@@ -546,11 +544,11 @@ class TestBoundaryConditions:
         """GET /api/data/{dataset_id}/status with progress at boundaries."""
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "progress_hash", "jira")
-        
+
         # Set progress to 0/0
         data_service.update_dataset_progress(conn, dataset_id, 0, 0)
         conn.close()
-        
+
         response = client.get(f"/api/data/{dataset_id}/status")
         assert response.status_code == 200
         data = response.json()
@@ -561,11 +559,11 @@ class TestBoundaryConditions:
         """GET /api/data/{dataset_id}/status with progress at 100%."""
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "complete_hash", "jira")
-        
+
         # Set progress to 1000/1000
         data_service.update_dataset_progress(conn, dataset_id, 1000, 1000)
         conn.close()
-        
+
         response = client.get(f"/api/data/{dataset_id}/status")
         assert response.status_code == 200
         data = response.json()
@@ -620,7 +618,7 @@ TEST-1,Issue 1,2024-01-01
 TEST-2,Issue 2,01/01/2024
 TEST-3,Issue 3,2024-01-01T00:00:00Z"""
         files = {"file": ("test.csv", io.BytesIO(csv_content), "text/csv")}
-        
+
         with patch("backend.reader.csv.read_from_string") as mock_read:
             import pandas as pd
             mock_read.return_value = pd.DataFrame({
@@ -629,7 +627,7 @@ TEST-3,Issue 3,2024-01-01T00:00:00Z"""
                 "Created": pd.to_datetime(["2024-01-01", "2024-01-01", "2024-01-01"])
             })
             response = client.post("/api/data/upload-csv", files=files)
-        
+
         assert response.status_code == 200
 
 
@@ -639,18 +637,18 @@ class TestErrorRecovery:
     def test_trends_with_missing_data_columns(self, client: TestClient, db_temp):
         """GET /api/trends/{dataset_id} with dataframe missing required columns."""
         import pandas as pd
-        
+
         minimal_df = pd.DataFrame({
             "Key": ["TEST-1", "TEST-2"],
             "Status": ["Done", "In Progress"]
         })
-        
+
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "minimal_hash", "jira")
         data_service.update_dataset_status(conn, dataset_id, "ready")
         data_service.save_dataframe(conn, dataset_id, minimal_df)
         conn.close()
-        
+
         with patch("backend.services.backlog_cache.get_trends_response") as mock_trends:
             mock_trends.return_value = {
                 "cumulative_flow": {},
@@ -658,27 +656,27 @@ class TestErrorRecovery:
                 "epic_progress": {},
             }
             response = client.get(f"/api/trends/{dataset_id}")
-        
+
         assert response.status_code == 200
 
     def test_insights_with_minimal_data(self, client: TestClient, db_temp):
         """GET /api/insights/{dataset_id} with minimal dataset."""
         import pandas as pd
-        
+
         minimal_df = pd.DataFrame({
             "Key": ["TEST-1"],
             "Status": ["Done"],
             "Created": [datetime.now()]
         })
-        
+
         conn = database.get_db(db_temp)
         dataset_id = data_service.create_dataset(conn, "insight_min_hash", "jira")
         data_service.update_dataset_status(conn, dataset_id, "ready")
         data_service.save_dataframe(conn, dataset_id, minimal_df)
         conn.close()
-        
+
         with patch("backend.services.backlog_cache.get_insights_response") as mock_insights:
             mock_insights.return_value = {"insights": []}
             response = client.get(f"/api/insights/{dataset_id}")
-        
+
         assert response.status_code in [200, 404, 500]  # Might fail, but shouldn't crash
