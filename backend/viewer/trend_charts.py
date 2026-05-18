@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 
 from .backlog_data import BacklogData
 from .chart_config import ANANSI_COLORS
+from .chart_helpers import _fig_to_dict
 
 
 class TrendChartsMixin:
@@ -19,11 +20,11 @@ class TrendChartsMixin:
     def draw_cumulative_flow(self) -> str:
         df = self.treemap_data
         if "Created" not in df.columns:
-            return go.Figure(layout={"title": "cumulative_flow unavailable: No Created date column"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "cumulative_flow unavailable: No Created date column"}))
 
         created = pd.to_datetime(df["Created"], errors="coerce").dropna()
         if created.empty:
-            return go.Figure(layout={"title": "cumulative_flow unavailable: No date data"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "cumulative_flow unavailable: No date data"}))
 
         done_dates = (
             pd.to_datetime(self._done_df[self.done_step], errors="coerce").dropna()
@@ -62,11 +63,11 @@ class TrendChartsMixin:
             xaxis={"tickformat": "%b %Y", "tickangle": -30},
             yaxis={"title": "Cumulative items"},
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_monthly_throughput(self) -> str:
         if self._done_df.empty:
-            return go.Figure(layout={"title": "monthly_throughput unavailable: No completed items"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "monthly_throughput unavailable: No completed items"}))
         done_dates = self._done_df[self.done_step].dropna()
         monthly = done_dates.dt.to_period("M").value_counts().sort_index()
         xs = [str(p) for p in monthly.index]
@@ -88,11 +89,11 @@ class TrendChartsMixin:
             xaxis={"type": "category", "tickangle": -30},
             yaxis={"title": "Items completed"},
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_epic_progress(self) -> str:
         if self._done_df.empty:
-            return go.Figure(layout={"title": "epic_progress unavailable: No completed items"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "epic_progress unavailable: No completed items"}))
         done_col = self.done_step
         done_data = self._done_df
         epic_groups = done_data.groupby("Epic Name")[done_col]
@@ -101,7 +102,7 @@ class TrendChartsMixin:
         epic_count = done_data.groupby("Epic Name").size()
         epics = sorted(set(epic_first.index) & set(epic_last.index))
         if not epics:
-            return go.Figure(layout={"title": "epic_progress unavailable: No completed items"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "epic_progress unavailable: No completed items"}))
         epic_df = pd.DataFrame(
             [
                 {"Epic": e, "Start": epic_first[e], "End": epic_last[e], "Count": int(epic_count.get(e, 1))}
@@ -112,4 +113,4 @@ class TrendChartsMixin:
             epic_df, x_start="Start", x_end="End", y="Epic", color="Epic", color_discrete_sequence=ANANSI_COLORS
         )
         fig.update_layout(showlegend=False, yaxis={"automargin": True})
-        return fig.to_json()
+        return _fig_to_dict(fig)

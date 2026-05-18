@@ -12,7 +12,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from .chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap
-from .chart_helpers import _create_empty_state_figure
+from .chart_helpers import _create_empty_state_figure, _fig_to_dict
 
 
 class BacklogChartsMixin:
@@ -22,7 +22,7 @@ class BacklogChartsMixin:
         """Treemap of completed work only, coloured by Epic."""
         done_data = self._done_df
         if done_data.empty:
-            return go.Figure(layout={"title": f"No completed items — need '{self.done_step}' dates"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": f"No completed items — need '{self.done_step}' dates"}))
 
         done_data = done_data.assign(Count=1)
 
@@ -42,12 +42,12 @@ class BacklogChartsMixin:
             marker_line_width=2,
             marker_line_color="#F9F9F7",
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_treemap_all(self) -> str:
         """Treemap of all work, coloured by normalized status bucket."""
         if self.treemap_data.empty:
-            return go.Figure(layout={"title": "No data available"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "No data available"}))
         df = self.treemap_data.assign(
             Count=1,
             Progress=self.treemap_data["Status"].apply(self._normalize_status),
@@ -73,7 +73,7 @@ class BacklogChartsMixin:
             marker_line_width=2,
             marker_line_color="#F9F9F7",
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_distribution(self) -> str:
         date_cols = [c for c in [self.done_step, self.in_progress_step] if c in self.treemap_data.columns]
@@ -92,12 +92,12 @@ class BacklogChartsMixin:
             color_discrete_map=color_map,
             title=f"{self.done_step} and {self.in_progress_step} dates",
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_issues_histogram(self, date_column: str) -> str:
         df = self.treemap_data.dropna(subset=[date_column])
         if df.empty:
-            return go.Figure(layout={"title": f"No data for {date_column}"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": f"No data for {date_column}"}))
         fig = px.histogram(
             df,
             x=date_column,
@@ -105,17 +105,17 @@ class BacklogChartsMixin:
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_story_points(self) -> str:
         sp_col = "Story Points"
         if sp_col not in self.treemap_data.columns:
-            return go.Figure(layout={"title": "story_points unavailable: Story Points column missing"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "story_points unavailable: Story Points column missing"}))
         df = self.treemap_data.copy()
         df[sp_col] = pd.to_numeric(df[sp_col], errors="coerce").fillna(0)
         agg = df.groupby("Epic Name", as_index=False)[sp_col].sum()
         if agg[sp_col].sum() == 0:
-            return go.Figure(layout={"title": "story_points unavailable: No story points data"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "story_points unavailable: No story points data"}))
 
         agg_dict = agg.to_dict(orient="records")
         fig = go.Figure()
@@ -134,7 +134,7 @@ class BacklogChartsMixin:
             xaxis=dict(type="category", tickangle=-30, automargin=True, showticklabels=False),
             barmode="relative",
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_type_issue(self) -> str:
         fig = px.histogram(
@@ -144,11 +144,11 @@ class BacklogChartsMixin:
             color="Epic Name",
             color_discrete_sequence=ANANSI_COLORS,
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_timeline_size(self) -> str:
         if self._done_df.empty:
-            return go.Figure(layout={"title": f"No data — No issues have {self.done_step} date assigned"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": f"No data — No issues have {self.done_step} date assigned"}))
 
         done_data = self._done_df.copy()
         min_ct = float(done_data["Cycle Time"].min())
@@ -186,7 +186,7 @@ class BacklogChartsMixin:
             trace.hovertemplate = hover
             trace.marker.size = [_scale(ct) for ct in epic_ct]
 
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_aging_heatmap(self) -> str:
         """Heatmap of active backlog items by age and epic."""
@@ -196,7 +196,7 @@ class BacklogChartsMixin:
             return _create_empty_state_figure("No active backlog items - everything has reached Done status")
 
         if "Created" not in active_df.columns:
-            return go.Figure(layout={"title": "aging_heatmap unavailable: No Created date"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "aging_heatmap unavailable: No Created date"}))
 
         today = pd.Timestamp(datetime.now().date())
         created = pd.to_datetime(active_df["Created"], errors="coerce")
@@ -250,7 +250,7 @@ class BacklogChartsMixin:
             height=height,
             showlegend=False,
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_epic_investment(self) -> str:
         """Side-by-side treemaps: epic scope by item count vs story points."""
@@ -319,7 +319,7 @@ class BacklogChartsMixin:
                 font=dict(size=12, color="#2C3E50"),
             )
             fig.update_layout(height=340, margin=dict(t=40, r=16, b=60, l=16))
-            return fig.to_json()
+            return _fig_to_dict(fig)
 
         fig = go.Figure()
         fig.add_trace(
@@ -369,4 +369,4 @@ class BacklogChartsMixin:
             font=dict(size=12, color="#2C3E50"),
         )
         fig.update_layout(height=340, margin=dict(t=40, r=16, b=8, l=16), showlegend=False)
-        return fig.to_json()
+        return _fig_to_dict(fig)

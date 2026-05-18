@@ -89,8 +89,15 @@ def load_dataframe(db: sqlite3.Connection, dataset_id: str) -> DataFrame:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors="coerce")
 
+    # Only attempt datetime heuristic on columns whose names suggest date/time values
+    _DATE_HINTS = {"date", "time", "created", "updated", "resolved", "started", "ended"}
     for col in df.columns:
+        if col in datetime_cols:
+            continue  # already handled above
         if df[col].dtype == object:
+            col_lower = col.lower()
+            if not any(hint in col_lower for hint in _DATE_HINTS):
+                continue
             try:
                 import warnings
 

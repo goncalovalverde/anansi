@@ -6,12 +6,19 @@ Responsibilities:
 Depends on: plotly, viewer.chart_config. Does not import pandas or backlog logic.
 """
 
+import json
+
 import plotly.graph_objects as go
 
 from .chart_config import ChartConfig
 
 
-def create_empty_state_figure(message: str, height: int = ChartConfig.EMPTY_STATE_HEIGHT) -> str:
+def _fig_to_dict(fig) -> dict:
+    """Convert a Plotly figure to a JSON-safe dict without an intermediate string round-trip."""
+    return json.loads(fig.to_json())
+
+
+def create_empty_state_figure(message: str, height: int = ChartConfig.EMPTY_STATE_HEIGHT) -> dict:
     """Create a standardized empty state figure with a centered message.
 
     Used by chart methods when there is no data to display, so every empty
@@ -22,7 +29,7 @@ def create_empty_state_figure(message: str, height: int = ChartConfig.EMPTY_STAT
         height: Figure height in pixels.
 
     Returns:
-        JSON string of a Plotly figure ready for ``Plotly.react``.
+        Dict representation of a Plotly figure ready for ``Plotly.react``.
     """
     fig = go.Figure()
     fig.add_annotation(
@@ -42,7 +49,7 @@ def create_empty_state_figure(message: str, height: int = ChartConfig.EMPTY_STAT
         yaxis={"visible": False},
         height=height,
     )
-    return fig.to_json()
+    return _fig_to_dict(fig)
 
 
 # Private alias keeps existing internal call sites in backlog.py working without

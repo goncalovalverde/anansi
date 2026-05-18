@@ -10,7 +10,7 @@ import plotly.graph_objects as go
 
 from .backlog_data import BacklogData
 from .chart_config import ANANSI_COLORS, ChartConfig
-from .chart_helpers import _create_empty_state_figure
+from .chart_helpers import _create_empty_state_figure, _fig_to_dict
 
 
 class FlowChartsMixin:
@@ -22,12 +22,12 @@ class FlowChartsMixin:
         in_prog_col = self.in_progress_step
 
         if done_col not in df.columns or "Cycle Time" not in df.columns:
-            return go.Figure(layout={"title": "flow_efficiency unavailable: No done date column"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "flow_efficiency unavailable: No done date column"}))
 
         done_mask = df[done_col].notna()
         done_count = int(done_mask.sum())
         if done_count == 0:
-            return go.Figure(layout={"title": "flow_efficiency unavailable: No completed items"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "flow_efficiency unavailable: No completed items"}))
 
         current_wip = 0
         if in_prog_col in df.columns:
@@ -57,7 +57,7 @@ class FlowChartsMixin:
                 },
             )
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_wip_trend(self) -> str:
         df = self.treemap_data
@@ -75,12 +75,12 @@ class FlowChartsMixin:
             entry_dates = df["Created"]
             using_fallback = True
         else:
-            return go.Figure(layout={"title": "wip_trend unavailable: No date data"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "wip_trend unavailable: No date data"}))
 
         wip = BacklogData.build_event_wip(entry_dates, done_series)
 
         if wip.empty:
-            return go.Figure(layout={"title": "wip_trend unavailable: No in-progress data"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "wip_trend unavailable: No in-progress data"}))
 
         wip_df = pd.DataFrame({"week": wip.index, "wip": wip.values})
 
@@ -98,14 +98,14 @@ class FlowChartsMixin:
             )
         )
         fig.update_layout(xaxis={"title": "Week"}, yaxis={"title": y_title})
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_throughput(self) -> str:
         if self._done_df.empty:
-            return go.Figure(layout={"title": "throughput unavailable: No completed items"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "throughput unavailable: No completed items"}))
         weekly = BacklogData.build_weekly_counts(self._done_df[self.done_step])
         if weekly.empty:
-            return go.Figure(layout={"title": "throughput unavailable: No completed items"}).to_json()
+            return _fig_to_dict(go.Figure(layout={"title": "throughput unavailable: No completed items"}))
         weeks = [str(p.start_time.date()) for p in weekly.index]
         counts = weekly.values.tolist()
         rolling = pd.Series(counts).rolling(4, min_periods=1).mean().round(1).tolist()
@@ -121,7 +121,7 @@ class FlowChartsMixin:
             )
         )
         fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
-        return fig.to_json()
+        return _fig_to_dict(fig)
 
     def draw_throughput_histogram(self) -> str:
         """Weekly throughput histogram with rolling average and color coding."""
@@ -189,4 +189,4 @@ class FlowChartsMixin:
             showlegend=True,
             hovermode="x unified",
         )
-        return fig.to_json()
+        return _fig_to_dict(fig)

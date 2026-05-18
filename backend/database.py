@@ -76,6 +76,9 @@ def init_db(db_path: str = DB_PATH) -> None:
                 PRIMARY KEY (dataset_id, row_index),
                 FOREIGN KEY (dataset_id) REFERENCES datasets(id) ON DELETE CASCADE
             );
+
+            CREATE INDEX IF NOT EXISTS idx_datasets_config_status
+                ON datasets(config_hash, status, created_at DESC);
             """
         )
 

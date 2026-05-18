@@ -1,15 +1,11 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import DashboardView from '@/views/DashboardView.vue'
-import ConfigView from '@/views/ConfigView.vue'
-import FlowView from '@/views/FlowView.vue'
-import TrendsView from '@/views/TrendsView.vue'
 
 export default createRouter({
   history: createWebHashHistory(),
   routes: [
-    { path: '/', component: DashboardView },
-    { path: '/config', component: ConfigView },
-    { path: '/flow', component: FlowView },
-    { path: '/trends', component: TrendsView },
+    { path: '/', component: () => import('@/views/DashboardView.vue') },
+    { path: '/config', component: () => import('@/views/ConfigView.vue') },
+    { path: '/flow', component: () => import('@/views/FlowView.vue') },
+    { path: '/trends', component: () => import('@/views/TrendsView.vue') },
   ],
 })

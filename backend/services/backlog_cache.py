@@ -22,6 +22,7 @@ but short enough that a manual data reload is always reflected quickly.
 Explicit invalidation is also called after every data load.
 """
 
+import json
 import logging
 import sqlite3
 import threading
@@ -54,8 +55,6 @@ def _is_fresh(key: str) -> bool:
 
 
 def _config_signature(config: dict) -> str:
-    import json
-
     return json.dumps(config, sort_keys=True, default=str)
 
 

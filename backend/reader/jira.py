@@ -99,8 +99,10 @@ class Jira:
         if self.jira_config.get("epic_link_field"):
             fields_to_request.append(self.jira_config["epic_link_field"])
 
-        # Request all custom fields as fallback
-        fields_str = ",".join(fields_to_request) + ",customfield_*"
+        # Only request the specific custom fields that are configured — avoid
+        # the expensive customfield_* wildcard which forces Jira to resolve and
+        # return every custom field on every issue.
+        fields_str = ",".join(fields_to_request)
         logger.info(f"Requesting fields: {fields_str}")
 
         while True:

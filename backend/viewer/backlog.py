@@ -1,4 +1,3 @@
-import json
 import logging
 
 import pandas as pd
@@ -8,6 +7,7 @@ from .backlog_charts import BacklogChartsMixin
 from .backlog_data import BacklogData
 from .backlog_insights import BacklogInsightsMixin
 from .chart_config import ANANSI_COLORS, ChartConfig, EpicColorMap  # re-exported for callers  # noqa: F401
+from .chart_helpers import _fig_to_dict
 from .chart_helpers import _create_empty_state_figure  # re-exported for callers  # noqa: F401
 from .flow_charts import FlowChartsMixin
 from .trend_charts import TrendChartsMixin
@@ -63,7 +63,6 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
                 self.in_progress_step = fallback
 
         self.link_ref = '<a href="{}browse/{}" style="cursor:pointer" target="_blank" rel="noopener noreferrer">{}</a>'
-        self.raw_data = cycle_data.copy()  # Store raw unfiltered data for charts like issues_by_status
         self.treemap_data = self.get_treemap_data(cycle_data)
         self.treemap_data = self.calculate_cycle_time(self.treemap_data)
 
@@ -131,10 +130,10 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         results = {}
         for name, method in chart_methods.items():
             try:
-                results[name] = json.loads(method())
+                results[name] = method()
             except Exception as exc:
                 logger.exception("Chart '%s' failed: %s", name, exc)
-                results[name] = json.loads(go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json())
+                results[name] = _fig_to_dict(go.Figure(layout={"title": f"{name} unavailable: {exc}"}))
         return results
 
     def get_flow_charts(self) -> dict:
@@ -149,10 +148,10 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         results = {}
         for name, method in flow_methods.items():
             try:
-                results[name] = json.loads(method())
+                results[name] = method()
             except Exception as exc:
                 logger.error("Chart '%s' failed: %s", name, exc, exc_info=True)
-                results[name] = json.loads(go.Figure(layout={"title": f"{name} unavailable"}).to_json())
+                results[name] = _fig_to_dict(go.Figure(layout={"title": f"{name} unavailable"}))
         return results
 
     def get_kpis(self) -> dict:
@@ -215,7 +214,7 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
             # Remove "Total" (it's just a label) and filter to the rest
             filtered_types = [t for t in configured_types if t != "Total"]
             if filtered_types:
-                df = df[df["Type"].isin(filtered_types)].copy()
+                df = df[df["Type"].isin(filtered_types)]
                 logger.info(f"Filtered to tracked types: {filtered_types}, {len(df)} issues remaining")
 
         non_epics = df.query('Type != "Epic"')

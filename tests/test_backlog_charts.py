@@ -3,7 +3,7 @@ Comprehensive test suite for backlog chart functions.
 Tests edge cases, data validation, and performance characteristics.
 """
 
-import json
+
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
@@ -98,7 +98,7 @@ class TestEmptyStateFigureHelper:
     def test_creates_valid_plotly_figure(self):
         """Ensure helper returns valid JSON Plotly figure."""
         json_str = _create_empty_state_figure("Test message")
-        fig_dict = json.loads(json_str)
+        fig_dict = json_str
 
         assert "data" in fig_dict
         assert "layout" in fig_dict
@@ -107,7 +107,7 @@ class TestEmptyStateFigureHelper:
         """Verify message is included in annotation."""
         message = "Custom test message"
         json_str = _create_empty_state_figure(message)
-        fig_dict = json.loads(json_str)
+        fig_dict = json_str
 
         annotations = fig_dict["layout"].get("annotations", [])
         assert any(message in ann.get("text", "") for ann in annotations)
@@ -116,14 +116,14 @@ class TestEmptyStateFigureHelper:
         """Verify height parameter is applied."""
         custom_height = 500
         json_str = _create_empty_state_figure("Test", height=custom_height)
-        fig_dict = json.loads(json_str)
+        fig_dict = json_str
 
         assert fig_dict["layout"]["height"] == custom_height
 
     def test_uses_default_height(self):
         """Verify default height matches config."""
         json_str = _create_empty_state_figure("Test")
-        fig_dict = json.loads(json_str)
+        fig_dict = json_str
 
         assert fig_dict["layout"]["height"] == ChartConfig.EMPTY_STATE_HEIGHT
 
@@ -146,7 +146,7 @@ class TestBacklogAgingHeatmap:
 
         # Call the actual method
         result = Backlog.draw_aging_heatmap(mock_backlog)
-        fig = json.loads(result)
+        fig = result
 
         assert "No active backlog items" in str(fig)
 
@@ -170,7 +170,7 @@ class TestBacklogAgingHeatmap:
         mock_backlog.treemap_data = pd.DataFrame(data)
         mock_backlog._active_df = pd.DataFrame(data)
         result = Backlog.draw_aging_heatmap(mock_backlog)
-        fig = json.loads(result)
+        fig = result
 
         assert fig["data"][0]["type"] == "heatmap"
         assert len(fig["data"][0]["y"]) == 3  # 3 epics
@@ -196,7 +196,7 @@ class TestBacklogAgingHeatmap:
         mock_backlog.treemap_data = pd.DataFrame(data)
         mock_backlog._active_df = pd.DataFrame(data)
         result = Backlog.draw_aging_heatmap(mock_backlog)
-        fig = json.loads(result)
+        fig = result
 
         # Height = max(240, epics * 36 + 80)
         expected_min_height = max(240, 10 * 36 + 80)
@@ -231,7 +231,7 @@ class TestBacklogEpicInvestment:
         mock_backlog.treemap_data = pd.DataFrame(data)
 
         result = Backlog.draw_epic_investment(mock_backlog)
-        fig = json.loads(result)
+        fig = result
 
         # Should have only one treemap trace
         treemaps = [t for t in fig["data"] if t.get("type") == "treemap"]
@@ -248,7 +248,7 @@ class TestBacklogEpicInvestment:
         mock_backlog.treemap_data = pd.DataFrame(data)
 
         result = Backlog.draw_epic_investment(mock_backlog)
-        fig = json.loads(result)
+        fig = result
 
         # Should have two treemap traces
         treemaps = [t for t in fig["data"] if t.get("type") == "treemap"]
@@ -277,7 +277,7 @@ class TestBacklogThroughputHistogram:
         # _done_df is already empty from fixture
 
         result = Backlog.draw_throughput_histogram(mock_backlog)
-        assert "No completed items" in result
+        assert "No completed items" in str(result)
 
     def test_histogram_with_weekly_data(self, mock_backlog):
         """Test histogram generation with realistic weekly data."""
@@ -294,7 +294,7 @@ class TestBacklogThroughputHistogram:
         mock_backlog._done_df = df
 
         result = Backlog.draw_throughput_histogram(mock_backlog)
-        fig = json.loads(result)
+        fig = result
 
         # Should have bar and line traces
         types = [t.get("type") for t in fig["data"]]
@@ -318,7 +318,7 @@ class TestBacklogThroughputHistogram:
         mock_backlog._done_df = df
 
         result = Backlog.draw_throughput_histogram(mock_backlog)
-        fig = json.loads(result)
+        fig = result
 
         # Verify colors include multiple types
         bar_trace = next(t for t in fig["data"] if t.get("type") == "bar")
@@ -357,7 +357,7 @@ class TestPerformanceOptimizations:
         # Should execute without significant slowdown
         result = Backlog.draw_aging_heatmap(backlog)
         assert result is not None
-        assert len(json.loads(result)) > 0
+        assert len(result) > 0
 
 
 class TestEdgeCases:
@@ -377,7 +377,7 @@ class TestEdgeCases:
         backlog._active_df = df
 
         result = Backlog.draw_aging_heatmap(backlog)
-        fig = json.loads(result)
+        fig = result
 
         assert fig["data"][0]["type"] == "heatmap"
 
@@ -393,7 +393,7 @@ class TestEdgeCases:
         )
 
         result = Backlog.draw_epic_investment(backlog)
-        fig = json.loads(result)
+        fig = result
 
         treemaps = [t for t in fig["data"] if t.get("type") == "treemap"]
         assert len(treemaps) > 0
@@ -412,7 +412,7 @@ class TestEdgeCases:
         result = Backlog.draw_epic_investment(backlog)
         assert result is not None
 
-        fig = json.loads(result)
+        fig = result
         assert fig is not None
 
 
