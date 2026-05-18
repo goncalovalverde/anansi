@@ -225,7 +225,7 @@
         </section>
 
         <!-- Section 2: Workflow (revealed after connection test) -->
-        <section v-if="workflowVisible" class="config-section" id="workflow-section">
+        <section v-if="stepConnect" class="config-section" id="workflow-section">
           <h2 class="section-title">Workflow &amp; Issue Types</h2>
 
           <div class="form-section">
@@ -308,7 +308,7 @@
         </section>
 
         <!-- Section 3: Chart Thresholds -->
-        <section v-if="workflowVisible" class="config-section">
+        <section v-if="stepConnect" class="config-section">
           <div class="section-header">
             <h2 class="section-title">Chart Thresholds</h2>
             <button class="btn btn-secondary btn-sm" @click="resetThresholds">↺ Reset All to Defaults</button>
@@ -793,6 +793,7 @@ onMounted(async () => {
 
     if (workflowSteps.value.length > 0) {
       workflowVisible.value = true
+      stepConnect.value = true
       stepWorkflow.value = true
     }
 
