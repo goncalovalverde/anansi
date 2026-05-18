@@ -3,7 +3,6 @@ Comprehensive test suite for backlog chart functions.
 Tests edge cases, data validation, and performance characteristics.
 """
 
-
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 
