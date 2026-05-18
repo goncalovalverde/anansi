@@ -34,14 +34,14 @@ cd frontend-vue && npm install && npm run build && cd ..
 ./start.sh
 ```
 
-This installs Python dependencies, builds the frontend (first run only), and starts the backend on port 8000. Alternatively, run manually:
+This installs Python dependencies, builds the frontend (first run only), and starts the backend on port 9000. Alternatively, run manually:
 
 ```bash
 cd backend
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --port 9000
 ```
 
-Then open **http://localhost:8000** in your browser.
+Then open **http://localhost:9000** in your browser.
 
 > **Rebuild the frontend** after any frontend changes: `cd frontend-vue && npm run build`
 
@@ -62,8 +62,8 @@ docker run -d --name anansi -p 9000:9000 -v anansi-data:/app/data anansi:latest
 
 **Option 3: Docker Run with Host Directory**
 ```bash
-mkdir -p ./data
-docker run -d --name anansi -p 9000:9000 -v $(pwd)/data:/app/data anansi:latest
+mkdir -p ./.anansi
+docker run -d --name anansi -p 9000:9000 -v $(pwd)/anansi:/app/data anansi:latest
 ```
 
 **Option 4: From GitHub Container Registry**
@@ -84,11 +84,11 @@ See [DOCKER.md](DOCKER.md) for detailed setup, volume management, and backup pro
 
 ## Usage
 
-1. Navigate to **http://localhost:8000/#/config** and choose your data source:
+1. Navigate to **http://localhost:9000/#/config** and choose your data source:
    - **Jira**: enter your Jira URL, credentials, and JQL filter, then click **Test Connection**
    - **CSV**: drag and drop (or click to browse) a CSV file — it is processed in memory, nothing saved to disk
 2. In the **Workflow** section, arrange your board columns and select the **Cycle Time Start Step** (the step that marks when active work begins).
-3. Click **Save Configuration** then navigate to **http://localhost:8000** (Dashboard).
+3. Click **Save Configuration** then navigate to **http://localhost:9000** (Dashboard).
 4. Click **Load Data** — a progress bar shows issues fetched / total while Jira data loads.
 5. Once ready, all 8 charts are rendered on the dashboard.
 
