@@ -1,6 +1,9 @@
 name: Build & Push Docker Image (ARM64)
 
 on:
+  push:
+    branches:
+      - main
   release:
     types: [published]
 
@@ -25,6 +28,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Determine tags
+        id: tags
+        run: |
+          REGISTRY="ghcr.io/${{ github.repository_owner }}/anansi"
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tags=${REGISTRY}:stable,${REGISTRY}:${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+            echo "summary_tags=stable, ${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tags=${REGISTRY}:latest" >> "$GITHUB_OUTPUT"
+            echo "summary_tags=latest" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build and push Docker image for ARM64
         uses: docker/build-push-action@v5
         with:
@@ -32,13 +47,10 @@ jobs:
           file: ./Dockerfile
           platforms: linux/arm64
           push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/anansi:latest
-            ghcr.io/${{ github.repository_owner }}/anansi:${{ github.event.release.tag_name }}
+          tags: ${{ steps.tags.outputs.tags }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ github.event.release.tag_name }}
             org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
       - name: Image build summary
@@ -46,8 +58,8 @@ jobs:
           echo "✅ Docker Image Built Successfully"
           echo "Platform: linux/arm64 (Apple Silicon/macOS)"
           echo "Port: 9000"
-          echo "Tags: latest, ${{ github.event.release.tag_name }}"
+          echo "Tags: ${{ steps.tags.outputs.summary_tags }}"
           echo "Registry: ghcr.io/${{ github.repository_owner }}/anansi"
           echo ""
           echo "Pull command:"
-          echo "docker pull ghcr.io/${{ github.repository_owner }}/anansi:latest"
+          echo "docker pull ghcr.io/${{ github.repository_owner }}/anansi:${{ github.event_name == 'release' && 'stable' || 'latest' }}"
