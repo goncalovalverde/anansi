@@ -67,6 +67,16 @@ docker run -d --name anansi -p 9000:9000 -v $(pwd)/anansi:/app/data anansi:lates
 ```
 
 **Option 4: From GitHub Container Registry**
+
+The image is automatically built and published to GHCR on every push to `main`:
+
+```
+ghcr.io/goncalovalverde/anansi:latest
+ghcr.io/goncalovalverde/anansi:<commit-sha>
+```
+
+Platform: `linux/arm64` (Apple Silicon / ARM-based hosts)
+
 ```bash
 docker pull ghcr.io/goncalovalverde/anansi:latest
 docker run -d --name anansi -p 9000:9000 -v anansi-data:/app/data ghcr.io/goncalovalverde/anansi:latest
