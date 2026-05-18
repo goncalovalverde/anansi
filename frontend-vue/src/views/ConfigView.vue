@@ -626,7 +626,6 @@ async function testConnection() {
       ])
       allStatuses.value = statuses || []
       allIssueTypes.value = issueTypesResult.issue_types || []
-      workflowVisible.value = true
       testResultText.value = `✓ Connected — ${allStatuses.value.length} workflow statuses available`
 
       // Load project picker
@@ -640,6 +639,7 @@ async function testConnection() {
       } catch { /* silently skip */ }
 
       stepConnect.value = true
+      workflowVisible.value = true
       await nextTick()
       document.getElementById('project-fields-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     } catch {
