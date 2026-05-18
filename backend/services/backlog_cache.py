@@ -242,8 +242,6 @@ def get_trends_response(db: sqlite3.Connection, dataset_id: str, request_cache=N
     Returns:
         Dict with trend charts
     """
-    import json as json_mod
-
     import plotly.graph_objects as go
 
     from . import config_service
@@ -266,8 +264,8 @@ def get_trends_response(db: sqlite3.Connection, dataset_id: str, request_cache=N
                 raw[name] = method()
             except Exception as exc:
                 logger.exception("Trend chart '%s' failed", name)
-                raw[name] = go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json()
-        return {k: json_mod.loads(v) for k, v in raw.items()}
+                raw[name] = json.loads(go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json())
+        return raw
 
     return _get_or_build(trends_key, build, request_cache)
 
