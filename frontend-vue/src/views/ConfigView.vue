@@ -138,7 +138,7 @@
             </div>
 
             <!-- Project, fields & advanced (revealed after successful connection test) -->
-            <div v-if="stepConnect" class="form-section">
+            <div v-if="stepConnect" id="project-fields-section" class="form-section">
               <div class="form-section-title">Project &amp; Fields</div>
 
               <!-- Project picker -->
@@ -628,8 +628,6 @@ async function testConnection() {
       allIssueTypes.value = issueTypesResult.issue_types || []
       workflowVisible.value = true
       testResultText.value = `✓ Connected — ${allStatuses.value.length} workflow statuses available`
-      await nextTick()
-      document.getElementById('workflow-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
       // Load project picker
       try {
@@ -642,6 +640,8 @@ async function testConnection() {
       } catch { /* silently skip */ }
 
       stepConnect.value = true
+      await nextTick()
+      document.getElementById('project-fields-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     } catch {
       workflowVisible.value = true
       testResultText.value = '✓ Connected (could not fetch statuses)'
