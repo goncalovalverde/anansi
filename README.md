@@ -68,18 +68,31 @@ docker run -d --name anansi -p 9000:9000 -v $(pwd)/anansi:/app/data anansi:lates
 
 **Option 4: From GitHub Container Registry**
 
-The image is automatically built and published to GHCR on every push to `main`:
+Pre-built images are published to GHCR automatically:
 
-```
-ghcr.io/goncalovalverde/anansi:latest
-ghcr.io/goncalovalverde/anansi:<commit-sha>
-```
+| Tag | Description |
+|-----|-------------|
+| `latest` | Built on every push to `main` (development edge) |
+| `stable` | Always points to the most recent GitHub release |
+| `vX.Y.Z` | Pinned to a specific release version |
 
-Platform: `linux/arm64` (Apple Silicon / ARM-based hosts)
+**Registry:** `ghcr.io/goncalovalverde/anansi`
+**Platform:** `linux/arm64` (Apple Silicon / ARM-based hosts)
 
 ```bash
+# Latest development build
 docker pull ghcr.io/goncalovalverde/anansi:latest
-docker run -d --name anansi -p 9000:9000 -v anansi-data:/app/data ghcr.io/goncalovalverde/anansi:latest
+
+# Stable release (recommended for production)
+docker pull ghcr.io/goncalovalverde/anansi:stable
+
+# Specific version
+docker pull ghcr.io/goncalovalverde/anansi:v0.2.0
+```
+
+```bash
+docker volume create anansi-data
+docker run -d --name anansi -p 9000:9000 -v anansi-data:/app/data ghcr.io/goncalovalverde/anansi:stable
 ```
 
 Then open **http://localhost:9000** in your browser.
