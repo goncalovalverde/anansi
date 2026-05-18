@@ -1,9 +1,8 @@
 name: Build & Push Docker Image (ARM64)
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types: [published]
 
 jobs:
   build-and-push:
@@ -35,10 +34,11 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/anansi:latest
-            ghcr.io/${{ github.repository_owner }}/anansi:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/anansi:${{ github.event.release.tag_name }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ github.event.release.tag_name }}
             org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
       - name: Image build summary
@@ -46,7 +46,7 @@ jobs:
           echo "✅ Docker Image Built Successfully"
           echo "Platform: linux/arm64 (Apple Silicon/macOS)"
           echo "Port: 9000"
-          echo "Tags: latest, ${{ github.sha }}"
+          echo "Tags: latest, ${{ github.event.release.tag_name }}"
           echo "Registry: ghcr.io/${{ github.repository_owner }}/anansi"
           echo ""
           echo "Pull command:"
