@@ -74,12 +74,13 @@ class Backlog(BacklogInsightsMixin, BacklogChartsMixin, FlowChartsMixin, TrendCh
         self._ct_df = self.data.ct_df
 
     @staticmethod
-    def _resolve_step(df: pd.DataFrame, preferred: str, workflow: list, reversed_order: bool) -> str:
+    def _resolve_step(df: pd.DataFrame, preferred: str, workflow: list[str], reversed_order: bool) -> str:
         """Return preferred if it is a column in df, otherwise the nearest
         matching column. For done_step (reversed_order=True) common terminal
         names are tried before workflow steps so 'Done' beats 'In Review'."""
         if preferred in df.columns:
             return preferred
+        common: tuple[str, ...]
         if reversed_order:
             common = ("Done", "Resolved", "Closed", "Completed", "Complete", "Released")
         else:

@@ -18,7 +18,7 @@ from .chart_helpers import _create_empty_state_figure, _fig_to_dict
 class BacklogChartsMixin:
     """Chart methods rendered on the Dashboard and Backlog Composition views."""
 
-    def draw_treemap(self) -> str:
+    def draw_treemap(self) -> dict:
         """Treemap of completed work only, coloured by Epic."""
         done_data = self._done_df
         if done_data.empty:
@@ -44,7 +44,7 @@ class BacklogChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_treemap_all(self) -> str:
+    def draw_treemap_all(self) -> dict:
         """Treemap of all work, coloured by normalized status bucket."""
         if self.treemap_data.empty:
             return _fig_to_dict(go.Figure(layout={"title": "No data available"}))
@@ -75,7 +75,7 @@ class BacklogChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_distribution(self) -> str:
+    def draw_distribution(self) -> dict:
         date_cols = [c for c in [self.done_step, self.in_progress_step] if c in self.treemap_data.columns]
         df = self.treemap_data[["Epic Name"] + date_cols].copy()
         long = df.melt(id_vars="Epic Name", value_vars=date_cols, var_name="Stage", value_name="Date")
@@ -94,7 +94,7 @@ class BacklogChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_issues_histogram(self, date_column: str) -> str:
+    def draw_issues_histogram(self, date_column: str) -> dict:
         df = self.treemap_data.dropna(subset=[date_column])
         if df.empty:
             return _fig_to_dict(go.Figure(layout={"title": f"No data for {date_column}"}))
@@ -107,7 +107,7 @@ class BacklogChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_story_points(self) -> str:
+    def draw_story_points(self) -> dict:
         sp_col = "Story Points"
         if sp_col not in self.treemap_data.columns:
             return _fig_to_dict(go.Figure(layout={"title": "story_points unavailable: Story Points column missing"}))
@@ -136,7 +136,7 @@ class BacklogChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_type_issue(self) -> str:
+    def draw_type_issue(self) -> dict:
         fig = px.histogram(
             self.treemap_data,
             x="Type",
@@ -146,7 +146,7 @@ class BacklogChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_timeline_size(self) -> str:
+    def draw_timeline_size(self) -> dict:
         if self._done_df.empty:
             return _fig_to_dict(go.Figure(layout={"title": f"No data — No issues have {self.done_step} date assigned"}))
 
@@ -188,7 +188,7 @@ class BacklogChartsMixin:
 
         return _fig_to_dict(fig)
 
-    def draw_aging_heatmap(self) -> str:
+    def draw_aging_heatmap(self) -> dict:
         """Heatmap of active backlog items by age and epic."""
         active_df = self._active_df
 
@@ -252,7 +252,7 @@ class BacklogChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_epic_investment(self) -> str:
+    def draw_epic_investment(self) -> dict:
         """Side-by-side treemaps: epic scope by item count vs story points."""
         df = self.treemap_data
 

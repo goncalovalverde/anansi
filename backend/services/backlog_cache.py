@@ -176,7 +176,7 @@ def get_dashboard_response(db: sqlite3.Connection, dataset_id: str, request_cach
         response["callouts"] = backlog.get_callouts()
         return response
 
-    return _get_or_build(dash_key, build, request_cache)
+    return _get_or_build(dash_key, build, request_cache) # type: ignore[no-any-return]
 
 
 def get_flow_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
@@ -203,7 +203,7 @@ def get_flow_response(db: sqlite3.Connection, dataset_id: str, request_cache=Non
         response["callouts"] = backlog.get_flow_callouts()
         return response
 
-    return _get_or_build(flow_key, build, request_cache)
+    return _get_or_build(flow_key, build, request_cache) # type: ignore[no-any-return]
 
 
 def get_insights_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> list:
@@ -228,7 +228,7 @@ def get_insights_response(db: sqlite3.Connection, dataset_id: str, request_cache
         backlog = _get_or_build(backlog_key, lambda: _build_backlog(db, dataset_id, config), request_cache)
         return backlog.get_insights()
 
-    return _get_or_build(insights_key, build, request_cache)
+    return _get_or_build(insights_key, build, request_cache) # type: ignore[no-any-return]
 
 
 def get_trends_response(db: sqlite3.Connection, dataset_id: str, request_cache=None) -> dict:
@@ -267,7 +267,7 @@ def get_trends_response(db: sqlite3.Connection, dataset_id: str, request_cache=N
                 raw[name] = json.loads(go.Figure(layout={"title": f"{name} unavailable: {exc}"}).to_json())
         return raw
 
-    return _get_or_build(trends_key, build, request_cache)
+    return _get_or_build(trends_key, build, request_cache) # type: ignore[no-any-return]
 
 
 def invalidate(dataset_id: str) -> None:

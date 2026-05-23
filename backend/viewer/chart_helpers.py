@@ -13,9 +13,10 @@ import plotly.graph_objects as go
 from .chart_config import ChartConfig
 
 
-def _fig_to_dict(fig) -> dict:
+def _fig_to_dict(fig: go.Figure) -> dict:
     """Convert a Plotly figure to a JSON-safe dict without an intermediate string round-trip."""
-    return json.loads(fig.to_json())
+    result: dict = json.loads(fig.to_json())
+    return result
 
 
 def create_empty_state_figure(message: str, height: int = ChartConfig.EMPTY_STATE_HEIGHT) -> dict:

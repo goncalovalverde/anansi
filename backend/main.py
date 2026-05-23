@@ -1,7 +1,7 @@
 import logging
 import os
 import time
-from typing import Callable
+from typing import Any, Callable
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,7 +26,7 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def add_correlation_id_middleware(request: Request, call_next: Callable) -> any:
+async def add_correlation_id_middleware(request: Request, call_next: Callable) -> Any:
     """Middleware to add correlation ID to all requests."""
     # Get or create correlation ID from request header or generate new one
     correlation_id = request.headers.get("X-Correlation-ID") or request.headers.get("x-correlation-id")

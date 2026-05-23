@@ -17,7 +17,7 @@ from .chart_helpers import _fig_to_dict
 class TrendChartsMixin:
     """Chart methods rendered on the Trends view."""
 
-    def draw_cumulative_flow(self) -> str:
+    def draw_cumulative_flow(self) -> dict:
         df = self.treemap_data
         if "Created" not in df.columns:
             return _fig_to_dict(go.Figure(layout={"title": "cumulative_flow unavailable: No Created date column"}))
@@ -65,7 +65,7 @@ class TrendChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_monthly_throughput(self) -> str:
+    def draw_monthly_throughput(self) -> dict:
         if self._done_df.empty:
             return _fig_to_dict(go.Figure(layout={"title": "monthly_throughput unavailable: No completed items"}))
         done_dates = self._done_df[self.done_step].dropna()
@@ -91,7 +91,7 @@ class TrendChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_epic_progress(self) -> str:
+    def draw_epic_progress(self) -> dict:
         if self._done_df.empty:
             return _fig_to_dict(go.Figure(layout={"title": "epic_progress unavailable: No completed items"}))
         done_col = self.done_step

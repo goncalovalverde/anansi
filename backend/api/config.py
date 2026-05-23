@@ -131,7 +131,7 @@ def _merge_overrides(jira_config: dict, overrides: schemas.TestConnectionRequest
 
 @router.post("/test-connection", response_model=schemas.TestConnectionResponse)
 def test_connection(
-    body: schemas.TestConnectionRequest = None,
+    body: schemas.TestConnectionRequest | None = None,
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Test connection to Jira with current or provided config."""
@@ -161,7 +161,7 @@ def test_connection(
 
 @router.post("/jira-statuses", response_model=schemas.JiraStatusesResponse)
 def get_jira_statuses(
-    body: schemas.TestConnectionRequest = None,
+    body: schemas.TestConnectionRequest | None = None,
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Get list of available statuses from Jira instance."""
@@ -191,7 +191,7 @@ def get_jira_statuses(
 
 @router.post("/jira-projects", response_model=schemas.JiraProjectsResponse)
 def get_jira_projects(
-    body: schemas.TestConnectionRequest = None,
+    body: schemas.TestConnectionRequest | None = None,
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Return list of Jira projects accessible with current credentials."""
@@ -220,7 +220,7 @@ def get_jira_projects(
 
 @router.post("/jira-issue-types", response_model=schemas.JiraIssueTypesResponse)
 def get_jira_issue_types(
-    body: schemas.TestConnectionRequest = None,
+    body: schemas.TestConnectionRequest | None = None,
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Return all issue types available in the connected Jira instance."""
@@ -249,7 +249,7 @@ def get_jira_issue_types(
 
 @router.post("/jira-fields", response_model=schemas.JiraFieldsResponse)
 def get_jira_fields(
-    body: schemas.TestConnectionRequest = None,
+    body: schemas.TestConnectionRequest | None = None,
     db: sqlite3.Connection = Depends(get_db),
 ):
     """Return custom fields that likely map to story points or epic link."""

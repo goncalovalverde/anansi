@@ -16,7 +16,7 @@ from .chart_helpers import _create_empty_state_figure, _fig_to_dict
 class FlowChartsMixin:
     """Chart methods rendered on the Flow view."""
 
-    def draw_flow_efficiency(self) -> str:
+    def draw_flow_efficiency(self) -> dict:
         df = self.treemap_data
         done_col = self.done_step
         in_prog_col = self.in_progress_step
@@ -59,7 +59,7 @@ class FlowChartsMixin:
         )
         return _fig_to_dict(fig)
 
-    def draw_wip_trend(self) -> str:
+    def draw_wip_trend(self) -> dict:
         df = self.treemap_data
         in_prog_col = self.in_progress_step
         done_col = self.done_step
@@ -100,7 +100,7 @@ class FlowChartsMixin:
         fig.update_layout(xaxis={"title": "Week"}, yaxis={"title": y_title})
         return _fig_to_dict(fig)
 
-    def draw_throughput(self) -> str:
+    def draw_throughput(self) -> dict:
         if self._done_df.empty:
             return _fig_to_dict(go.Figure(layout={"title": "throughput unavailable: No completed items"}))
         weekly = BacklogData.build_weekly_counts(self._done_df[self.done_step])
@@ -123,7 +123,7 @@ class FlowChartsMixin:
         fig.update_layout(xaxis={"type": "category", "tickangle": -30}, yaxis={"title": "Items completed"})
         return _fig_to_dict(fig)
 
-    def draw_throughput_histogram(self) -> str:
+    def draw_throughput_histogram(self) -> dict:
         """Weekly throughput histogram with rolling average and color coding."""
         _EMPTY = "No completed items yet - data will appear once items reach Done status"
         if self._done_df.empty:

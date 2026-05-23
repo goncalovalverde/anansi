@@ -97,7 +97,7 @@ async def upload_csv(
 
     Validates file format, parses CSV, and returns cached dataset if available.
     """
-    if not file.filename.endswith(".csv"):
+    if not file.filename or not file.filename.endswith(".csv"):
         raise HTTPException(status_code=400, detail="Only .csv files are accepted")
 
     contents = await file.read()

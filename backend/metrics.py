@@ -49,7 +49,7 @@ cache_misses = Counter(
 )
 
 
-def track_metrics(endpoint: str = None):
+def track_metrics(endpoint: str | None = None):
     """Decorator to track request metrics.
 
     Args:

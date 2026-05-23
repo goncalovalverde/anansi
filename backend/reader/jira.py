@@ -86,7 +86,7 @@ class Jira:
     def get_issues(self, progress_callback=None) -> list:
         """Fetch issues using python-jira library, requesting custom fields explicitly."""
         jira = self.get_jira_instance()
-        issues = []
+        issues: list = []
         i = 0
         chunk_size = 100
 
@@ -118,7 +118,7 @@ class Jira:
                 # Debug first issue to check available attributes
                 if len(issues) == 0:
                     story_points_field = self.jira_config.get("story_points_field")
-                    sp_value = getattr(issue.fields, story_points_field, None)
+                    sp_value = getattr(issue.fields, story_points_field or "", None)
                     logger.info(
                         f"First issue {issue.key}: {story_points_field} = {sp_value} (type: {type(sp_value).__name__})"
                     )
@@ -160,7 +160,7 @@ class Jira:
         validate_auth_config(self.jira_config)
         auth_method = self.jira_config.get("auth_method", "basic")
         api_version = str(self.jira_config.get("api_version", "2"))
-        options = {"rest_api_version": api_version}
+        options: dict[str, str | bool] = {"rest_api_version": api_version}
         logger.debug("Using Jira REST API v%s", api_version)
 
         if auth_method == "pat":

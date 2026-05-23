@@ -2,16 +2,11 @@
 
 import contextvars
 import sqlite3
-from typing import Any, Optional
+from typing import Any, Callable, Generator, Optional
 
 from . import database
 
 # Request-scoped cache — automatically isolated per HTTP request
-_request_cache_var: contextvars.ContextVar[Optional[dict[str, Any]]] = contextvars.ContextVar(
-    "request_cache", default=None
-)
-
-
 class RequestCache:
     """Request-scoped cache for expensive objects during a single HTTP request.
 
@@ -35,7 +30,7 @@ class RequestCache:
         """Store a value in the request-scoped cache."""
         self._cache[key] = value
 
-    def get_or_build(self, key: str, builder: callable) -> Any:
+    def get_or_build(self, key: str, builder: Callable[[], Any]) -> Any:
         """Return cached value or call builder() and cache the result."""
         if key not in self._cache:
             self._cache[key] = builder()
@@ -44,6 +39,11 @@ class RequestCache:
     def clear(self) -> None:
         """Clear all cached entries (useful for testing)."""
         self._cache.clear()
+
+
+_request_cache_var: contextvars.ContextVar[Optional["RequestCache"]] = contextvars.ContextVar(
+    "request_cache", default=None
+)
 
 
 def get_request_cache() -> RequestCache:
@@ -72,7 +72,7 @@ def get_request_cache() -> RequestCache:
     return cache
 
 
-def get_db() -> sqlite3.Connection:
+def get_db() -> Generator[sqlite3.Connection, None, None]:
     """FastAPI dependency for database connection.
 
     Provides a database connection that is properly closed after use.
